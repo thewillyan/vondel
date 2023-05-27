@@ -1,5 +1,8 @@
+use enum_as_inner::EnumAsInner;
+
 pub type TokenType = Token;
-#[derive(Debug, PartialEq, Clone)]
+
+#[derive(Debug, PartialEq, Clone, EnumAsInner)]
 pub enum Token {
     Ident(String),
     Integer(String),
