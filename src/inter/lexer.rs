@@ -1,4 +1,5 @@
-#[derive(Debug, PartialEq)]
+pub type TokenType = Token;
+#[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     Ident(String),
     Integer(String),
@@ -151,6 +152,19 @@ impl Lexer {
             self.read_char();
         }
         Token::Integer(String::from_utf8(self.input[start..self.read_position].to_vec()).unwrap())
+    }
+
+    pub fn get_all_toks(&mut self) -> Vec<TokenType> {
+        let mut toks = Vec::new();
+        loop {
+            let tok = self.next_token();
+            if tok == Token::EOF {
+                toks.push(tok);
+                break;
+            }
+            toks.push(tok);
+        }
+        toks
     }
 }
 
