@@ -1,4 +1,4 @@
-use super::lexer::TokenType;
+use super::tokens::TokenType;
 use anyhow::{bail, Error, Result};
 use enum_as_inner::EnumAsInner;
 use thiserror::Error;
@@ -74,8 +74,8 @@ struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub fn new(toks: &'a [TokenType]) -> Parser {
         let mut p = Parser {
-            cur_token: &TokenType::EOF,
-            peek_token: &TokenType::EOF,
+            cur_token: &TokenType::Eof,
+            peek_token: &TokenType::Eof,
             toks,
             idx: 0,
         };
@@ -87,7 +87,7 @@ impl<'a> Parser<'a> {
     fn next_token(&mut self) {
         self.cur_token = self.peek_token;
         if self.idx + 1 >= self.toks.len() {
-            self.peek_token = &TokenType::EOF;
+            self.peek_token = &TokenType::Eof;
         } else {
             self.peek_token = &self.toks[self.idx];
             self.idx += 1;
@@ -178,7 +178,7 @@ impl<'a> Parser<'a> {
         let mut sttms = Vec::new();
         self.next_token();
 
-        while !self.curr_token_is(TokenType::RSquirly) && !self.curr_token_is(TokenType::EOF) {
+        while !self.curr_token_is(TokenType::RSquirly) && !self.curr_token_is(TokenType::Eof) {
             let sttm = self.parse_statement()?;
             sttms.push(sttm);
             self.next_token();
@@ -368,7 +368,7 @@ impl<'a> Parser<'a> {
             errors: Vec::new(),
         };
 
-        while *self.cur_token != TokenType::EOF {
+        while *self.cur_token != TokenType::Eof {
             match self.parse_statement() {
                 Ok(stmt) => program.statements.push(stmt),
                 Err(e) => program.errors.push(e),
@@ -409,7 +409,7 @@ mod tests {
             TokenType::Ident(String::from("barfoo")),
             TokenType::Ident(String::from("z")),
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
 
         let mut parser = Parser::new(&toks);
@@ -451,7 +451,7 @@ mod tests {
             TokenType::Return,
             TokenType::Integer(String::from("10")),
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
         let program = parser.parse_program();
@@ -475,7 +475,7 @@ mod tests {
         let toks = vec![
             TokenType::Ident(String::from("foobar")),
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
         let program = parser.parse_program();
@@ -498,7 +498,7 @@ mod tests {
         let toks = vec![
             TokenType::Integer(5.to_string()),
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
         let program = parser.parse_program();
@@ -533,7 +533,7 @@ mod tests {
             TokenType::Bang,
             TokenType::True,
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
         let program = parser.parse_program();
@@ -620,7 +620,7 @@ mod tests {
             TokenType::Equal,
             TokenType::True,
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
 
         let mut parser = Parser::new(&toks);
@@ -748,7 +748,7 @@ mod tests {
             TokenType::Slash,
             TokenType::Integer(3.to_string()),
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
 
         let mut parser = Parser::new(&toks);
@@ -890,7 +890,7 @@ mod tests {
             TokenType::Ident(String::from("y")),
             TokenType::RSquirly,
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
 
         let stts = vec![
@@ -974,7 +974,7 @@ mod tests {
             TokenType::Semicolon,
             TokenType::RSquirly,
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
 
         let stts = vec![
@@ -1049,7 +1049,7 @@ mod tests {
             TokenType::Integer(5.to_string()),
             TokenType::RParen,
             TokenType::Semicolon,
-            TokenType::EOF,
+            TokenType::Eof,
         ];
 
         let stts = vec![StatementType::Expression(Expression::Call {

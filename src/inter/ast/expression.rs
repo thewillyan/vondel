@@ -1,7 +1,7 @@
 use anyhow::{bail, Result};
 
 use super::StatementType;
-use crate::inter::lexer::TokenType;
+use crate::inter::tokens::TokenType;
 
 #[derive(Debug, PartialEq)]
 pub enum PrefixOp {
