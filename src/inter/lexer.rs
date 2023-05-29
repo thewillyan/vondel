@@ -1,42 +1,4 @@
-use enum_as_inner::EnumAsInner;
-
-pub type TokenType = Token;
-
-#[derive(Debug, PartialEq, Clone, EnumAsInner)]
-pub enum Token {
-    Ident(String),
-    Integer(String),
-    ILLEGAL,
-    EOF,
-    //Punctuation
-    Comma,
-    Semicolon,
-    LParen,
-    RParen,
-    LSquirly,
-    RSquirly,
-    //Keywords
-    True,
-    False,
-    Return,
-    If,
-    Else,
-    Function,
-    Let,
-    //Operators
-    Assign,
-    Plus,
-    Minus,
-    Bang,
-    Asterisk,
-    Slash,
-    LessThan,
-    GreaterThan,
-    LessEQ,
-    GreaterEQ,
-    Equal,
-    NotEqual,
-}
+use super::tokens::TokenType;
 
 pub struct Lexer {
     ch: u8,
@@ -81,53 +43,53 @@ impl Lexer {
         }
     }
 
-    pub fn next_token(&mut self) -> Token {
+    pub fn next_token(&mut self) -> TokenType {
         self.skip_whitespace();
         let tok = self.tokenizer();
         self.read_char();
         tok
     }
 
-    fn parse_operator(&mut self) -> Token {
+    fn parse_operator(&mut self) -> TokenType {
         let curr = self.ch;
         let doubled = self.peek_char() == '=';
         if doubled {
             self.read_char();
         }
         match (curr, doubled) {
-            (b'=', true) => Token::Equal,
-            (b'=', false) => Token::Assign,
-            (b'<', true) => Token::LessEQ,
-            (b'<', false) => Token::LessThan,
-            (b'>', true) => Token::GreaterEQ,
-            (b'>', false) => Token::GreaterThan,
-            (b'!', true) => Token::NotEqual,
-            (b'!', false) => Token::Bang,
-            (b'+', false) => Token::Plus,
-            (b'-', false) => Token::Minus,
-            (b'*', false) => Token::Asterisk,
-            (b'/', false) => Token::Slash,
-            _ => Token::ILLEGAL,
+            (b'=', true) => TokenType::Equal,
+            (b'=', false) => TokenType::Assign,
+            (b'<', true) => TokenType::LessEQ,
+            (b'<', false) => TokenType::LessThan,
+            (b'>', true) => TokenType::GreaterEQ,
+            (b'>', false) => TokenType::GreaterThan,
+            (b'!', true) => TokenType::NotEqual,
+            (b'!', false) => TokenType::Bang,
+            (b'+', false) => TokenType::Plus,
+            (b'-', false) => TokenType::Minus,
+            (b'*', false) => TokenType::Asterisk,
+            (b'/', false) => TokenType::Slash,
+            _ => TokenType::Illegal,
         }
     }
 
-    fn tokenizer(&mut self) -> Token {
+    fn tokenizer(&mut self) -> TokenType {
         match self.ch {
-            b'\0' => Token::EOF,
-            b',' => Token::Comma,
-            b';' => Token::Semicolon,
-            b'(' => Token::LParen,
-            b')' => Token::RParen,
-            b'{' => Token::LSquirly,
-            b'}' => Token::RSquirly,
+            b'\0' => TokenType::Eof,
+            b',' => TokenType::Comma,
+            b';' => TokenType::Semicolon,
+            b'(' => TokenType::LParen,
+            b')' => TokenType::RParen,
+            b'{' => TokenType::LSquirly,
+            b'}' => TokenType::RSquirly,
             b'!' | b'=' | b'<' | b'>' | b'+' | b'-' | b'*' | b'/' => self.parse_operator(),
             c if c.is_ascii_alphabetic() || c == b'_' => self.read_name(),
             c if c.is_ascii_digit() => self.read_number(),
-            _ => Token::ILLEGAL,
+            _ => TokenType::Illegal,
         }
     }
 
-    fn read_name(&mut self) -> Token {
+    fn read_name(&mut self) -> TokenType {
         let start = self.position;
         while self.read_position != self.input.len()
             && self.input[self.read_position].is_ascii_alphabetic()
@@ -136,32 +98,34 @@ impl Lexer {
         }
         let ident = String::from_utf8(self.input[start..self.read_position].to_vec()).unwrap();
         match ident.as_str() {
-            "true" => Token::True,
-            "false" => Token::False,
-            "fn" => Token::Function,
-            "let" => Token::Let,
-            "return" => Token::Return,
-            "if" => Token::If,
-            "else" => Token::Else,
-            _ => Token::Ident(ident),
+            "true" => TokenType::True,
+            "false" => TokenType::False,
+            "fn" => TokenType::Function,
+            "let" => TokenType::Let,
+            "return" => TokenType::Return,
+            "if" => TokenType::If,
+            "else" => TokenType::Else,
+            _ => TokenType::Ident(ident),
         }
     }
 
-    fn read_number(&mut self) -> Token {
+    fn read_number(&mut self) -> TokenType {
         let start = self.position;
         while self.read_position != self.input.len()
             && self.input[self.read_position].is_ascii_digit()
         {
             self.read_char();
         }
-        Token::Integer(String::from_utf8(self.input[start..self.read_position].to_vec()).unwrap())
+        TokenType::Integer(
+            String::from_utf8(self.input[start..self.read_position].to_vec()).unwrap(),
+        )
     }
 
-    pub fn get_all_toks(&mut self) -> Vec<TokenType> {
+    pub fn get_deez_toks(&mut self) -> Vec<TokenType> {
         let mut toks = Vec::new();
         loop {
             let tok = self.next_token();
-            if tok == Token::EOF {
+            if tok == TokenType::Eof {
                 toks.push(tok);
                 break;
             }
@@ -178,7 +142,7 @@ mod tests {
     #[test]
     fn skip_whitespace() {
         let mut lexer = Lexer::new(String::from("               {"));
-        assert_eq!(lexer.next_token(), Token::LSquirly);
+        assert_eq!(lexer.next_token(), TokenType::LSquirly);
     }
 
     #[test]
@@ -186,7 +150,7 @@ mod tests {
         let mut lexer = Lexer::new(String::from("tubiaasdasdasd"));
         assert_eq!(
             lexer.next_token(),
-            Token::Ident(String::from("tubiaasdasdasd"))
+            TokenType::Ident(String::from("tubiaasdasdasd"))
         );
     }
 
@@ -195,7 +159,7 @@ mod tests {
         let mut lexer = Lexer::new(String::from("123123123"));
         assert_eq!(
             lexer.next_token(),
-            Token::Integer(String::from("123123123"))
+            TokenType::Integer(String::from("123123123"))
         );
     }
 
@@ -203,11 +167,11 @@ mod tests {
     fn no_whitespace_idents() {
         let mut l = Lexer::new(String::from("five=5;"));
         let v = vec![
-            Token::Ident(String::from("five")),
-            Token::Assign,
-            Token::Integer(String::from("5")),
-            Token::Semicolon,
-            Token::EOF,
+            TokenType::Ident(String::from("five")),
+            TokenType::Assign,
+            TokenType::Integer(String::from("5")),
+            TokenType::Semicolon,
+            TokenType::Eof,
         ];
 
         for i in v.into_iter() {
@@ -224,23 +188,23 @@ mod tests {
             9 <= 10;"#,
         ));
         let v = vec![
-            Token::Integer(String::from("10")),
-            Token::Equal,
-            Token::Integer(String::from("10")),
-            Token::Semicolon,
-            Token::Integer(String::from("10")),
-            Token::NotEqual,
-            Token::Integer(String::from("9")),
-            Token::Semicolon,
-            Token::Integer(String::from("10")),
-            Token::GreaterEQ,
-            Token::Integer(String::from("9")),
-            Token::Semicolon,
-            Token::Integer(String::from("9")),
-            Token::LessEQ,
-            Token::Integer(String::from("10")),
-            Token::Semicolon,
-            Token::EOF,
+            TokenType::Integer(String::from("10")),
+            TokenType::Equal,
+            TokenType::Integer(String::from("10")),
+            TokenType::Semicolon,
+            TokenType::Integer(String::from("10")),
+            TokenType::NotEqual,
+            TokenType::Integer(String::from("9")),
+            TokenType::Semicolon,
+            TokenType::Integer(String::from("10")),
+            TokenType::GreaterEQ,
+            TokenType::Integer(String::from("9")),
+            TokenType::Semicolon,
+            TokenType::Integer(String::from("9")),
+            TokenType::LessEQ,
+            TokenType::Integer(String::from("10")),
+            TokenType::Semicolon,
+            TokenType::Eof,
         ];
 
         for i in v.into_iter() {
@@ -263,45 +227,45 @@ mod tests {
             "#,
         );
         let v = vec![
-            Token::Let,
-            Token::Ident(String::from("five")),
-            Token::Assign,
-            Token::Integer(String::from("5")),
-            Token::Semicolon,
-            Token::Let,
-            Token::Ident(String::from("add")),
-            Token::Assign,
-            Token::Function,
-            Token::LParen,
-            Token::Ident(String::from("x")),
-            Token::Comma,
-            Token::Ident(String::from("y")),
-            Token::RParen,
-            Token::LSquirly,
-            Token::Ident(String::from("x")),
-            Token::Plus,
-            Token::Ident(String::from("y")),
-            Token::Semicolon,
-            Token::RSquirly,
-            Token::Semicolon,
-            Token::If,
-            Token::LParen,
-            Token::Integer(String::from("5")),
-            Token::LessThan,
-            Token::Integer(String::from("10")),
-            Token::RParen,
-            Token::LSquirly,
-            Token::Return,
-            Token::True,
-            Token::Semicolon,
-            Token::RSquirly,
-            Token::Else,
-            Token::LSquirly,
-            Token::Return,
-            Token::False,
-            Token::Semicolon,
-            Token::RSquirly,
-            Token::EOF,
+            TokenType::Let,
+            TokenType::Ident(String::from("five")),
+            TokenType::Assign,
+            TokenType::Integer(String::from("5")),
+            TokenType::Semicolon,
+            TokenType::Let,
+            TokenType::Ident(String::from("add")),
+            TokenType::Assign,
+            TokenType::Function,
+            TokenType::LParen,
+            TokenType::Ident(String::from("x")),
+            TokenType::Comma,
+            TokenType::Ident(String::from("y")),
+            TokenType::RParen,
+            TokenType::LSquirly,
+            TokenType::Ident(String::from("x")),
+            TokenType::Plus,
+            TokenType::Ident(String::from("y")),
+            TokenType::Semicolon,
+            TokenType::RSquirly,
+            TokenType::Semicolon,
+            TokenType::If,
+            TokenType::LParen,
+            TokenType::Integer(String::from("5")),
+            TokenType::LessThan,
+            TokenType::Integer(String::from("10")),
+            TokenType::RParen,
+            TokenType::LSquirly,
+            TokenType::Return,
+            TokenType::True,
+            TokenType::Semicolon,
+            TokenType::RSquirly,
+            TokenType::Else,
+            TokenType::LSquirly,
+            TokenType::Return,
+            TokenType::False,
+            TokenType::Semicolon,
+            TokenType::RSquirly,
+            TokenType::Eof,
         ];
         let mut l = Lexer::new(input);
 

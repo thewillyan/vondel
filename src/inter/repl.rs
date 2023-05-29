@@ -1,4 +1,5 @@
 use super::lexer::*;
+use super::tokens::*;
 use std::io::{self, Write};
 
 const PROMPT: &str = "🔥 ";
@@ -18,7 +19,7 @@ pub fn start() {
         let mut lexer = Lexer::new(buf);
         loop {
             let token = lexer.next_token();
-            if token == Token::EOF {
+            if token == TokenType::Eof {
                 break;
             }
             println!("{:?}", token);
