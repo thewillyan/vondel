@@ -1,13 +1,12 @@
 use super::tokens::TokenType;
 use anyhow::{bail, Error, Result};
-use enum_as_inner::EnumAsInner;
 use thiserror::Error;
 mod expression;
 use expression::Expression;
 
 #[derive(Error, Debug, PartialEq)]
-pub enum ParserError {
-    #[error("Expected token {expected:?}, found {found:?}")]
+enum ParserError {
+    #[error("Expected token '{expected}', found '{found}'")]
     MissingToken {
         expected: TokenType,
         found: TokenType,
@@ -24,6 +23,21 @@ pub enum ParserError {
 
     #[error("Unexpected Boolean {bool:?}")]
     NotAllowedBoolean { bool: TokenType },
+
+    #[error("Illegal Token '{tok}'")]
+    IllegalToken { tok: TokenType },
+}
+
+#[derive(Error, Debug)]
+struct ErrorWithCtx {
+    error: Error,
+    ctx: String,
+}
+
+impl std::fmt::Display for ErrorWithCtx {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "{} \n-> {}", self.ctx, self.error)
+    }
 }
 
 #[derive(Debug, PartialEq, PartialOrd)]
@@ -51,12 +65,12 @@ impl Precedence {
     }
 }
 
-struct Program {
-    statements: Vec<StatementType>,
-    errors: Vec<Error>,
+pub struct Program {
+    pub statements: Vec<StatementType>,
+    pub errors: Vec<Error>,
 }
 
-#[derive(Debug, EnumAsInner, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum StatementType {
     Let { name: String, value: Expression },
     Return(Expression),
@@ -64,7 +78,7 @@ pub enum StatementType {
     Block(Vec<StatementType>),
 }
 
-struct Parser<'a> {
+pub struct Parser<'a> {
     cur_token: &'a TokenType,
     peek_token: &'a TokenType,
     idx: usize,
@@ -105,14 +119,12 @@ impl<'a> Parser<'a> {
             self.next_token();
             Ok(self.cur_token)
         } else {
-            let tok = self.cur_token;
-            while *self.cur_token != TokenType::Semicolon {
-                self.next_token();
-            }
-            bail!(ParserError::MissingToken {
+            let err = ParserError::MissingToken {
                 expected: t,
-                found: tok.clone(),
-            });
+                found: self.peek_token.clone(),
+            }
+            .into();
+            bail!(self.errors_with_ctx(err, self.idx - 2))
         }
     }
 
@@ -305,7 +317,7 @@ impl<'a> Parser<'a> {
     fn parse_expression(&mut self, precedence: Precedence) -> Result<Expression> {
         let prefix = self
             .prefix_parse_fns()
-            .unwrap_or_else(|| bail!("No prefix found for {:?}", self.cur_token))?;
+            .unwrap_or_else(|| bail!("no prefix parse function for {:?}", self.cur_token))?;
 
         let mut left_exp = prefix;
 
@@ -356,13 +368,39 @@ impl<'a> Parser<'a> {
         let res = match self.cur_token {
             TokenType::Let => self.parse_let_statement()?,
             TokenType::Return => self.parse_return_statement()?,
+            TokenType::Illegal(_) => bail!(ParserError::IllegalToken {
+                tok: self.cur_token.clone()
+            }),
             _ => self.parse_expression_statement()?,
         };
 
         Ok(res)
     }
 
-    pub fn parse_program(&mut self) -> Program {
+    fn errors_with_ctx(&mut self, error: anyhow::Error, idx: usize) -> anyhow::Error {
+        let mut ctx = String::new();
+        let mut i = idx;
+
+        while i != 0 && self.toks[i] != TokenType::Semicolon {
+            ctx.insert_str(0, &format!("{} ", self.toks[i]));
+            i -= 1;
+        }
+
+        if i == 0 {
+            ctx.insert_str(0, &format!("{} ", self.toks[i]));
+        }
+
+        while self.peek_token != &TokenType::Eof && self.peek_token != &TokenType::Semicolon {
+            ctx.push_str(&format!("{}", self.peek_token));
+            self.next_token();
+        }
+
+        self.next_token();
+
+        ErrorWithCtx { error, ctx }.into()
+    }
+
+    pub fn get_deez_program(&mut self) -> Program {
         let mut program = Program {
             statements: Vec::new(),
             errors: Vec::new(),
@@ -413,7 +451,7 @@ mod tests {
         ];
 
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![
             StatementType::Let {
@@ -425,9 +463,12 @@ mod tests {
                 value: Expression::new_ident(&String::from("y")),
             },
         ];
-        let err = anyhow!(ParserError::MissingToken {
-            expected: TokenType::Assign,
-            found: TokenType::Ident(String::from("barfoo")),
+        let err = anyhow!(ErrorWithCtx {
+            error: anyhow!(ParserError::MissingToken {
+                expected: TokenType::Assign,
+                found: TokenType::Ident("z".to_string())
+            }),
+            ctx: String::from("let barfoo z"),
         });
 
         assert_eq!(program.errors.len(), 1);
@@ -454,7 +495,7 @@ mod tests {
             TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![
             StatementType::Return(Expression::new_integer(&"5".to_string()).unwrap()),
@@ -478,7 +519,7 @@ mod tests {
             TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![StatementType::Expression(Expression::Identifier(
             String::from("foobar"),
@@ -501,7 +542,7 @@ mod tests {
             TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![StatementType::Expression(Expression::Integer(5))];
 
@@ -536,7 +577,7 @@ mod tests {
             TokenType::Eof,
         ];
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![
             StatementType::Expression(Expression::Prefix {
@@ -624,7 +665,7 @@ mod tests {
         ];
 
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![
             StatementType::Expression(Expression::Infix {
@@ -752,7 +793,7 @@ mod tests {
         ];
 
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![
             StatementType::Expression(Expression::Infix {
@@ -846,7 +887,7 @@ mod tests {
         ];
 
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         let stts = vec![
             StatementType::Expression(Expression::Boolean(true)),
@@ -917,7 +958,7 @@ mod tests {
         ];
 
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         assert_eq!(program.statements.len(), 2);
         assert_eq!(program.errors.len(), 0);
@@ -1022,7 +1063,7 @@ mod tests {
         ];
 
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         assert_eq!(program.statements.len(), 3);
         assert_eq!(program.errors.len(), 0);
@@ -1070,7 +1111,7 @@ mod tests {
         })];
 
         let mut parser = Parser::new(&toks);
-        let program = parser.parse_program();
+        let program = parser.get_deez_program();
 
         assert_eq!(program.statements.len(), 1);
         assert_eq!(program.errors.len(), 0);
