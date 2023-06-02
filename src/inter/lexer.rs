@@ -69,7 +69,7 @@ impl Lexer {
             (b'-', false) => TokenType::Minus,
             (b'*', false) => TokenType::Asterisk,
             (b'/', false) => TokenType::Slash,
-            _ => TokenType::Illegal,
+            v => TokenType::Illegal(String::from_utf8(vec![v.0]).unwrap()),
         }
     }
 
@@ -85,7 +85,7 @@ impl Lexer {
             b'!' | b'=' | b'<' | b'>' | b'+' | b'-' | b'*' | b'/' => self.parse_operator(),
             c if c.is_ascii_alphabetic() || c == b'_' => self.read_name(),
             c if c.is_ascii_digit() => self.read_number(),
-            _ => TokenType::Illegal,
+            rest => TokenType::Illegal(String::from_utf8(vec![rest]).unwrap()),
         }
     }
 
