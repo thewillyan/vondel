@@ -72,7 +72,7 @@ pub struct Program {
 
 #[derive(Debug, PartialEq)]
 pub enum StatementType {
-    Let { name: String, value: Expression },
+    Let { name: Expression, value: Expression },
     Return(Expression),
     Expression(Expression),
     Block(Vec<StatementType>),
@@ -338,7 +338,7 @@ impl<'a> Parser<'a> {
             .expect_peek(TokenType::Ident(String::new()))?
             .as_ident()
             .unwrap();
-        let name = String::from(res);
+        let name = Expression::Identifier(res.to_string());
 
         self.expect_peek(TokenType::Assign)?;
         self.next_token();
@@ -455,11 +455,11 @@ mod tests {
 
         let stts = vec![
             StatementType::Let {
-                name: String::from("tubias"),
+                name: Expression::new_ident(&String::from("tubias")),
                 value: Expression::new_ident(&String::from("x")),
             },
             StatementType::Let {
-                name: String::from("foobar"),
+                name: Expression::new_ident(&String::from("foobar")),
                 value: Expression::new_ident(&String::from("y")),
             },
         ];
