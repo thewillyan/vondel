@@ -1,5 +1,8 @@
 use anyhow::Error;
 
+use crate::inter::environment::Environment;
+use crate::inter::evaluator::{rust::RustEvaluator, Evaluator};
+
 use super::ast::*;
 use super::lexer::*;
 use std::io::{self, Write};
@@ -34,6 +37,7 @@ fn print_parser_errors(errors: Vec<Error>) {
 }
 
 pub fn start() {
+    let mut env = Environment::new();
     loop {
         print!("{PROMPT}");
         io::stdout().flush().unwrap();
@@ -45,6 +49,8 @@ pub fn start() {
             Err(e) => panic!("{e}"),
         };
 
+        let start = std::time::Instant::now();
+
         let toks = Lexer::new(buf).get_deez_toks();
         let program = Parser::new(&toks).get_deez_program();
 
@@ -53,6 +59,15 @@ pub fn start() {
             continue;
         }
 
-        println!("{:#?}\n", program.statements);
+        let rust_eval = RustEvaluator::new();
+
+        let evaluated = rust_eval.eval(&program, &mut env);
+        match evaluated {
+            Ok(obj) => println!("{}\n", obj.inspect()),
+            Err(e) => println!("{}\n", e),
+        }
+
+        let finish = std::time::Instant::now();
+        println!("Evaluated in {:?}", finish.duration_since(start));
     }
 }

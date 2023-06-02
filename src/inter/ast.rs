@@ -70,7 +70,7 @@ pub struct Program {
     pub errors: Vec<Error>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum StatementType {
     Let { name: Expression, value: Expression },
     Return(Expression),

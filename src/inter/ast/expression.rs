@@ -5,7 +5,7 @@ use anyhow::{bail, Result};
 use super::StatementType;
 use crate::inter::tokens::TokenType;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum PrefixOp {
     Bang,
     Minus,
@@ -20,7 +20,7 @@ impl PrefixOp {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum InfixOp {
     Plus,
     Minus,
@@ -63,7 +63,7 @@ impl fmt::Display for InfixOp {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Expression {
     Identifier(String),
     Integer(i64),
