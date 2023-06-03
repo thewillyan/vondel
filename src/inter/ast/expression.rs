@@ -1,3 +1,5 @@
+use std::fmt;
+
 use anyhow::{bail, Result};
 
 use super::StatementType;
@@ -7,6 +9,15 @@ use crate::inter::tokens::TokenType;
 pub enum PrefixOp {
     Bang,
     Minus,
+}
+
+impl PrefixOp {
+    pub fn type_as_string(&self) -> &'static str {
+        match self {
+            PrefixOp::Bang => "!",
+            PrefixOp::Minus => "-",
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -19,6 +30,37 @@ pub enum InfixOp {
     NotEqual,
     LessThan,
     GreaterThan,
+}
+
+impl InfixOp {
+    pub fn type_as_string(&self) -> &'static str {
+        match self {
+            InfixOp::Plus => "+",
+            InfixOp::Minus => "-",
+            InfixOp::Asterisk => "*",
+            InfixOp::Slash => "/",
+            InfixOp::Equal => "==",
+            InfixOp::NotEqual => "!=",
+            InfixOp::LessThan => "<",
+            InfixOp::GreaterThan => ">",
+        }
+    }
+}
+
+impl fmt::Display for InfixOp {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let buf = match self {
+            InfixOp::Plus => "+",
+            InfixOp::Minus => "-",
+            InfixOp::Asterisk => "*",
+            InfixOp::Slash => "/",
+            InfixOp::Equal => "==",
+            InfixOp::NotEqual => "!=",
+            InfixOp::LessThan => "<",
+            InfixOp::GreaterThan => ">",
+        };
+        write!(f, "{}", buf)
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -51,6 +93,18 @@ pub enum Expression {
 }
 
 impl Expression {
+    pub fn type_as_string(&self) -> &'static str {
+        match self {
+            Expression::Identifier(_) => "Identifier",
+            Expression::Integer(_) => "Integer",
+            Expression::Prefix { .. } => "Prefix",
+            Expression::Infix { .. } => "Infix",
+            Expression::Boolean(_) => "Boolean",
+            Expression::If { .. } => "If",
+            Expression::FunctionLiteral { .. } => "FunctionLiteral",
+            Expression::Call { .. } => "Call",
+        }
+    }
     pub fn new_ident(ident: &String) -> Self {
         Expression::Identifier(String::from(ident))
     }

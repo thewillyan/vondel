@@ -1,8 +1,8 @@
 use super::tokens::TokenType;
 use anyhow::{bail, Error, Result};
 use thiserror::Error;
-mod expression;
-use expression::Expression;
+pub mod expression;
+pub use expression::Expression;
 
 #[derive(Error, Debug, PartialEq)]
 enum ParserError {
