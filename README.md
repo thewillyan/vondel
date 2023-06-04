@@ -14,12 +14,17 @@ perform opposite operations in a given time in order to reduce clock cycles.
 For that we will use two [_datapaths_](https://en.wikipedia.org/wiki/Datapath)
 with one [_ALU_](https://en.wikipedia.org/wiki/Arithmetic_logic_unit) each,
 but a clock of one is the opposite of the other. In other words, the ALU1 has a
-clock $\alpha_1$ which performs one clock cycle on an interval $\delta_1$, so
-the ALU2 must have a clock $\delta_2 = \neg \delta_1$ plus a delay of $\delta_1$.
+clock _α<sub>1</sub>_ which performs one clock cycle on an interval _δ<sub>1</sub>_,
+so the ALU2 must have a clock _α<sub>2</sub> = ¬α<sub>1</sub>_
+plus a delay of _δ<sub>1</sub>_.
 
-| ![Clock relation diagram](https://i.imgur.com/dOZeaWO.png) |
-| :--------------------------------------------------------: |
-|  The relation between the clock $\alpha_1$ and $\alpha_2$. |
+<div align="center">
+
+|      ![Clock relation diagram](https://i.imgur.com/dOZeaWO.png)      |
+| :------------------------------------------------------------------: |
+|  The relation between the clock _α<sub>1</sub>_ and _α<sub>1</sub>_. |
+
+</div>
 
 The advantage of this method is that we can share the
 [_control store_](https://en.wikipedia.org/wiki/Control_storebbjk) and some
@@ -27,17 +32,25 @@ registers without big cost in the Misconstruction size, external hardware
 components and additional logic steps that may cost some clock cycles. The
 way that the components are shared is shown below:
 
-Those two datapaths will become a [_thread_](https://en.wikipedia.org/wiki/Thread_(computing))
-in a future design of this Microarchitecture that is planned to have two task parallel threads.
+<div align="center">
 
 |               ![Shared components diagram](https://i.imgur.com/WpGOWy0.png)               |
 | :---------------------------------------------------------------------------------------: |
 | The datapaths share some components such as the Microprogram, RAM and a shared registers.|
 
+</div>
+
 The way that each datapath is structured is not far from the usual three-bus design
 plus a [_IFU_](https://en.wikipedia.org/wiki/Instruction_unit), the techniques
 involved a rather simple for now as you can see the diagram below:
 
+<div align="center">
+
 | ![Data path diagram](https://i.imgur.com/zmysFrc.png) |
 | :---------------------------------------------------: |
-|           The diagram of a single datapath.           |
+| The diagram of a single datapath (click to zoom).     |
+
+</div>
+
+Those two datapaths will become a [_thread_](https://en.wikipedia.org/wiki/Thread_(computing))
+in a future design of this Microarchitecture that is planned to have two task parallel threads.
