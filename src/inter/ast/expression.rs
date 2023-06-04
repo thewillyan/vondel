@@ -11,15 +11,6 @@ pub enum PrefixOp {
     Minus,
 }
 
-impl PrefixOp {
-    pub fn type_as_string(&self) -> &'static str {
-        match self {
-            PrefixOp::Bang => "!",
-            PrefixOp::Minus => "-",
-        }
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum InfixOp {
     Plus,

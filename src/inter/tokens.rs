@@ -1,10 +1,8 @@
 use core::fmt;
 
-use enum_as_inner::EnumAsInner;
-
 pub type TokenType = Token;
 
-#[derive(Debug, PartialEq, Clone, EnumAsInner)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     Ident(String),
     Integer(String),
