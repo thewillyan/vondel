@@ -54,3 +54,4 @@ involved a rather simple for now as you can see the diagram below:
 
 Those two datapaths will become a [_thread_](https://en.wikipedia.org/wiki/Thread_(computing))
 in a future design of this Microarchitecture that is planned to have two task parallel threads.
+The implementation of this design is provided by the `uarch` module.

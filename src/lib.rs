@@ -1,4 +1,4 @@
 // microarchiteture
-pub mod march;
+pub mod uarch;
 // interpreter
 pub mod inter;
