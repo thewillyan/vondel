@@ -60,7 +60,6 @@ mod test {
     fn test_eval_program(eval: &dyn Evaluator, prog: &ast::Program) -> Result<Object> {
         let mut e = Environment::new();
         let res = eval.eval(prog, &mut e)?;
-        println!("e: {:?}", e);
         Ok(res)
     }
 

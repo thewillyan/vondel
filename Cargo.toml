@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.71"
-enum-as-inner = "0.5.1"
 thiserror = "1.0.40"

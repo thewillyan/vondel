@@ -1,13 +1,11 @@
 use std::{cell::RefCell, fmt, rc::Rc};
 
-use enum_as_inner::EnumAsInner;
-
 use crate::inter::{
     ast::{Expression, StatementType},
     environment::Environment,
 };
 
-#[derive(Debug, PartialEq, EnumAsInner, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Object {
     Integer(i64),
     Boolean(bool),

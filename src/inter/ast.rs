@@ -162,6 +162,15 @@ impl<'a> Parser<'a> {
         Expression::new_boolean(self.cur_token)
     }
 
+    fn get_current_identifier(&self) -> Result<String> {
+        match self.cur_token {
+            TokenType::Ident(s) => Ok(s.clone()),
+            _ => bail!(ParserError::IllegalToken {
+                tok: self.cur_token.clone()
+            }),
+        }
+    }
+
     fn parse_prefix_expression(&mut self) -> Result<Expression> {
         let op = self.cur_token;
         self.next_token();
@@ -227,13 +236,13 @@ impl<'a> Parser<'a> {
             return Ok(params);
         }
 
-        let ident = self.parse_identifier_expression(self.cur_token.as_ident().unwrap())?;
+        let ident = self.parse_identifier_expression(&self.get_current_identifier()?)?;
         params.push(ident);
 
         while self.peek_token_is(TokenType::Comma) {
             self.next_token();
             self.next_token();
-            let ident = self.parse_identifier_expression(self.cur_token.as_ident().unwrap())?;
+            let ident = self.parse_identifier_expression(&self.get_current_identifier()?)?;
             params.push(ident);
         }
 
@@ -334,11 +343,9 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_let_statement(&mut self) -> Result<StatementType> {
-        let res = self
-            .expect_peek(TokenType::Ident(String::new()))?
-            .as_ident()
-            .unwrap();
-        let name = Expression::Identifier(res.to_string());
+        self.expect_peek(TokenType::Ident(String::new()))?;
+        let ident = self.get_current_identifier()?;
+        let name = Expression::Identifier(ident);
 
         self.expect_peek(TokenType::Assign)?;
         self.next_token();
