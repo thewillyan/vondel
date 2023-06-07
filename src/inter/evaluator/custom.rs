@@ -10,7 +10,7 @@ impl CustomEvaluator {
 }
 
 impl Evaluator for CustomEvaluator {
-    fn eval(&self, prog: &Program, e: &mut Environment) -> Result<super::Object> {
+    fn eval(&self, _prog: &Program, _e: &mut Environment) -> Result<super::Object> {
         todo!();
     }
 }
