@@ -1,11 +1,15 @@
-use crate::inter::{ast::Program, environment::Environment};
+use crate::inter::{
+    ast::{Parser, Program},
+    environment::Environment,
+    lexer::Lexer,
+};
 
 use super::ast;
 use super::object::Object;
 use anyhow::Result;
 use thiserror::Error;
 
-mod custom;
+pub mod custom;
 pub mod rust;
 
 const TRUE: Object = Object::Boolean(true);
@@ -40,8 +44,31 @@ pub enum EvaluationError {
     NotAFunction { found: &'static str },
 }
 
-pub(crate) trait Evaluator {
+pub trait Evaluator {
     fn eval(&self, node: &Program, env: &mut Environment) -> Result<Object>;
+}
+
+pub fn evaluate_buffer(evaluator: Box<dyn Evaluator>, input: String) -> Result<()> {
+    let mut lexer = Lexer::new(input);
+    let toks = lexer.get_deez_toks();
+    let mut parser = Parser::new(&toks);
+    let program = parser.get_deez_program();
+
+    if !program.errors.is_empty() {
+        for err in program.errors {
+            println!("{}", err);
+        }
+        return Ok(());
+    }
+
+    let mut env = Environment::new();
+    let evaluated = evaluator.eval(&program, &mut env);
+    match evaluated {
+        Ok(obj) => println!("{}\n", obj.inspect()),
+        Err(e) => println!("{}\n", e),
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
