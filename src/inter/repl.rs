@@ -1,7 +1,7 @@
 use anyhow::Error;
 
 use crate::inter::environment::Environment;
-use crate::inter::evaluator::{rust::RustEvaluator, Evaluator};
+use crate::inter::evaluator::Evaluator;
 
 use super::ast::*;
 use super::lexer::*;
