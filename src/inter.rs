@@ -1,6 +1,7 @@
 mod ast;
+pub mod cli;
 mod environment;
-mod evaluator;
+pub mod evaluator;
 mod lexer;
 mod object;
 pub mod repl;
