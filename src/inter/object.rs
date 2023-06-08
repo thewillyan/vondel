@@ -5,6 +5,7 @@ use crate::inter::{
     environment::Environment,
 };
 
+/// Represents different types of objects in the language.
 #[derive(Debug, PartialEq, Clone)]
 pub enum Object {
     Integer(i64),
@@ -19,6 +20,7 @@ pub enum Object {
 }
 
 impl Object {
+    /// Returns a string representation of the object.
     pub fn inspect(&self) -> String {
         match self {
             Object::Integer(i) => i.to_string(),
@@ -29,6 +31,7 @@ impl Object {
         }
     }
 
+    /// Returns the type of the object as a string. Just used for error handling
     pub fn type_as_string(&self) -> &'static str {
         match self {
             Object::Integer(_) => "Integer",
@@ -41,6 +44,7 @@ impl Object {
 }
 
 impl fmt::Display for Object {
+    /// Formats the object for display.
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let buf = match self {
             Object::Integer(v) => v.to_string(),
@@ -52,3 +56,5 @@ impl fmt::Display for Object {
         write!(f, "{}", buf)
     }
 }
+
+

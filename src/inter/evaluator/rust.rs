@@ -8,13 +8,17 @@ use crate::inter::{
 
 use super::ast::*;
 use anyhow::{bail, Result};
+
+/// Represents an evaluator for Rust code.
 pub struct RustEvaluator {}
 
 impl RustEvaluator {
+    /// Creates a new instance of `RustEvaluator`.
     pub fn new() -> Self {
         RustEvaluator {}
     }
 
+    /// Maps a boolean value to the corresponding `Object`.
     fn map_boolean(&self, b: bool) -> Object {
         if b {
             super::TRUE
@@ -23,6 +27,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates the logical NOT (`!`) operator on the right operand.
     fn eval_bang_operator(&self, right: Object) -> Result<Object> {
         match right {
             Object::Boolean(true) => Ok(super::FALSE),
@@ -32,6 +37,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates the arithmetic minus (`-`) operator on the right operand.
     fn eval_minus_operator(&self, right: Object) -> Result<Object> {
         match right {
             Object::Integer(i) => Ok(Object::Integer(-i)),
@@ -41,6 +47,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates a prefix expression (e.g., -, !)
     fn eval_prefix_expression(
         &self,
         op: &PrefixOp,
@@ -54,6 +61,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates an infix expression (e.g., +, -, *, /, <, >, ==, !=).
     fn eval_infix_expression(
         &self,
         left: &Expression,
@@ -90,6 +98,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Checks if an object is truthy (evaluates to true).
     fn is_truthy(&self, obj: &Object) -> bool {
         match obj {
             Object::Null => false,
@@ -98,6 +107,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates an `if` expression.
     fn eval_if_expression(
         &self,
         cond: &Expression,
@@ -113,6 +123,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates a `let` statement.
     fn eval_let_statement(
         &self,
         name: &Expression,
@@ -124,6 +135,7 @@ impl RustEvaluator {
         Ok(value)
     }
 
+    /// Evaluates expressions in a given environment.
     fn eval_expressions(&self, params: &[Expression], e: &mut Environment) -> Result<Vec<Object>> {
         let mut args = Vec::with_capacity(params.len());
         for p in params {
@@ -133,6 +145,7 @@ impl RustEvaluator {
         Ok(args)
     }
 
+    /// Evaluates a function call expression.
     fn eval_fn_call(
         &self,
         function: &Expression,
@@ -184,6 +197,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates an expression.
     fn eval_expression(&self, expr: &Expression, e: &mut Environment) -> Result<Object> {
         match *expr {
             Expression::Integer(i) => Ok(Object::Integer(i)),
@@ -217,6 +231,7 @@ impl RustEvaluator {
         }
     }
 
+    /// Evaluates a block of statements in a given environment.
     fn eval_block_statements(
         &self,
         stmts: &[super::ast::StatementType],
@@ -231,6 +246,8 @@ impl RustEvaluator {
         }
         Ok(res)
     }
+
+    /// Evaluates statements in a given environment.
     fn eval_statements(
         &self,
         node: &super::ast::StatementType,
@@ -251,6 +268,7 @@ impl RustEvaluator {
 }
 
 impl super::Evaluator for RustEvaluator {
+    /// Evaluates a program in a given environment.
     fn eval(&self, prog: &Program, e: &mut Environment) -> Result<super::Object> {
         let mut res = Object::Null;
         for stmt in prog.statements.iter() {

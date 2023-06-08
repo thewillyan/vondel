@@ -5,6 +5,7 @@ use crate::inter::{ast::Expression, evaluator::EvaluationError};
 
 use super::object::Object;
 
+/// Represents an environment that stores variables and their corresponding values.
 #[derive(Debug, PartialEq, Clone)]
 pub struct Environment {
     store: HashMap<String, Object>,
@@ -12,6 +13,7 @@ pub struct Environment {
 }
 
 impl Environment {
+    /// Creates a new environment with an empty store and no outer environment.
     pub fn new() -> Self {
         Environment {
             store: HashMap::new(),
@@ -19,6 +21,7 @@ impl Environment {
         }
     }
 
+    /// Creates a new environment with an empty store and a specified outer environment.
     pub fn new_with_outer(outer: Rc<RefCell<Environment>>) -> Self {
         Environment {
             store: HashMap::new(),
@@ -26,6 +29,8 @@ impl Environment {
         }
     }
 
+    /// Sets the arguments to the environment, matching them with the corresponding parameters.
+    /// Returns an error if the number of arguments and parameters don't match.
     pub fn set_arguments_to_env(
         &mut self,
         args: Vec<Object>,
@@ -39,6 +44,8 @@ impl Environment {
         Ok(())
     }
 
+    /// Retrieves the name of an identifier expression.
+    /// Returns an error if the expression is not an identifier.
     fn get_name(&self, name: &Expression) -> Result<String> {
         let name = match name {
             Expression::Identifier(s) => s,
@@ -49,6 +56,9 @@ impl Environment {
         Ok(name.to_string())
     }
 
+    /// Retrieves the value of a variable with the given name from the environment.
+    /// If the variable is not found in the current environment, it recursively looks for it in the outer environments.
+    /// Returns an error if the variable is not found.
     pub fn get(&self, name: &str) -> Result<Object> {
         let res = match self.store.get(name) {
             Some(o) => o,
@@ -65,6 +75,8 @@ impl Environment {
         Ok(res.clone())
     }
 
+    /// Sets the value of a variable with the given name in the environment.
+    /// Returns an error if the name is not a valid identifier.
     pub fn set(&mut self, name: &Expression, value: Object) -> Result<()> {
         let name = self.get_name(name)?;
         self.store.insert(name, value);

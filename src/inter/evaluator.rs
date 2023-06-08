@@ -16,6 +16,7 @@ const TRUE: Object = Object::Boolean(true);
 const FALSE: Object = Object::Boolean(false);
 const NULL: Object = Object::Null;
 
+/// Represents possible errors that can occur during evaluation.
 #[derive(Debug, Error, PartialEq)]
 pub enum EvaluationError {
     #[error("Unexpected object to invert signal: '{obj}, object must be an Integer")]
@@ -44,10 +45,37 @@ pub enum EvaluationError {
     NotAFunction { found: &'static str },
 }
 
+/// Defines the behavior of an evaluator.
 pub trait Evaluator {
+    /// Evaluates the provided AST `node` within the given `env`.
+    /// Returns the resulting `Object` or an `Error` if evaluation fails.
     fn eval(&self, node: &Program, env: &mut Environment) -> Result<Object>;
 }
 
+/// Evaluates the buffer input using the provided evaluator.
+///
+/// # Arguments
+///
+/// * `evaluator` - A boxed trait object implementing the `Evaluator` trait.
+/// * `input` - The input string to evaluate.
+///
+/// # Examples
+///
+/// ```
+/// use my_evaluator::{Evaluator, evaluate_buffer};
+///
+/// // Define a custom evaluator
+/// struct MyEvaluator;
+/// impl Evaluator for MyEvaluator {
+///     // Implement the `eval` method
+///     // ...
+/// }
+///
+/// let evaluator = Box::new(MyEvaluator);
+/// let input = "1 + 2";
+///
+/// evaluate_buffer(evaluator, input);
+/// ```
 pub fn evaluate_buffer(evaluator: Box<dyn Evaluator>, input: String) -> Result<()> {
     let mut lexer = Lexer::new(input);
     let toks = lexer.get_deez_toks();
