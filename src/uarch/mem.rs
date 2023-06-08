@@ -1,5 +1,6 @@
 use std::{
     cell::Cell,
+    collections::VecDeque,
     rc::Rc,
     sync::{Arc, Mutex},
 };
@@ -22,27 +23,32 @@ impl Ram {
     }
 }
 
+impl Clone for Ram {
+    fn clone(&self) -> Self {
+        Ram {
+            data: Arc::clone(&self.data),
+        }
+    }
+}
+
 #[derive(Debug)]
-pub struct CltrStoreBuilder {
+pub struct CtrlStoreBuilder {
     firmware: [u64; u8::MAX as usize + 1],
 }
 
-impl CltrStoreBuilder {
-    /// get the nth word of the memory
-    pub fn get(&self, n: u8) -> u64 {
-        self.firmware[n as usize]
-    }
-
+impl CtrlStoreBuilder {
     /// set the nth word of the memory to `v`
-    pub fn set(&mut self, n: u8, v: u64) {
-        self.firmware[n as usize] = v
+    pub fn set(mut self, n: u8, v: u64) -> Self {
+        self.firmware[n as usize] = v;
+        self
     }
 
     /// load the microintructions of `v` starting at the nth memory word
-    pub fn load<T: IntoIterator<Item = u64>>(&mut self, n: u8, v: T) {
+    pub fn load<T: IntoIterator<Item = u64>>(mut self, n: u8, v: T) -> Self {
         for (i, mi) in v.into_iter().enumerate() {
-            self.firmware[i + n as usize] = mi
+            self.firmware[i + n as usize] = mi;
         }
+        self
     }
 
     /// Build a `CtrlStore`
@@ -53,16 +59,22 @@ impl CltrStoreBuilder {
     }
 }
 
+impl Default for CtrlStoreBuilder {
+    fn default() -> Self {
+        CtrlStoreBuilder {
+            firmware: [0; u8::MAX as usize + 1],
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct CtrlStore {
     firmware: Arc<[u64; u8::MAX as usize + 1]>,
 }
 
 impl CtrlStore {
-    pub fn new() -> CltrStoreBuilder {
-        CltrStoreBuilder {
-            firmware: [0; u8::MAX as usize + 1],
-        }
+    pub fn builder() -> CtrlStoreBuilder {
+        CtrlStoreBuilder::default()
     }
 
     // get the nth word of the memory
@@ -132,6 +144,43 @@ impl<T: Copy> Register for SharedReg<T> {
     }
 }
 
+/// A Instruction Fetch Unit with 8 bytes of cache
+#[derive(Debug)]
+struct Ifu {
+    cache: VecDeque<u8>,
+    imar: u32,
+}
+
+impl Ifu {
+    pub fn new() -> Self {
+        Self {
+            cache: VecDeque::with_capacity(8),
+            imar: 0,
+        }
+    }
+
+    /// fetches a word (4 bytes) from the memory if necessary
+    fn try_fetch(&mut self, mem: Ram) {
+        if self.cache.len() <= 4 {
+            let word = mem.get(self.imar);
+            self.imar += 1;
+            for &b in word.to_le_bytes().iter().rev() {
+                self.cache.push_back(b);
+            }
+        }
+    }
+
+    fn get_mbr(&mut self) -> Option<u8> {
+        self.cache.pop_front()
+    }
+
+    fn get_mbr2(&mut self) -> Option<u16> {
+        let a = self.cache.pop_front()?;
+        let b = self.cache.pop_front()?;
+        Some((b as u16) << 8 | a as u16)
+    }
+}
+
 #[derive(Debug)]
 pub struct MemRegs {
     mar: Reg<u32>,
@@ -139,6 +188,55 @@ pub struct MemRegs {
     pc: Reg<u32>,
     mbr: Reg<u8>,
     mbr2: Reg<u16>,
+    ifu: Ifu,
+    mem: Ram,
+}
+
+impl MemRegs {
+    pub fn new(mem: Ram) -> Self {
+        Self {
+            mar: Reg::default(),
+            mdr: Reg::default(),
+            pc: Reg::default(),
+            mbr: Reg::default(),
+            mbr2: Reg::default(),
+            ifu: Ifu::new(),
+            mem,
+        }
+    }
+
+    pub fn read(&mut self) {
+        self.mdr.set(self.mem.get(self.mar.get()));
+    }
+
+    pub fn write(&mut self) {
+        self.mem.set(self.mar.get(), self.mdr.get())
+    }
+
+    pub fn fetch_mbr(&mut self) {
+        self.ifu.try_fetch(self.mem.clone());
+        let byte = self
+            .ifu
+            .get_mbr()
+            .expect("Should not panic: the memory was fetched previously");
+        self.mbr.set(byte);
+        self.pc.set(self.pc.get() + 1)
+    }
+
+    pub fn fetch_mbr2(&mut self) {
+        self.ifu.try_fetch(self.mem.clone());
+        let bytes = self
+            .ifu
+            .get_mbr2()
+            .expect("Should not panic: the memory was fetched previously");
+        self.mbr2.set(bytes);
+        self.pc.set(self.pc.get() + 2)
+    }
+
+    pub fn update_pc(&mut self, v: u32) {
+        self.pc.set(v);
+        self.ifu.imar = v
+    }
 }
 
 #[derive(Debug)]
@@ -150,14 +248,14 @@ pub struct SysRegs {
 
 #[derive(Debug)]
 pub struct GenRegs {
-    oa: Reg<u32>,
-    ob: Reg<u32>,
-    sor: SharedReg<u32>,
+    pub oa: Reg<u32>,
+    pub ob: Reg<u32>,
+    pub sor: SharedReg<u32>,
 }
 
 #[derive(Debug)]
 struct Registers {
-    mem: MemRegs,
-    sys: SysRegs,
-    gen: GenRegs,
+    pub mem: MemRegs,
+    pub sys: SysRegs,
+    pub gen: GenRegs,
 }
