@@ -1,7 +1,4 @@
-use std::{
-    collections::VecDeque,
-    sync::{Arc, Mutex},
-};
+use std::collections::VecDeque;
 
 pub mod alu;
 pub mod mem;
@@ -41,17 +38,13 @@ impl Default for ClkLevel {
 struct Ifu {
     cache: VecDeque<u8>,
     imar: u32,
-    mem: Arc<Mutex<mem::Ram>>,
+    mem: mem::Ram,
 }
 
 impl Ifu {
     // fetches a word (4 bytes) from the memory
     fn fetch(&mut self) {
-        let word = self
-            .mem
-            .lock()
-            .expect("IFU failed to get the RAM lock")
-            .get(self.imar);
+        let word = self.mem.get(self.imar);
         self.imar += 1;
         for &b in word.to_le_bytes().iter().rev() {
             self.cache.push_back(b);

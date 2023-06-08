@@ -6,35 +6,68 @@ use std::{
 
 #[derive(Debug)]
 pub struct Ram {
-    data: [u32; u32::MAX as usize + 1],
+    data: Arc<Mutex<[u32; u32::MAX as usize + 1]>>,
 }
 
 impl Ram {
     // get the nth word of the memory
     pub fn get(&self, n: u32) -> u32 {
-        self.data[n as usize]
+        self.data.lock().expect("Failed to get the RAM lock")[n as usize]
     }
 
     // set the nth word of the memory to `v`
-    pub fn set(&mut self, n: u16, v: u32) {
-        self.data[n as usize] = v
+    pub fn set(&mut self, n: u32, v: u32) {
+        let mut words = self.data.lock().expect("Failed to get the RAM lock");
+        words[n as usize] = v
+    }
+}
+
+#[derive(Debug)]
+pub struct CltrStoreBuilder {
+    firmware: [u64; u8::MAX as usize + 1],
+}
+
+impl CltrStoreBuilder {
+    /// get the nth word of the memory
+    pub fn get(&self, n: u8) -> u64 {
+        self.firmware[n as usize]
+    }
+
+    /// set the nth word of the memory to `v`
+    pub fn set(&mut self, n: u8, v: u64) {
+        self.firmware[n as usize] = v
+    }
+
+    /// load the microintructions of `v` starting at the nth memory word
+    pub fn load<T: IntoIterator<Item = u64>>(&mut self, n: u8, v: T) {
+        for (i, mi) in v.into_iter().enumerate() {
+            self.firmware[i + n as usize] = mi
+        }
+    }
+
+    /// Build a `CtrlStore`
+    pub fn build(self) -> CtrlStore {
+        CtrlStore {
+            firmware: Arc::new(self.firmware),
+        }
     }
 }
 
 #[derive(Debug)]
 pub struct CtrlStore {
-    firmware: [u64; u8::MAX as usize + 1],
+    firmware: Arc<[u64; u8::MAX as usize + 1]>,
 }
 
 impl CtrlStore {
+    pub fn new() -> CltrStoreBuilder {
+        CltrStoreBuilder {
+            firmware: [0; u8::MAX as usize + 1],
+        }
+    }
+
     // get the nth word of the memory
     pub fn get(&self, n: u8) -> u64 {
         self.firmware[n as usize]
-    }
-
-    // set the nth word of the memory to `v`
-    pub fn set(&mut self, n: u8, v: u64) {
-        self.firmware[n as usize] = v
     }
 }
 
