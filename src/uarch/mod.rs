@@ -64,15 +64,21 @@ impl Ifu {
         }
         self.cache
             .pop_front()
-            .expect("Should not panic because the memory is fetched before this operation")
+            .expect("Should not panic: memory was fetched previously")
     }
 
     fn get_mbr2(&mut self) -> u16 {
         if self.cache.len() <= 2 {
             self.fetch();
         }
-        let a = self.cache.pop_front().unwrap();
-        let b = self.cache.pop_front().unwrap();
+        let a = self
+            .cache
+            .pop_front()
+            .expect("Should not panic: memory was fetched previously");
+        let b = self
+            .cache
+            .pop_front()
+            .expect("Should not panic: memory was fetched previously");
         (b as u16) << 8 | a as u16
     }
 }
