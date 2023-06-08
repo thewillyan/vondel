@@ -18,8 +18,6 @@ fn read_from_file(file: &str) -> Result<String> {
 
 fn main() -> Result<()> {
     let cli = InterpreterCli::parse();
-    let verb = cli.verbose;
-
     let evaluator: Box<dyn evaluator::Evaluator> = match cli.evaluator {
         EvaluatorChoice::Rust => Box::new(evaluator::rust::RustEvaluator::new()),
         EvaluatorChoice::Custom => Box::new(evaluator::custom::CustomEvaluator::new()),
@@ -30,7 +28,7 @@ fn main() -> Result<()> {
             let buf = read_from_file(&file)?;
             evaluate_buffer(evaluator, buf)?;
         }
-        None => repl::start(evaluator, verb),
+        None => repl::start(evaluator),
     }
 
     Ok(())
