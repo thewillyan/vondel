@@ -25,8 +25,4 @@ pub struct InterpreterCli {
     /// The file to run the interpreter on
     #[arg(short, long)]
     pub file: Option<String>,
-
-    /// The verbose flag
-    #[arg(short, long, default_value = "false")]
-    pub verbose: bool,
 }

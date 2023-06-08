@@ -48,7 +48,7 @@ fn print_parser_errors(errors: Vec<Error>) {
     }
 }
 
-pub fn start(evaluator: Box<dyn Evaluator>, _verbose: bool) {
+pub fn start(evaluator: Box<dyn Evaluator>) {
     println!("{}", WELCOME_MESSAGE);
     let mut env = Environment::new();
     loop {
