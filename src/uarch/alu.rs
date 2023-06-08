@@ -1,5 +1,5 @@
 #[derive(Debug, Default)]
-struct Alu {
+pub struct Alu {
     f: Func,
     a: u32,
     b: u32,
@@ -7,7 +7,12 @@ struct Alu {
 }
 
 impl Alu {
-    fn entry(&mut self, opcode: u8, a: u32, b: u32) {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Set ALU inputs
+    pub fn entry(&mut self, opcode: u8, a: u32, b: u32) {
         let inc = (opcode & 0b00000001) == 0b00000001;
         let inva = (opcode & 0b00000010) == 0b00000010;
 
@@ -43,7 +48,7 @@ impl Alu {
         self.s.sra = sra;
     }
 
-    fn op(&self) -> u32 {
+    pub fn op(&self) -> u32 {
         let c = match &self.f {
             Func::Add { inc } => {
                 let mut sum = self.a as i32 + self.b as i32;
@@ -57,24 +62,6 @@ impl Alu {
             Func::Not => !self.b,
         };
         self.s.shift(c)
-    }
-}
-
-#[derive(Debug, Default)]
-struct Shifter {
-    sll: bool,
-    sra: bool,
-}
-
-impl Shifter {
-    fn shift(&self, mut entry: u32) -> u32 {
-        if self.sra {
-            entry = entry >> 1;
-        }
-        if self.sll {
-            entry = entry << 8;
-        }
-        entry
     }
 }
 
@@ -92,7 +79,24 @@ impl Default for Func {
     }
 }
 
-// ALU tests
+#[derive(Debug, Default)]
+struct Shifter {
+    sll: bool,
+    sra: bool,
+}
+
+impl Shifter {
+    fn shift(&self, mut entry: u32) -> u32 {
+        if self.sra {
+            entry >>= 1;
+        }
+        if self.sll {
+            entry <<= 8;
+        }
+        entry
+    }
+}
+
 #[cfg(test)]
 pub mod test {
     use super::*;
