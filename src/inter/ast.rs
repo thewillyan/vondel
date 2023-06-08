@@ -5,6 +5,7 @@ pub mod expression;
 pub use expression::Expression;
 
 #[derive(Error, Debug, PartialEq)]
+/// ParserError is an error that can occur during parsing
 enum ParserError {
     #[error("Expected token '{expected}', found '{found}'")]
     MissingToken {
@@ -52,6 +53,7 @@ enum Precedence {
 }
 
 impl Precedence {
+    /// Returns the precedence of a given token used in Pratt Parsing
     fn precedence_of(t: &TokenType) -> Precedence {
         // TODO: Add more precedence for LESSEQ AND GREATEREQ
         match t {
@@ -71,6 +73,7 @@ pub struct Program {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+/// Represents different types of statements in the program.
 pub enum StatementType {
     Let { name: Expression, value: Expression },
     Return(Expression),
@@ -78,6 +81,7 @@ pub enum StatementType {
     Block(Vec<StatementType>),
 }
 
+/// Creates a Parser that will use the Pratt Parser approach to parse the tokens
 pub struct Parser<'a> {
     cur_token: &'a TokenType,
     peek_token: &'a TokenType,
@@ -86,6 +90,7 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
+    /// Creates a new parser with the given tokens.
     pub fn new(toks: &'a [TokenType]) -> Parser {
         let mut p = Parser {
             cur_token: &TokenType::Eof,
@@ -98,6 +103,7 @@ impl<'a> Parser<'a> {
         p
     }
 
+    /// Moves to the next token in the token stream.
     fn next_token(&mut self) {
         self.cur_token = self.peek_token;
         if self.idx + 1 >= self.toks.len() {
@@ -108,6 +114,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Expects the next token to be of type `t`, otherwise returns an error
     fn expect_peek(&mut self, t: TokenType) -> Result<&'a TokenType> {
         let tok = match *self.peek_token {
             TokenType::Ident(_) => TokenType::Ident(String::new()),
@@ -128,40 +135,49 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Skips the next token if it is a semicolon
     fn skip_peek_semicolon(&mut self) {
         if *self.peek_token == TokenType::Semicolon {
             self.next_token();
         }
     }
 
+    /// Returns if the current token is of type `t`
     fn curr_token_is(&self, t: TokenType) -> bool {
         *self.cur_token == t
     }
 
+    /// Returns if the peek token is of type `t`
     fn peek_token_is(&self, t: TokenType) -> bool {
         *self.peek_token == t
     }
 
+    /// Return the precedence of the peek token
     fn peek_precedence(&self) -> Precedence {
         Precedence::precedence_of(self.peek_token)
     }
 
+    /// Return the precedence of the current token
     fn cur_precedence(&self) -> Precedence {
         Precedence::precedence_of(self.cur_token)
     }
 
+    /// Creates a new Identifier expression from the current token
     fn parse_identifier_expression(&self, s: &String) -> Result<Expression> {
         Ok(Expression::new_ident(s))
     }
 
+    /// Creates a new Integer expression from the current token
     fn parse_integer_expression(&self, s: &String) -> Result<Expression> {
         Expression::new_integer(s)
     }
 
+    /// Creates a new Boolean expression from the current token
     fn parse_boolean_expression(&self) -> Result<Expression> {
         Expression::new_boolean(self.cur_token)
     }
 
+    /// Get the current identifier as a string
     fn get_current_identifier(&self) -> Result<String> {
         match self.cur_token {
             TokenType::Ident(s) => Ok(s.clone()),
@@ -171,6 +187,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parses prefix expressions
     fn parse_prefix_expression(&mut self) -> Result<Expression> {
         let op = self.cur_token;
         self.next_token();
@@ -178,6 +195,7 @@ impl<'a> Parser<'a> {
         Expression::new_prefix(op, right)
     }
 
+    /// Parses infix expressions
     fn parse_infix_expression(&mut self, left: Expression) -> Result<Expression> {
         let op = self.cur_token;
         let precedence = self.cur_precedence();
@@ -187,6 +205,7 @@ impl<'a> Parser<'a> {
         Expression::new_infix(left, op, right)
     }
 
+    /// Parses a expression with parentesis precedence
     fn parse_grouped_expression(&mut self) -> Result<Expression> {
         self.next_token();
         let exp = self.parse_expression(Precedence::Lowest)?;
@@ -195,6 +214,7 @@ impl<'a> Parser<'a> {
         Ok(exp)
     }
 
+    /// Parses a block statement
     fn parse_block_statement(&mut self) -> Result<StatementType> {
         let mut sttms = Vec::new();
         self.next_token();
@@ -208,6 +228,7 @@ impl<'a> Parser<'a> {
         Ok(StatementType::Block(sttms))
     }
 
+    /// Parses a if expression
     fn parse_if_expression(&mut self) -> Result<Expression> {
         self.expect_peek(TokenType::LParen)?;
         self.next_token();
@@ -227,6 +248,7 @@ impl<'a> Parser<'a> {
         Ok(Expression::new_if(condition, consequence, alternative))
     }
 
+    /// Returns the function parameters of a given function
     fn parse_function_parameters(&mut self) -> Result<Vec<Expression>> {
         let mut params = Vec::new();
 
@@ -251,6 +273,7 @@ impl<'a> Parser<'a> {
         Ok(params)
     }
 
+    /// Creates a new function literal
     fn parse_function_literal(&mut self) -> Result<Expression> {
         self.expect_peek(TokenType::LParen)?;
         let params = self.parse_function_parameters()?;
@@ -260,6 +283,7 @@ impl<'a> Parser<'a> {
         Ok(Expression::new_function(params, block))
     }
 
+    /// Matches the current token with a prefix parse function
     fn prefix_parse_fns(&mut self) -> Option<Result<Expression>> {
         match self.cur_token {
             TokenType::Ident(v) => Some(self.parse_identifier_expression(v)),
@@ -273,6 +297,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Returns the arguments of a function call
     fn parse_call_arguments(&mut self) -> Result<Vec<Expression>> {
         let mut args = Vec::new();
 
@@ -295,11 +320,14 @@ impl<'a> Parser<'a> {
         Ok(args)
     }
 
+    /// Parses a function call
     fn parse_call_expression(&mut self, function: Expression) -> Result<Expression> {
         let args = self.parse_call_arguments()?;
         Ok(Expression::new_call(function, args))
     }
 
+    /// Return which Infix Parse Function to use based on the current token
+    /// If there is no infix parse function for the current token, return None
     fn infix_parse_fns(
         &mut self,
     ) -> Option<Box<dyn FnOnce(Expression) -> Result<Expression> + '_>> {
@@ -323,6 +351,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Parses all expressions
     fn parse_expression(&mut self, precedence: Precedence) -> Result<Expression> {
         let prefix = self
             .prefix_parse_fns()
@@ -342,6 +371,7 @@ impl<'a> Parser<'a> {
         Ok(left_exp)
     }
 
+    /// Parses a let statement
     fn parse_let_statement(&mut self) -> Result<StatementType> {
         self.expect_peek(TokenType::Ident(String::new()))?;
         let ident = self.get_current_identifier()?;
@@ -356,6 +386,7 @@ impl<'a> Parser<'a> {
         Ok(StatementType::Let { name, value })
     }
 
+    /// Parses a return statement
     fn parse_return_statement(&mut self) -> Result<StatementType> {
         self.next_token();
         let ret_value = self.parse_expression(Precedence::Lowest)?;
@@ -365,12 +396,14 @@ impl<'a> Parser<'a> {
         Ok(StatementType::Return(ret_value))
     }
 
+    /// Parses an expression statement
     fn parse_expression_statement(&mut self) -> Result<StatementType> {
         let res = self.parse_expression(Precedence::Lowest)?;
         self.skip_peek_semicolon();
         Ok(StatementType::Expression(res))
     }
 
+    /// Parses a statement and returns the resulting `StatementType` enum.
     fn parse_statement(&mut self) -> Result<StatementType> {
         let res = match self.cur_token {
             TokenType::Let => self.parse_let_statement()?,
@@ -407,6 +440,7 @@ impl<'a> Parser<'a> {
         ErrorWithCtx { error, ctx }.into()
     }
 
+    /// Parses the program and returns the resulting `Program` struct.
     pub fn get_deez_program(&mut self) -> Program {
         let mut program = Program {
             statements: Vec::new(),

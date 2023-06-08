@@ -8,6 +8,7 @@ pub struct Lexer {
 }
 
 impl Lexer {
+    /// Creates a new `Lexer` instance with the given input string.
     pub fn new(input: String) -> Self {
         let mut l = Lexer {
             ch: b' ',
@@ -19,12 +20,14 @@ impl Lexer {
         l
     }
 
+    /// Skips whitespace characters in the input until a non-whitespace character is encountered.
     fn skip_whitespace(&mut self) {
         while self.ch.is_ascii_whitespace() {
             self.read_char();
         }
     }
 
+    /// Returns the next character in the input without consuming it.
     fn peek_char(&self) -> char {
         let mut c = '\0';
         if self.read_position < self.input.len() {
@@ -33,6 +36,7 @@ impl Lexer {
         c
     }
 
+    /// Reads the next character from the input and updates the lexer's internal state.
     fn read_char(&mut self) {
         if self.read_position >= self.input.len() {
             self.ch = b'\0';
@@ -43,6 +47,7 @@ impl Lexer {
         }
     }
 
+    /// Returns the next token from the input.
     pub fn next_token(&mut self) -> TokenType {
         self.skip_whitespace();
         let tok = self.tokenizer();
@@ -50,6 +55,7 @@ impl Lexer {
         tok
     }
 
+    /// Parses an operator token based on the current and next characters in the input.
     fn parse_operator(&mut self) -> TokenType {
         let curr = self.ch;
         let doubled = self.peek_char() == '=';
@@ -73,6 +79,7 @@ impl Lexer {
         }
     }
 
+    /// Tokenizes the current character based on its type.
     fn tokenizer(&mut self) -> TokenType {
         match self.ch {
             b'\0' => TokenType::Eof,
@@ -89,6 +96,7 @@ impl Lexer {
         }
     }
 
+    /// Reads an identifier token from the input.
     fn read_name(&mut self) -> TokenType {
         let start = self.position;
         while self.read_position != self.input.len()
@@ -109,6 +117,7 @@ impl Lexer {
         }
     }
 
+    /// Reads an integer number token from the input.
     fn read_number(&mut self) -> TokenType {
         let start = self.position;
         while self.read_position != self.input.len()
@@ -121,6 +130,7 @@ impl Lexer {
         )
     }
 
+    /// Returns a vector of all tokens found in the input.
     pub fn get_deez_toks(&mut self) -> Vec<TokenType> {
         let mut toks = Vec::new();
         loop {
