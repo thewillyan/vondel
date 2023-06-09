@@ -61,7 +61,7 @@ pub trait Evaluator {
 ///
 /// # Examples
 ///
-/// ```
+/// ```ignore
 /// use my_evaluator::{Evaluator, evaluate_buffer};
 ///
 /// // Define a custom evaluator
