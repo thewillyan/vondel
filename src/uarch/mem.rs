@@ -21,6 +21,21 @@ impl Ram {
         let mut words = self.data.lock().expect("Failed to get the RAM lock");
         words[n as usize] = v
     }
+
+    /// load words from `v` starting at the nth memory word
+    pub fn load<T: IntoIterator<Item = u32>>(&mut self, n: u32, v: T) {
+        for (i, word) in v.into_iter().enumerate() {
+            self.set(i as u32 + n, word);
+        }
+    }
+}
+
+impl Default for Ram {
+    fn default() -> Self {
+        Self {
+            data: Arc::new(Mutex::new([0; u32::MAX as usize + 1])),
+        }
+    }
 }
 
 impl Clone for Ram {
@@ -33,21 +48,27 @@ impl Clone for Ram {
 
 #[derive(Debug)]
 pub struct CtrlStoreBuilder {
-    firmware: [u64; u8::MAX as usize + 1],
+    firmware: [u64; 512],
+    mpc: u16,
 }
 
 impl CtrlStoreBuilder {
     /// set the nth word of the memory to `v`
-    pub fn set(mut self, n: u8, v: u64) -> Self {
+    pub fn set(mut self, n: u16, v: u64) -> Self {
         self.firmware[n as usize] = v;
         self
     }
 
     /// load the microintructions of `v` starting at the nth memory word
-    pub fn load<T: IntoIterator<Item = u64>>(mut self, n: u8, v: T) -> Self {
+    pub fn load<T: IntoIterator<Item = u64>>(mut self, n: u16, v: T) -> Self {
         for (i, mi) in v.into_iter().enumerate() {
             self.firmware[i + n as usize] = mi;
         }
+        self
+    }
+
+    pub fn set_mpc(mut self, byte: u16) -> Self {
+        self.mpc = byte & 0b0000000111111111;
         self
     }
 
@@ -55,6 +76,7 @@ impl CtrlStoreBuilder {
     pub fn build(self) -> CtrlStore {
         CtrlStore {
             firmware: Arc::new(self.firmware),
+            mpc: SharedReg::new(self.mpc),
         }
     }
 }
@@ -62,24 +84,81 @@ impl CtrlStoreBuilder {
 impl Default for CtrlStoreBuilder {
     fn default() -> Self {
         CtrlStoreBuilder {
-            firmware: [0; u8::MAX as usize + 1],
+            firmware: [0; 512],
+            mpc: 0,
         }
     }
 }
 
 #[derive(Debug)]
 pub struct CtrlStore {
-    firmware: Arc<[u64; u8::MAX as usize + 1]>,
+    firmware: Arc<[u64; 512]>,
+    pub mpc: SharedReg<u16>,
 }
 
 impl CtrlStore {
+    /// TERMINATE instruction
+    pub const TERM: u64 = 0b11111111111111111111111111111111111111;
+
     pub fn builder() -> CtrlStoreBuilder {
         CtrlStoreBuilder::default()
     }
 
-    // get the nth word of the memory
-    pub fn get(&self, n: u8) -> u64 {
-        self.firmware[n as usize]
+    /// Get the next Microinstruction from the CtrlStore, in other words,
+    /// fetch the MI at the position stored at MPC.
+    ///
+    /// ### MI (38 bits):
+    ///
+    ///```
+    /// |   NEXT  |JAM|   ALU  | C BUS  |MEM| A  | B |
+    /// |---------|---|--------|--------|---|----|---|
+    /// |000000000|000|00000000|00000000|000|0000|000|
+    /// ```
+    pub fn get_mi(&self) -> u64 {
+        self.firmware[self.mpc.get() as usize]
+    }
+
+    /// Update the MPC from the opcode of the format:
+    ///
+    /// `[ ... | NEXT_ADDR | JMPC | JAMN | JAMZ ]`
+    ///
+    /// where `JMPC`, `JAMN` and `JAMZ` are 1-bit wide and `NEXT_ADDR` is
+    /// 9-bit wide. The 4 bits represented by `...` are ignored.
+    pub fn update_mpc(&self, mut opcode: u16, z: bool, mbr: u8) {
+        // ignored 4 MSBs
+        opcode &= 0b0000111111111111;
+
+        let jamz = (opcode & 1) == 1;
+        opcode >>= 1;
+        let jamn = (opcode & 1) == 1;
+        opcode >>= 1;
+        let jmpc = (opcode & 1) == 1;
+        opcode >>= 1;
+
+        let mut next_addr = opcode;
+
+        if jamn && !z {
+            next_addr |= 0b0000000100000000;
+        }
+
+        if jamz && z {
+            next_addr |= 0b0000000100000000;
+        }
+
+        if jmpc {
+            next_addr |= mbr as u16;
+        }
+
+        self.mpc.set(next_addr);
+    }
+}
+
+impl Clone for CtrlStore {
+    fn clone(&self) -> Self {
+        CtrlStore {
+            firmware: Arc::clone(&self.firmware),
+            mpc: self.mpc.clone(),
+        }
     }
 }
 
@@ -92,6 +171,14 @@ pub trait Register {
 #[derive(Debug, Clone)]
 pub struct Reg<T: Copy> {
     v: Rc<Cell<T>>,
+}
+
+impl<T: Copy> Reg<T> {
+    pub fn new(v: T) -> Self {
+        Self {
+            v: Rc::new(Cell::new(v)),
+        }
+    }
 }
 
 impl<T: Copy + Default> Default for Reg<T> {
@@ -113,15 +200,31 @@ impl<T: Copy> Register for Reg<T> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct SharedReg<T> {
     v: Arc<Mutex<T>>,
+}
+
+impl<T> SharedReg<T> {
+    pub fn new(v: T) -> Self {
+        Self {
+            v: Arc::new(Mutex::new(v)),
+        }
+    }
 }
 
 impl<T: Default> Default for SharedReg<T> {
     fn default() -> Self {
         let v = Arc::new(Mutex::new(T::default()));
         Self { v }
+    }
+}
+
+impl<T> Clone for SharedReg<T> {
+    fn clone(&self) -> Self {
+        Self {
+            v: Arc::clone(&self.v),
+        }
     }
 }
 
@@ -155,6 +258,10 @@ pub struct MemRegs {
 }
 
 impl MemRegs {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     pub fn mar(&self) -> u32 {
         self.mar.get()
     }
@@ -167,16 +274,16 @@ impl MemRegs {
         self.pc.get()
     }
 
-    pub fn mbr(&self) -> u8 {
+    pub fn mbr(&mut self) -> u8 {
+        self.ifu.consume_mbr();
+        self.pc.set(self.pc.get() + 1);
         self.mbr.get()
     }
 
-    pub fn mbr2(&self) -> u16 {
+    pub fn mbr2(&mut self) -> u16 {
+        self.ifu.consume_mbr2();
+        self.pc.set(self.pc.get() + 2);
         self.mbr2.get()
-    }
-
-    pub fn new() -> Self {
-        Self::default()
     }
 
     pub fn read(&mut self, mem: Ram) {
@@ -187,19 +294,18 @@ impl MemRegs {
         mem.set(self.mar.get(), self.mdr.get())
     }
 
-    pub fn fetch_mbr(&mut self, mem: Ram) {
-        self.mbr.set(self.ifu.get_mbr(mem));
-        self.pc.set(self.pc.get() + 1)
+    pub fn fetch(&mut self, mem: Ram) {
+        self.ifu.load(self.mbr.clone(), self.mbr2.clone(), mem);
     }
 
-    pub fn fetch_mbr2(&mut self, mem: Ram) {
-        self.mbr2.set(self.ifu.get_mbr2(mem));
-        self.pc.set(self.pc.get() + 2);
-    }
-
-    pub fn update_pc(&mut self, v: u32) {
+    pub fn update_pc(&mut self, v: u32, mem: Ram) {
         self.pc.set(v);
-        self.ifu.imar = v
+        self.ifu.imar = v;
+        self.ifu.load(self.mbr.clone(), self.mbr2.clone(), mem);
+    }
+
+    pub fn update_mar(&mut self, v: u32) {
+        self.mar.set(v)
     }
 }
 
@@ -211,10 +317,6 @@ struct Ifu {
 }
 
 impl Ifu {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     /// fetches a word (4 bytes) from the memory if necessary
     fn try_fetch(&mut self, mem: Ram) {
         if self.cache.len() <= 4 {
@@ -226,24 +328,27 @@ impl Ifu {
         }
     }
 
-    fn get_mbr(&mut self, mem: Ram) -> u8 {
+    fn load(&mut self, mbr: Reg<u8>, mbr2: Reg<u16>, mem: Ram) {
         self.try_fetch(mem);
-        self.cache
-            .pop_front()
-            .expect("Should not panic: the memory was fetched previously")
+        let a = *self
+            .cache
+            .front()
+            .expect("Should not panic: the memory was fetched previously");
+        let b = *self
+            .cache
+            .get(1)
+            .expect("Should not panic: the memory was fetched previously");
+        mbr.set(a);
+        mbr2.set((b as u16) << 8 | a as u16);
     }
 
-    fn get_mbr2(&mut self, mem: Ram) -> u16 {
-        self.try_fetch(mem);
-        let a = self
-            .cache
-            .pop_front()
-            .expect("Should not panic: the memory was fetched previously");
-        let b = self
-            .cache
-            .pop_front()
-            .expect("Should not panic: the memory was fetched previously");
-        (b as u16) << 8 | a as u16
+    fn consume_mbr(&mut self) {
+        self.cache.pop_front();
+    }
+
+    fn consume_mbr2(&mut self) {
+        self.cache.pop_front();
+        self.cache.pop_front();
     }
 }
 
@@ -258,9 +363,9 @@ impl Default for Ifu {
 
 #[derive(Debug, Default)]
 pub struct SysRegs {
-    lv: Reg<u32>,
-    sp: Reg<u32>,
-    cpp: Reg<u32>,
+    pub lv: Reg<u32>,
+    pub sp: Reg<u32>,
+    pub cpp: Reg<u32>,
 }
 
 impl SysRegs {

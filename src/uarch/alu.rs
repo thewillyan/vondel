@@ -1,9 +1,12 @@
+use crate::uarch::mem::{Reg, Register};
+
 #[derive(Debug, Default)]
 pub struct Alu {
     f: Func,
     a: u32,
     b: u32,
     s: Shifter,
+    z: Reg<bool>,
 }
 
 impl Alu {
@@ -61,7 +64,12 @@ impl Alu {
             Func::Or => self.a | self.b,
             Func::Not => !self.b,
         };
+        self.z.set(c == 0);
         self.s.shift(c)
+    }
+
+    pub fn z(&self) -> bool {
+        self.z.get()
     }
 }
 
