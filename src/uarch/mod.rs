@@ -1,4 +1,7 @@
-#![allow(unused)]
+use std::{
+    sync::{mpsc, Arc, Mutex},
+    thread,
+};
 
 pub mod alu;
 pub mod mem;
@@ -7,15 +10,64 @@ use alu::Alu;
 use mem::{CtrlStore, Ram, Register, Registers};
 
 #[derive(Debug)]
-struct Computer {
+pub struct Computer {
     mem: Ram,
     cpu: Cpu,
-    clock: Clock,
+    clock: Arc<Mutex<Clock>>,
+}
+
+impl Computer {
+    pub fn new<M, F>(mem: M, firmware: F) -> Self
+    where
+        M: IntoIterator<Item = u32>,
+        F: IntoIterator<Item = u64>,
+    {
+        let mut ram = Ram::default();
+        ram.load(0, mem);
+        let cs = CtrlStore::builder().load(0, firmware).build();
+        Self {
+            mem: ram,
+            cpu: Cpu::new(cs),
+            clock: Arc::new(Mutex::new(Clock::default())),
+        }
+    }
+
+    pub fn exec(&mut self) {
+        let (tx, rx) = mpsc::sync_channel(1);
+        let clk = Arc::clone(&self.clock);
+        thread::spawn(move || loop {
+            let mut clk = clk.lock().expect("Cannot get the clock lock.");
+            tx.send(clk.lv.clone())
+                .expect("Failed to send clock signal");
+            clk.alt();
+        });
+        self.cpu.run(self.mem.clone(), rx);
+    }
 }
 
 #[derive(Debug)]
 struct Cpu {
     thr: Thread,
+    firmware: CtrlStore,
+}
+
+impl Cpu {
+    pub fn new(firmware: CtrlStore) -> Self {
+        Self {
+            thr: Thread::new(),
+            firmware,
+        }
+    }
+
+    pub fn run(&mut self, mem: Ram, recver: mpsc::Receiver<ClkLevel>) {
+        self.thr.init(self.firmware.get_mi(), mem.clone());
+        while let Ok(trigger) = recver.recv() {
+            if self.firmware.get_mi() != CtrlStore::TERM {
+                break;
+            }
+            self.thr.step(&trigger, mem.clone(), self.firmware.clone());
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -24,51 +76,71 @@ struct Thread {
     dp2: DataPath,
 }
 
+impl Thread {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    fn init(&mut self, mi: u64, mem: Ram) {
+        self.dp1.init_cycle(mi, mem);
+    }
+
+    fn step(&mut self, trigger: &ClkLevel, mem: Ram, cs: CtrlStore) {
+        if trigger == &self.dp1.trigger {
+            self.dp2.end_cycle(mem.clone(), cs.clone());
+            self.dp1.init_cycle(cs.get_mi(), mem);
+        } else {
+            self.dp1.end_cycle(mem.clone(), cs.clone());
+            self.dp2.init_cycle(cs.get_mi(), mem);
+        }
+    }
+}
+
+impl Default for Thread {
+    fn default() -> Self {
+        let trigger1 = ClkLevel::default();
+        let trigger2 = trigger1.inv();
+        Thread {
+            dp1: DataPath::new(trigger1),
+            dp2: DataPath::new(trigger2),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct DataPath {
     alu: Alu,
     regs: Registers,
     state: DPState,
-    cs: CtrlStore,
     trigger: ClkLevel,
 }
 
 impl DataPath {
-    pub fn new<T>(firmware: T, trigger: ClkLevel) -> Self
-    where
-        T: IntoIterator<Item = u64>,
-    {
-        let cs = CtrlStore::builder().load(0, firmware).build();
+    pub fn new(trigger: ClkLevel) -> Self {
         Self {
             alu: Alu::new(),
             regs: Registers::new(),
             state: DPState::default(),
-            cs,
             trigger,
         }
     }
 
-    pub fn recv_signal(&mut self, ck: &ClkLevel, mem: Ram) {
+    pub fn recv_signal(&mut self, ck: &ClkLevel, mem: Ram, cs: CtrlStore) {
         if ck == &self.trigger {
-            self.init_cycle(mem);
+            self.init_cycle(cs.get_mi(), mem);
         } else {
-            self.end_cycle(mem);
+            self.end_cycle(mem, cs);
         }
     }
 
-    pub fn init_cycle(&mut self, mem: Ram) {
-        // MI (38 bits):
-        // [   NEXT  |JAM|   ALU  | C BUS  |MEM| A  | B ]
-        //  000000000_000_00000000_00000000_000_0000_000
-        let mut curr_mi = self.cs.get_mi();
-
+    pub fn init_cycle(&mut self, mut mi: u64, mem: Ram) {
         // [ 0 | A | B ]
-        self.state.enable_out = (curr_mi & 0b1111111) as u8;
-        curr_mi >>= 7;
+        self.state.enable_out = (mi & 0b1111111) as u8;
+        mi >>= 7;
 
         // MEM: [ WRITE | READ | FETCH ]
-        let mut mem_code = (curr_mi & 0b111) as u8;
-        curr_mi >>= 3;
+        let mut mem_code = (mi & 0b111) as u8;
+        mi >>= 3;
 
         let fetch = (mem_code & 1) == 1;
         if fetch {
@@ -84,17 +156,17 @@ impl DataPath {
 
         self.state.write = mem_code == 1;
 
-        self.state.enable_in = (curr_mi & 0b11111111) as u8;
-        curr_mi >>= 8;
+        self.state.enable_in = (mi & 0b11111111) as u8;
+        mi >>= 8;
 
-        self.state.alu = (curr_mi & 0b11111111) as u8;
-        curr_mi >>= 8;
+        self.state.alu = (mi & 0b11111111) as u8;
+        mi >>= 8;
 
         // NEXT_ADDR + JAM
-        self.state.cs = curr_mi as u16;
+        self.state.cs = mi as u16;
     }
 
-    pub fn end_cycle(&mut self, mem: Ram) {
+    pub fn end_cycle(&mut self, mem: Ram, cs: CtrlStore) {
         let b_code = self.state.enable_out & 0b111;
         let b = match b_code {
             0b000 => self.regs.mem.mdr(),
@@ -165,7 +237,7 @@ impl DataPath {
 
         let enb_pc_in = (self.state.enable_in & 1) == 1;
         if enb_pc_in {
-            self.regs.mem.update_pc(c_bus);
+            self.regs.mem.update_pc(c_bus, mem.clone());
         }
         self.state.enable_in >>= 1;
 
@@ -174,12 +246,11 @@ impl DataPath {
             self.regs.mem.update_mar(c_bus);
         }
 
-        self.cs
-            .update_mpc(self.state.cs, self.alu.z(), self.regs.mem.mbr());
-
         if self.state.write {
             self.regs.mem.write(mem);
         }
+
+        cs.update_mpc(self.state.cs, self.alu.z(), self.regs.mem.mbr());
     }
 }
 
@@ -192,14 +263,11 @@ pub struct Clock {
 impl Clock {
     pub fn alt(&mut self) {
         self.count += 1;
-        self.lv = match self.lv {
-            ClkLevel::Falling => ClkLevel::Rising,
-            ClkLevel::Rising => ClkLevel::Falling,
-        }
+        self.lv = self.lv.inv();
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ClkLevel {
     Falling,
     Rising,
@@ -208,6 +276,15 @@ pub enum ClkLevel {
 impl Default for ClkLevel {
     fn default() -> Self {
         Self::Falling
+    }
+}
+
+impl ClkLevel {
+    pub fn inv(&self) -> Self {
+        match self {
+            ClkLevel::Falling => ClkLevel::Rising,
+            ClkLevel::Rising => ClkLevel::Falling,
+        }
     }
 }
 
