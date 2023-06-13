@@ -1,4 +1,4 @@
-# Vondel :floppy_disk:
+# Vondel
 
 A simple computer architecture, ISA and Interpreter build with Rust.
 
