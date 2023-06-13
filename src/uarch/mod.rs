@@ -17,37 +17,44 @@ pub struct Computer {
 }
 
 impl Computer {
-    pub fn new<M, F>(mem: M, firmware: F) -> Self
-    where
-        M: IntoIterator<Item = u32>,
-        F: IntoIterator<Item = u64>,
-    {
-        let mut ram = Ram::default();
-        ram.load(0, mem);
-        let cs = CtrlStore::builder().load(0, firmware).build();
+    pub fn new(mem: Ram, firmware: CtrlStore) -> Self {
         Self {
-            mem: ram,
-            cpu: Cpu::new(cs),
+            mem,
+            cpu: Cpu::new(firmware),
             clock: Arc::new(Mutex::new(Clock::default())),
         }
     }
 
     pub fn exec(&mut self) {
-        let (tx, rx) = mpsc::sync_channel(1);
+        self.cpu.thr_sync(&self.mem);
+        self.clock.lock().expect("Cannot get the clock lock.").alt();
+
+        let (tx, rx) = mpsc::sync_channel(0);
         let clk = Arc::clone(&self.clock);
+
         thread::spawn(move || loop {
             let mut clk = clk.lock().expect("Cannot get the clock lock.");
-            tx.send(clk.lv.clone())
-                .expect("Failed to send clock signal");
-            clk.alt();
+            match tx.send(clk.lv.clone()) {
+                Ok(_) => clk.alt(),
+                Err(_) => break,
+            }
         });
-        self.cpu.run(self.mem.clone(), rx);
+        self.cpu.run(&mut self.mem, rx);
+    }
+
+    pub fn cycles(&self) -> f64 {
+        let alts = self.clock.lock().expect("Cannot get the clock lock.").count as f64;
+        alts / 2.0
+    }
+
+    pub fn regs(&self) -> &Registers {
+        self.cpu.thr.regs()
     }
 }
 
 #[derive(Debug)]
 struct Cpu {
-    thr: Thread,
+    pub thr: Thread,
     firmware: CtrlStore,
 }
 
@@ -59,13 +66,16 @@ impl Cpu {
         }
     }
 
-    pub fn run(&mut self, mem: Ram, recver: mpsc::Receiver<ClkLevel>) {
-        self.thr.init(self.firmware.get_mi(), mem.clone());
-        while let Ok(trigger) = recver.recv() {
-            if self.firmware.get_mi() != CtrlStore::TERM {
+    pub fn thr_sync(&mut self, mem: &Ram) {
+        self.thr.sync(mem, &self.firmware);
+    }
+
+    pub fn run(&mut self, mem: &mut Ram, recver: mpsc::Receiver<ClkLevel>) {
+        for trigger in recver {
+            if self.firmware.get_mi() == CtrlStore::TERM {
                 break;
             }
-            self.thr.step(&trigger, mem.clone(), self.firmware.clone());
+            self.thr.step(&trigger, mem, &self.firmware);
         }
     }
 }
@@ -81,29 +91,30 @@ impl Thread {
         Self::default()
     }
 
-    fn init(&mut self, mi: u64, mem: Ram) {
-        self.dp1.init_cycle(mi, mem);
+    fn sync(&mut self, mem: &Ram, cs: &CtrlStore) {
+        self.dp1.init_cycle(mem, cs);
     }
 
-    fn step(&mut self, trigger: &ClkLevel, mem: Ram, cs: CtrlStore) {
+    fn step(&mut self, trigger: &ClkLevel, mem: &mut Ram, cs: &CtrlStore) {
         if trigger == &self.dp1.trigger {
-            self.dp2.end_cycle(mem.clone(), cs.clone());
-            self.dp1.init_cycle(cs.get_mi(), mem);
+            self.dp2.end_cycle(mem, cs);
+            self.dp1.init_cycle(mem, cs);
         } else {
-            self.dp1.end_cycle(mem.clone(), cs.clone());
-            self.dp2.init_cycle(cs.get_mi(), mem);
+            self.dp1.end_cycle(mem, cs);
+            self.dp2.init_cycle(mem, cs);
         }
+    }
+
+    pub fn regs(&self) -> &Registers {
+        &self.dp1.regs
     }
 }
 
 impl Default for Thread {
     fn default() -> Self {
-        let trigger1 = ClkLevel::default();
-        let trigger2 = trigger1.inv();
-        Thread {
-            dp1: DataPath::new(trigger1),
-            dp2: DataPath::new(trigger2),
-        }
+        let dp1 = DataPath::new(ClkLevel::default());
+        let dp2 = dp1.sibling();
+        Thread { dp1, dp2 }
     }
 }
 
@@ -125,15 +136,25 @@ impl DataPath {
         }
     }
 
-    pub fn recv_signal(&mut self, ck: &ClkLevel, mem: Ram, cs: CtrlStore) {
+    pub fn sibling(&self) -> Self {
+        DataPath {
+            alu: Alu::default(),
+            regs: Registers::from(&self.regs),
+            state: DPState::default(),
+            trigger: self.trigger.inv(),
+        }
+    }
+
+    pub fn recv_signal(&mut self, ck: &ClkLevel, mem: &mut Ram, cs: &CtrlStore) {
         if ck == &self.trigger {
-            self.init_cycle(cs.get_mi(), mem);
+            self.init_cycle(mem, cs);
         } else {
             self.end_cycle(mem, cs);
         }
     }
 
-    pub fn init_cycle(&mut self, mut mi: u64, mem: Ram) {
+    pub fn init_cycle(&mut self, mem: &Ram, cs: &CtrlStore) {
+        let mut mi = cs.get_mi();
         // [ 0 | A | B ]
         self.state.enable_out = (mi & 0b1111111) as u8;
         mi >>= 7;
@@ -144,7 +165,7 @@ impl DataPath {
 
         let fetch = (mem_code & 1) == 1;
         if fetch {
-            self.regs.mem.fetch(mem.clone());
+            self.regs.mem.fetch(mem);
         }
         mem_code >>= 1;
 
@@ -159,14 +180,14 @@ impl DataPath {
         self.state.enable_in = (mi & 0b11111111) as u8;
         mi >>= 8;
 
-        self.state.alu = (mi & 0b11111111) as u8;
+        self.state.alu_entry = (mi & 0b11111111) as u8;
         mi >>= 8;
 
         // NEXT_ADDR + JAM
-        self.state.cs = mi as u16;
+        self.state.cs_opcode = mi as u16;
     }
 
-    pub fn end_cycle(&mut self, mem: Ram, cs: CtrlStore) {
+    pub fn end_cycle(&mut self, mem: &mut Ram, cs: &CtrlStore) {
         let b_code = self.state.enable_out & 0b111;
         let b = match b_code {
             0b000 => self.regs.mem.mdr(),
@@ -187,15 +208,15 @@ impl DataPath {
             0b0011 => self.regs.mem.mbr() as u32,
             0b0100 => self.regs.mem.mbr2() as u32 | 0xFFFF0000,
             0b0101 => self.regs.mem.mbr2() as u32,
-            0b0111 => self.regs.sys.sp.get(),
-            0b1000 => self.regs.sys.lv.get(),
-            0b1001 => self.regs.sys.cpp.get(),
-            0b1010 => self.regs.gen.ob.get(),
-            0b1011 => self.regs.gen.sor.get(),
+            0b0110 => self.regs.sys.sp.get(),
+            0b0111 => self.regs.sys.lv.get(),
+            0b1000 => self.regs.sys.cpp.get(),
+            0b1001 => self.regs.gen.oa.get(),
+            0b1010 => self.regs.gen.sor.get(),
             _ => 0,
         };
 
-        self.alu.entry(self.state.alu, a, b);
+        self.alu.entry(self.state.alu_entry, a, b);
         let c_bus = self.alu.op();
 
         // | MAR | PC | SP | LV | CPP | OA | OB | SOR |
@@ -237,7 +258,7 @@ impl DataPath {
 
         let enb_pc_in = (self.state.enable_in & 1) == 1;
         if enb_pc_in {
-            self.regs.mem.update_pc(c_bus, mem.clone());
+            self.regs.mem.update_pc(c_bus, mem);
         }
         self.state.enable_in >>= 1;
 
@@ -249,8 +270,7 @@ impl DataPath {
         if self.state.write {
             self.regs.mem.write(mem);
         }
-
-        cs.update_mpc(self.state.cs, self.alu.z(), self.regs.mem.mbr());
+        cs.update_mpc(self.state.cs_opcode, self.alu.z(), self.regs.mem.mbr());
     }
 }
 
@@ -290,8 +310,8 @@ impl ClkLevel {
 
 #[derive(Debug, Default)]
 struct DPState {
-    cs: u16,
-    alu: u8,
+    cs_opcode: u16,
+    alu_entry: u8,
     enable_in: u8,
     enable_out: u8,
     write: bool,

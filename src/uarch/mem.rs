@@ -5,9 +5,14 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+// 32-bit word * 20-bit addr = about 4 MB
+const RAM_ADDRS: usize = 2usize.pow(20);
+// 9-bit addr
+const CS_ADDRS: usize = 2usize.pow(9);
+
 #[derive(Debug)]
 pub struct Ram {
-    data: Arc<Mutex<[u32; u32::MAX as usize + 1]>>,
+    data: Arc<Mutex<Box<[u32; RAM_ADDRS]>>>,
 }
 
 impl Ram {
@@ -33,7 +38,7 @@ impl Ram {
 impl Default for Ram {
     fn default() -> Self {
         Self {
-            data: Arc::new(Mutex::new([0; u32::MAX as usize + 1])),
+            data: Arc::new(Mutex::new(Box::new([0; RAM_ADDRS]))),
         }
     }
 }
@@ -48,7 +53,7 @@ impl Clone for Ram {
 
 #[derive(Debug)]
 pub struct CtrlStoreBuilder {
-    firmware: [u64; 512],
+    firmware: [u64; CS_ADDRS],
     mpc: u16,
 }
 
@@ -84,7 +89,7 @@ impl CtrlStoreBuilder {
 impl Default for CtrlStoreBuilder {
     fn default() -> Self {
         CtrlStoreBuilder {
-            firmware: [0; 512],
+            firmware: [0; CS_ADDRS],
             mpc: 0,
         }
     }
@@ -92,8 +97,8 @@ impl Default for CtrlStoreBuilder {
 
 #[derive(Debug)]
 pub struct CtrlStore {
-    firmware: Arc<[u64; 512]>,
-    pub mpc: SharedReg<u16>,
+    firmware: Arc<[u64; CS_ADDRS]>,
+    mpc: SharedReg<u16>,
 }
 
 impl CtrlStore {
@@ -250,11 +255,11 @@ impl<T: Copy> Register for SharedReg<T> {
 #[derive(Debug, Default)]
 pub struct MemRegs {
     mar: Reg<u32>,
-    mdr: Reg<u32>,
-    pc: Reg<u32>,
-    mbr: Reg<u8>,
-    mbr2: Reg<u16>,
-    ifu: Ifu,
+    mdr: SharedReg<u32>,
+    pc: SharedReg<u32>,
+    mbr: SharedReg<u8>,
+    mbr2: SharedReg<u16>,
+    ifu: Arc<Mutex<Ifu>>,
 }
 
 impl MemRegs {
@@ -275,33 +280,43 @@ impl MemRegs {
     }
 
     pub fn mbr(&mut self) -> u8 {
-        self.ifu.consume_mbr();
+        self.ifu
+            .lock()
+            .expect("failed to get the IFU lock")
+            .consume_mbr();
         self.pc.set(self.pc.get() + 1);
         self.mbr.get()
     }
 
     pub fn mbr2(&mut self) -> u16 {
-        self.ifu.consume_mbr2();
+        self.ifu
+            .lock()
+            .expect("failed to get the IFU lock")
+            .consume_mbr2();
         self.pc.set(self.pc.get() + 2);
         self.mbr2.get()
     }
 
-    pub fn read(&mut self, mem: Ram) {
+    pub fn read(&mut self, mem: &Ram) {
         self.mdr.set(mem.get(self.mar.get()));
     }
 
-    pub fn write(&mut self, mut mem: Ram) {
+    pub fn write(&mut self, mem: &mut Ram) {
         mem.set(self.mar.get(), self.mdr.get())
     }
 
-    pub fn fetch(&mut self, mem: Ram) {
-        self.ifu.load(self.mbr.clone(), self.mbr2.clone(), mem);
+    pub fn fetch(&mut self, mem: &Ram) {
+        self.ifu
+            .lock()
+            .expect("failed to get the IFU lock")
+            .load(&self.mbr, &self.mbr2, mem);
     }
 
-    pub fn update_pc(&mut self, v: u32, mem: Ram) {
+    pub fn update_pc(&mut self, v: u32, mem: &Ram) {
         self.pc.set(v);
-        self.ifu.imar = v;
-        self.ifu.load(self.mbr.clone(), self.mbr2.clone(), mem);
+        let mut ifu_lock = self.ifu.lock().expect("failed to get the IFU lock");
+        ifu_lock.imar = v;
+        ifu_lock.load(&self.mbr, &self.mbr2, mem);
     }
 
     pub fn update_mar(&mut self, v: u32) {
@@ -318,8 +333,8 @@ struct Ifu {
 
 impl Ifu {
     /// fetches a word (4 bytes) from the memory if necessary
-    fn try_fetch(&mut self, mem: Ram) {
-        if self.cache.len() <= 4 {
+    fn try_fetch(&mut self, mem: &Ram) {
+        if self.cache.len() < 4 {
             let word = mem.get(self.imar);
             self.imar += 1;
             for &b in word.to_le_bytes().iter().rev() {
@@ -328,7 +343,7 @@ impl Ifu {
         }
     }
 
-    fn load(&mut self, mbr: Reg<u8>, mbr2: Reg<u16>, mem: Ram) {
+    fn load(&mut self, mbr: &SharedReg<u8>, mbr2: &SharedReg<u16>, mem: &Ram) {
         self.try_fetch(mem);
         let a = *self
             .cache
@@ -363,9 +378,9 @@ impl Default for Ifu {
 
 #[derive(Debug, Default)]
 pub struct SysRegs {
-    pub lv: Reg<u32>,
-    pub sp: Reg<u32>,
-    pub cpp: Reg<u32>,
+    pub lv: SharedReg<u32>,
+    pub sp: SharedReg<u32>,
+    pub cpp: SharedReg<u32>,
 }
 
 impl SysRegs {
@@ -376,8 +391,8 @@ impl SysRegs {
 
 #[derive(Debug, Default)]
 pub struct GenRegs {
-    pub oa: Reg<u32>,
-    pub ob: Reg<u32>,
+    pub oa: SharedReg<u32>,
+    pub ob: SharedReg<u32>,
     pub sor: SharedReg<u32>,
 }
 
@@ -397,5 +412,28 @@ pub struct Registers {
 impl Registers {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn from(regs: &Registers) -> Self {
+        let mem = MemRegs {
+            mar: Reg::default(),
+            mdr: regs.mem.mdr.clone(),
+            pc: regs.mem.pc.clone(),
+            mbr: regs.mem.mbr.clone(),
+            mbr2: regs.mem.mbr2.clone(),
+            ifu: Arc::clone(&regs.mem.ifu),
+        };
+        let sys = SysRegs {
+            sp: regs.sys.sp.clone(),
+            lv: regs.sys.lv.clone(),
+            cpp: regs.sys.cpp.clone(),
+        };
+        let gen = GenRegs {
+            oa: regs.gen.oa.clone(),
+            ob: regs.gen.ob.clone(),
+            sor: regs.gen.sor.clone(),
+        };
+
+        Self { mem, sys, gen }
     }
 }
