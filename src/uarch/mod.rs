@@ -26,7 +26,7 @@ impl Computer {
     }
 
     pub fn exec(&mut self) {
-        self.cpu.thr_sync(&self.mem);
+        self.cpu.thr_sync();
         self.clock.lock().expect("Cannot get the clock lock.").alt();
 
         let (tx, rx) = mpsc::sync_channel(0);
@@ -66,8 +66,8 @@ impl Cpu {
         }
     }
 
-    pub fn thr_sync(&mut self, mem: &Ram) {
-        self.thr.sync(mem, &self.firmware);
+    pub fn thr_sync(&mut self) {
+        self.thr.sync(&self.firmware);
     }
 
     pub fn run(&mut self, mem: &mut Ram, recver: mpsc::Receiver<ClkLevel>) {
@@ -91,17 +91,17 @@ impl Thread {
         Self::default()
     }
 
-    fn sync(&mut self, mem: &Ram, cs: &CtrlStore) {
-        self.dp1.init_cycle(mem, cs);
+    fn sync(&mut self, cs: &CtrlStore) {
+        self.dp1.init_cycle(cs);
     }
 
     fn step(&mut self, trigger: &ClkLevel, mem: &mut Ram, cs: &CtrlStore) {
         if trigger == &self.dp1.trigger {
             self.dp2.end_cycle(mem, cs);
-            self.dp1.init_cycle(mem, cs);
+            self.dp1.init_cycle(cs);
         } else {
             self.dp1.end_cycle(mem, cs);
-            self.dp2.init_cycle(mem, cs);
+            self.dp2.init_cycle(cs);
         }
     }
 
@@ -147,49 +147,18 @@ impl DataPath {
 
     pub fn recv_signal(&mut self, ck: &ClkLevel, mem: &mut Ram, cs: &CtrlStore) {
         if ck == &self.trigger {
-            self.init_cycle(mem, cs);
+            self.init_cycle(cs);
         } else {
             self.end_cycle(mem, cs);
         }
     }
 
-    pub fn init_cycle(&mut self, mem: &Ram, cs: &CtrlStore) {
+    pub fn init_cycle(&mut self, cs: &CtrlStore) {
         let mut mi = cs.get_mi();
         // [ 0 | A | B ]
-        self.state.enable_out = (mi & 0b1111111) as u8;
-        mi >>= 7;
-
-        // MEM: [ WRITE | READ | FETCH ]
-        let mut mem_code = (mi & 0b111) as u8;
-        mi >>= 3;
-
-        let fetch = (mem_code & 1) == 1;
-        if fetch {
-            self.regs.mem.fetch(mem);
-        }
-        mem_code >>= 1;
-
-        let read = (mem_code & 1) == 1;
-        if read {
-            self.regs.mem.read(mem);
-        }
-        mem_code >>= 1;
-
-        self.state.write = mem_code == 1;
-
-        self.state.enable_in = (mi & 0b11111111) as u8;
-        mi >>= 8;
-
-        self.state.alu_entry = (mi & 0b11111111) as u8;
-        mi >>= 8;
-
-        // NEXT_ADDR + JAM
-        self.state.cs_opcode = mi as u16;
-    }
-
-    pub fn end_cycle(&mut self, mem: &mut Ram, cs: &CtrlStore) {
-        let b_code = self.state.enable_out & 0b111;
-        let b = match b_code {
+        let mut enable_out = (mi & 0b1111111) as u8;
+        let b_code = enable_out & 0b111;
+        self.state.b = match b_code {
             0b000 => self.regs.mem.mdr(),
             0b001 => self.regs.sys.sp.get(),
             0b010 => self.regs.sys.lv.get(),
@@ -198,10 +167,10 @@ impl DataPath {
             0b101 => self.regs.gen.sor.get(),
             _ => 0,
         };
-        self.state.enable_out >>= 3;
+        enable_out >>= 3;
 
-        let a_code = self.state.enable_out & 0b1111;
-        let a = match a_code {
+        let a_code = enable_out & 0b1111;
+        self.state.a = match a_code {
             0b0000 => self.regs.mem.mdr(),
             0b0001 => self.regs.mem.pc(),
             0b0010 => self.regs.mem.mbr() as u32 | 0xFFFFFF00,
@@ -215,8 +184,29 @@ impl DataPath {
             0b1010 => self.regs.gen.sor.get(),
             _ => 0,
         };
+        mi >>= 7;
 
-        self.alu.entry(self.state.alu_entry, a, b);
+        // MEM: [ WRITE | READ | FETCH ]
+        let mut mem_code = (mi & 0b111) as u8;
+        mi >>= 3;
+        self.state.fetch = (mem_code & 1) == 1;
+        mem_code >>= 1;
+        self.state.read = (mem_code & 1) == 1;
+        mem_code >>= 1;
+        self.state.write = mem_code == 1;
+
+        self.state.enable_in = (mi & 0b11111111) as u8;
+        mi >>= 8;
+        self.state.alu_entry = (mi & 0b11111111) as u8;
+        mi >>= 8;
+
+        // NEXT_ADDR + JAM
+        self.state.cs_opcode = mi as u16;
+    }
+
+    pub fn end_cycle(&mut self, mem: &mut Ram, cs: &CtrlStore) {
+        self.alu
+            .entry(self.state.alu_entry, self.state.a, self.state.b);
         let c_bus = self.alu.op();
 
         // | MAR | PC | SP | LV | CPP | OA | OB | SOR |
@@ -258,7 +248,7 @@ impl DataPath {
 
         let enb_pc_in = (self.state.enable_in & 1) == 1;
         if enb_pc_in {
-            self.regs.mem.update_pc(c_bus, mem);
+            self.regs.mem.update_pc(c_bus);
         }
         self.state.enable_in >>= 1;
 
@@ -267,10 +257,18 @@ impl DataPath {
             self.regs.mem.update_mar(c_bus);
         }
 
+        cs.update_mpc(self.state.cs_opcode, self.alu.z(), &mut self.regs.mem);
+
+        // MEMORY
+        if self.state.read {
+            self.regs.mem.read(mem);
+        }
         if self.state.write {
             self.regs.mem.write(mem);
         }
-        cs.update_mpc(self.state.cs_opcode, self.alu.z(), self.regs.mem.mbr());
+        if self.state.fetch {
+            self.regs.mem.fetch(mem);
+        }
     }
 }
 
@@ -313,6 +311,9 @@ struct DPState {
     cs_opcode: u16,
     alu_entry: u8,
     enable_in: u8,
-    enable_out: u8,
+    a: u32,
+    b: u32,
     write: bool,
+    read: bool,
+    fetch: bool,
 }

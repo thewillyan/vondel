@@ -6,8 +6,8 @@ use vondel::uarch::{
 pub fn main() {
     // trying to do 5 * 6 (dunno why)
     // both are u16 for now
-    let data = [(5 << 24) | 6];
-    let mut mem = Ram::default();
+    let data = [(5 << 24) | 6 << 8];
+    let mut mem = Ram::new();
     mem.load(0, data);
 
     // |   NEXT  |JAM|   ALU  | C BUS  |MEM| A  | B |
@@ -15,19 +15,21 @@ pub fn main() {
     // |000000000|000|00000000|00000000|000|0000|000|
     #[allow(clippy::unusual_byte_groupings)]
     let mcode = [
+        // FETCH (get data from MBR)
+        0b000000001_000_00000000_00000000_001_1111_111,
         // SOR <- 5
-        0b000000001_000_00011000_00000001_001_0101_111,
+        0b000000010_000_00011000_00000001_000_0101_111,
         // OB <- 6
-        0b000000010_000_00011000_00000010_001_0101_111,
+        0b000000011_000_00011000_00000010_000_0101_111,
         // OA <- OA + SOR
-        0b000000011_000_00111100_00000100_000_1001_101,
+        0b000000100_000_00111100_00000100_000_1001_101,
         // OB <- OB - 1 and JUMP if 0
-        0b000000010_001_00110110_00000010_000_1111_100,
+        0b000000011_001_00110110_00000010_000_1111_100,
     ];
     let firmware = CtrlStore::builder()
         .load(0, mcode)
         // end when JUMP
-        .set(0b100000010, CtrlStore::TERM)
+        .set(0b100000011, CtrlStore::TERM)
         .build();
 
     let mut comp = Computer::new(mem, firmware);

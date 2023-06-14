@@ -16,6 +16,10 @@ pub struct Ram {
 }
 
 impl Ram {
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     // get the nth word of the memory
     pub fn get(&self, n: u32) -> u32 {
         self.data.lock().expect("Failed to get the RAM lock")[n as usize]
@@ -129,7 +133,7 @@ impl CtrlStore {
     ///
     /// where `JMPC`, `JAMN` and `JAMZ` are 1-bit wide and `NEXT_ADDR` is
     /// 9-bit wide. The 4 bits represented by `...` are ignored.
-    pub fn update_mpc(&self, mut opcode: u16, z: bool, mbr: u8) {
+    pub fn update_mpc(&self, mut opcode: u16, z: bool, mem_regs: &mut MemRegs) {
         // ignored 4 MSBs
         opcode &= 0b0000111111111111;
 
@@ -151,7 +155,7 @@ impl CtrlStore {
         }
 
         if jmpc {
-            next_addr |= mbr as u16;
+            next_addr |= mem_regs.mbr() as u16;
         }
 
         self.mpc.set(next_addr);
@@ -280,21 +284,21 @@ impl MemRegs {
     }
 
     pub fn mbr(&mut self) -> u8 {
-        self.ifu
-            .lock()
-            .expect("failed to get the IFU lock")
-            .consume_mbr();
-        self.pc.set(self.pc.get() + 1);
-        self.mbr.get()
+        let val = self.mbr.get();
+        let mut ifu = self.ifu.lock().expect("failed to get the IFU lock");
+        ifu.consume_mbr();
+        ifu.load(&self.mbr, &self.mbr2);
+        self.pc.set(self.pc.get() + 2);
+        val
     }
 
     pub fn mbr2(&mut self) -> u16 {
-        self.ifu
-            .lock()
-            .expect("failed to get the IFU lock")
-            .consume_mbr2();
+        let val = self.mbr2.get();
+        let mut ifu = self.ifu.lock().expect("failed to get the IFU lock");
+        ifu.consume_mbr2();
+        ifu.load(&self.mbr, &self.mbr2);
         self.pc.set(self.pc.get() + 2);
-        self.mbr2.get()
+        val
     }
 
     pub fn read(&mut self, mem: &Ram) {
@@ -306,17 +310,15 @@ impl MemRegs {
     }
 
     pub fn fetch(&mut self, mem: &Ram) {
-        self.ifu
-            .lock()
-            .expect("failed to get the IFU lock")
-            .load(&self.mbr, &self.mbr2, mem);
+        let mut ifu = self.ifu.lock().expect("failed to get the IFU lock");
+        ifu.fetch(mem);
+        ifu.load(&self.mbr, &self.mbr2);
     }
 
-    pub fn update_pc(&mut self, v: u32, mem: &Ram) {
+    pub fn update_pc(&mut self, v: u32) {
         self.pc.set(v);
         let mut ifu_lock = self.ifu.lock().expect("failed to get the IFU lock");
         ifu_lock.imar = v;
-        ifu_lock.load(&self.mbr, &self.mbr2, mem);
     }
 
     pub fn update_mar(&mut self, v: u32) {
@@ -332,8 +334,8 @@ struct Ifu {
 }
 
 impl Ifu {
-    /// fetches a word (4 bytes) from the memory if necessary
-    fn try_fetch(&mut self, mem: &Ram) {
+    /// fetches a word (4 bytes) from the memory if has capacity, the max capacity is 7 bytes.
+    fn fetch(&mut self, mem: &Ram) {
         if self.cache.len() < 4 {
             let word = mem.get(self.imar);
             self.imar += 1;
@@ -343,16 +345,9 @@ impl Ifu {
         }
     }
 
-    fn load(&mut self, mbr: &SharedReg<u8>, mbr2: &SharedReg<u16>, mem: &Ram) {
-        self.try_fetch(mem);
-        let a = *self
-            .cache
-            .front()
-            .expect("Should not panic: the memory was fetched previously");
-        let b = *self
-            .cache
-            .get(1)
-            .expect("Should not panic: the memory was fetched previously");
+    fn load(&mut self, mbr: &SharedReg<u8>, mbr2: &SharedReg<u16>) {
+        let a = self.cache.front().copied().unwrap_or(0);
+        let b = self.cache.get(1).copied().unwrap_or(0);
         mbr.set(a);
         mbr2.set((b as u16) << 8 | a as u16);
     }
