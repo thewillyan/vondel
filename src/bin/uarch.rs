@@ -1,42 +1,52 @@
 use vondel::uarch::{
-    mem::{CtrlStore, Ram, Register},
+    mem::{CtrlStore, Ram},
     Computer,
 };
 
 pub fn main() {
     // trying to do 5 * 6 (dunno why)
-    // both are u16 for now
-    let data = [(5 << 24) | 6 << 8];
     let mut mem = Ram::new();
-    mem.load(0, data);
+    mem.load(0, [5, 6]);
 
-    // |   NEXT  |JAM|   ALU  | C BUS  |MEM| A  | B |
-    // |---------|---|--------|--------|---|----|---|
-    // |000000000|000|00000000|00000000|000|0000|000|
+    // |   NEXT  |JAM|   ALU  |          C BUS         |MEM|  A  |  B  |
+    // |---------|---|--------|------------------------|---|-----|-----|
+    // |000000000|000|00000000|000000000000000000000000|000|00000|00000|
+    //
+    // R15: Stores the sum
+    // R14: Stores the 5
+    // R13: Stores the 6
     #[allow(clippy::unusual_byte_groupings)]
     let mcode = [
-        // FETCH (get data from MBR)
-        0b000000001_000_00000000_00000000_001_1111_111,
-        // SOR <- 5
-        0b000000010_000_00011000_00000001_000_0101_111,
-        // OB <- 6
-        0b000000011_000_00011000_00000010_000_0101_111,
-        // OA <- OA + SOR
-        0b000000100_000_00111100_00000100_000_1001_101,
-        // OB <- OB - 1 and JUMP if 0
-        0b000000011_001_00110110_00000010_000_1111_100,
+        // READ word from memory (number 5 because MAR = 0 by default)
+        0b000000001_000_00000000_000000000000000000000_010_11111_11111,
+        // LOAD the value readed into R15 and R14
+        0b000000010_000_00011000_000000000000000000011_000_00000_11111,
+        // MAR = 1 (next word address)
+        0b000000011_000_00110001_100000000000000000000_000_11111_11111,
+        // READ word FROM memory (number 6)
+        0b000000100_000_00000000_000000000000000000000_010_11111_11111,
+        // LOAD the value readed into R13 and R12 (just to display later)
+        0b000000101_000_00011000_000000000000000001100_000_00000_11111,
+        // R13 <- R13 - 1 and JUMP if 0
+        0b000000110_001_00110110_000000000000000000100_000_11111_10001,
+        // R15 <- R15 + R14
+        0b000000101_000_00111100_000000000000000000001_000_11000_10010,
     ];
     let firmware = CtrlStore::builder()
         .load(0, mcode)
         // end when JUMP
-        .set(0b100000011, CtrlStore::TERM)
+        .set(0b100000110, CtrlStore::TERM)
         .build();
 
     let mut comp = Computer::new(mem, firmware);
     comp.exec();
 
-    println!("5 x 6 = OA = {}", comp.regs().gen.oa.get());
-    println!("OB: {}", comp.regs().gen.ob.get());
-    println!("SOR: {}", comp.regs().gen.sor.get());
+    let regs = &comp.regs().gen;
+    println!(
+        "{} x {} = {}",
+        regs.get(14).unwrap(),
+        regs.get(12).unwrap(),
+        regs.get(15).unwrap()
+    );
     println!("Cycles: {}", comp.cycles());
 }

@@ -116,12 +116,12 @@ impl CtrlStore {
     /// Get the next Microinstruction from the CtrlStore, in other words,
     /// fetch the MI at the position stored at MPC.
     ///
-    /// ### MI (38 bits):
+    /// ### MI (57 bits):
     ///
     ///```
-    /// |   NEXT  |JAM|   ALU  | C BUS  |MEM| A  | B |
-    /// |---------|---|--------|--------|---|----|---|
-    /// |000000000|000|00000000|00000000|000|0000|000|
+    /// |   NEXT  |JAM|   ALU  |          C BUS         |MEM|  A  |  B  |
+    /// |---------|---|--------|------------------------|---|-----|-----|
+    /// |000000000|000|00000000|000000000000000000000000|000|00000|00000|
     /// ```
     pub fn get_mi(&self) -> u64 {
         self.firmware[self.mpc.get() as usize]
@@ -258,7 +258,7 @@ impl<T: Copy> Register for SharedReg<T> {
 
 #[derive(Debug, Default)]
 pub struct MemRegs {
-    mar: Reg<u32>,
+    mar: SharedReg<u32>,
     mdr: SharedReg<u32>,
     pc: SharedReg<u32>,
     mbr: SharedReg<u8>,
@@ -386,14 +386,20 @@ impl SysRegs {
 
 #[derive(Debug, Default)]
 pub struct GenRegs {
-    pub oa: SharedReg<u32>,
-    pub ob: SharedReg<u32>,
-    pub sor: SharedReg<u32>,
+    regs: [SharedReg<u32>; 16],
 }
 
 impl GenRegs {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn get(&self, id: usize) -> Option<u32> {
+        self.regs.get(id).map(|reg| reg.get())
+    }
+
+    pub fn set(&self, id: usize, v: u32) {
+        self.regs[id].set(v);
     }
 }
 
@@ -411,7 +417,7 @@ impl Registers {
 
     pub fn from(regs: &Registers) -> Self {
         let mem = MemRegs {
-            mar: Reg::default(),
+            mar: regs.mem.mar.clone(),
             mdr: regs.mem.mdr.clone(),
             pc: regs.mem.pc.clone(),
             mbr: regs.mem.mbr.clone(),
@@ -424,9 +430,7 @@ impl Registers {
             cpp: regs.sys.cpp.clone(),
         };
         let gen = GenRegs {
-            oa: regs.gen.oa.clone(),
-            ob: regs.gen.ob.clone(),
-            sor: regs.gen.sor.clone(),
+            regs: regs.gen.regs.clone(),
         };
 
         Self { mem, sys, gen }

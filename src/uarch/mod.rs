@@ -155,21 +155,20 @@ impl DataPath {
 
     pub fn init_cycle(&mut self, cs: &CtrlStore) {
         let mut mi = cs.get_mi();
-        // [ 0 | A | B ]
-        let mut enable_out = (mi & 0b1111111) as u8;
-        let b_code = enable_out & 0b111;
+        // [ A | B ]
+        let mut enable_out = (mi & 0b1111111111) as u16;
+        let b_code = enable_out & 0b11111;
         self.state.b = match b_code {
-            0b000 => self.regs.mem.mdr(),
-            0b001 => self.regs.sys.sp.get(),
-            0b010 => self.regs.sys.lv.get(),
-            0b011 => self.regs.sys.cpp.get(),
-            0b100 => self.regs.gen.ob.get(),
-            0b101 => self.regs.gen.sor.get(),
-            _ => 0,
+            0b00000 => self.regs.mem.mdr(),
+            0b00001 => self.regs.sys.sp.get(),
+            0b00010 => self.regs.sys.lv.get(),
+            0b00011 => self.regs.sys.cpp.get(),
+            x => self.regs.gen.get(x as usize - 4).unwrap_or(0),
         };
-        enable_out >>= 3;
+        enable_out >>= 5;
+        mi >>= 5;
 
-        let a_code = enable_out & 0b1111;
+        let a_code = enable_out & 0b11111;
         self.state.a = match a_code {
             0b0000 => self.regs.mem.mdr(),
             0b0001 => self.regs.mem.pc(),
@@ -180,27 +179,25 @@ impl DataPath {
             0b0110 => self.regs.sys.sp.get(),
             0b0111 => self.regs.sys.lv.get(),
             0b1000 => self.regs.sys.cpp.get(),
-            0b1001 => self.regs.gen.oa.get(),
-            0b1010 => self.regs.gen.sor.get(),
-            _ => 0,
+            x => self.regs.gen.get(x as usize - 9).unwrap_or(0),
         };
-        mi >>= 7;
+        mi >>= 5;
 
         // MEM: [ WRITE | READ | FETCH ]
         let mut mem_code = (mi & 0b111) as u8;
-        mi >>= 3;
         self.state.fetch = (mem_code & 1) == 1;
         mem_code >>= 1;
         self.state.read = (mem_code & 1) == 1;
         mem_code >>= 1;
         self.state.write = mem_code == 1;
+        mi >>= 3;
 
-        self.state.enable_in = (mi & 0b11111111) as u8;
-        mi >>= 8;
+        self.state.enable_in = (mi & 0b111111111111111111111) as u32;
+        mi >>= 21;
         self.state.alu_entry = (mi & 0b11111111) as u8;
         mi >>= 8;
 
-        // NEXT_ADDR + JAM
+        // NEXT_ADDR | JAM
         self.state.cs_opcode = mi as u16;
     }
 
@@ -209,24 +206,14 @@ impl DataPath {
             .entry(self.state.alu_entry, self.state.a, self.state.b);
         let c_bus = self.alu.op();
 
-        // | MAR | PC | SP | LV | CPP | OA | OB | SOR |
-        let enb_sor_in = (self.state.enable_in & 1) == 1;
-        if enb_sor_in {
-            self.regs.gen.sor.set(c_bus);
+        // | MAR | PC | SP | LV | CPP | R0 | ... | R15 |
+        for i in (0..16).rev() {
+            let enb_in = (self.state.enable_in & 1) == 1;
+            if enb_in {
+                self.regs.gen.set(i, c_bus);
+            }
+            self.state.enable_in >>= 1;
         }
-        self.state.enable_in >>= 1;
-
-        let enb_ob_in = (self.state.enable_in & 1) == 1;
-        if enb_ob_in {
-            self.regs.gen.ob.set(c_bus);
-        }
-        self.state.enable_in >>= 1;
-
-        let enb_oa_in = (self.state.enable_in & 1) == 1;
-        if enb_oa_in {
-            self.regs.gen.oa.set(c_bus);
-        }
-        self.state.enable_in >>= 1;
 
         let enb_cpp_in = (self.state.enable_in & 1) == 1;
         if enb_cpp_in {
@@ -310,7 +297,7 @@ impl ClkLevel {
 struct DPState {
     cs_opcode: u16,
     alu_entry: u8,
-    enable_in: u8,
+    enable_in: u32,
     a: u32,
     b: u32,
     write: bool,
