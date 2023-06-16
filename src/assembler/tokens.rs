@@ -1,3 +1,19 @@
+#[derive(Debug, PartialEq)]
+pub struct TokWithCtx {
+    pub tok: AsmToken,
+    pub cur_line: usize,
+    pub cur_column: usize,
+}
+
+impl TokWithCtx {
+    pub fn new(tok: AsmToken, cur_line: usize, cur_column: usize) -> Self {
+        TokWithCtx {
+            tok,
+            cur_line,
+            cur_column,
+        }
+    }
+}
 //RISC-V ABI
 #[derive(Debug, PartialEq)]
 pub enum Register {

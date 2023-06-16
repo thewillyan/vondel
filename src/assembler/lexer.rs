@@ -1,6 +1,6 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::assembler::tokens::AsmToken;
+use crate::assembler::tokens::{AsmToken, TokWithCtx};
 
 pub struct Lexer<'a> {
     chars: Peekable<Chars<'a>>,
@@ -28,7 +28,7 @@ impl<'a> Lexer<'a> {
                 match c {
                     '\n' => {
                         self.cur_line += 1;
-                        self.cur_column = 1;
+                        self.cur_column = 0;
                     }
                     '\t' => self.cur_column += 4,
                     _ => self.cur_column += 1,
@@ -81,12 +81,50 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn next_token(&mut self) -> AsmToken {
+    fn next_token(&mut self) -> AsmToken {
         self.skip_whitespace();
         self.ignore_comment();
         let tok = self.tokenizer();
         self.read_char();
         tok
+    }
+
+    fn next_with_ctx(&mut self) -> TokWithCtx {
+        self.skip_whitespace();
+        self.ignore_comment();
+        let cur_line = self.cur_line;
+        let cur_column = self.cur_column;
+        let tok = self.tokenizer();
+        let tok_ctx = TokWithCtx::new(tok, cur_line, cur_column);
+        self.read_char();
+
+        tok_ctx
+    }
+
+    pub fn get_deez_toks(&mut self) -> Vec<AsmToken> {
+        let mut toks = Vec::new();
+        loop {
+            let tok = self.next_token();
+            if tok == AsmToken::Eof {
+                toks.push(tok);
+                break;
+            }
+            toks.push(tok);
+        }
+        toks
+    }
+
+    pub fn get_deez_toks_w_ctx(&mut self) -> Vec<TokWithCtx> {
+        let mut toks = Vec::new();
+        loop {
+            let tok = self.next_with_ctx();
+            if tok.tok == AsmToken::Eof {
+                toks.push(tok);
+                break;
+            }
+            toks.push(tok);
+        }
+        toks
     }
 }
 
@@ -270,6 +308,62 @@ mod tests {
 
         for t in toks.into_iter() {
             assert_eq!(l.next_token(), t);
+        }
+    }
+
+    #[test]
+    fn get_toks_with_ctx() {
+        use super::AsmToken::*;
+        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::tokens::Register::*;
+
+        let input = "add, tubias ; comment\n addi, zero, ra";
+        let mut l = Lexer::new(input);
+        let toks = vec![
+            TokWithCtx {
+                tok: Opcode(Add),
+                cur_line: 1,
+                cur_column: 1,
+            },
+            TokWithCtx {
+                tok: Comma,
+                cur_line: 1,
+                cur_column: 4,
+            },
+            TokWithCtx {
+                tok: Identifier("tubias".to_string()),
+                cur_line: 1,
+                cur_column: 6,
+            },
+            TokWithCtx {
+                tok: Opcode(Addi),
+                cur_line: 2,
+                cur_column: 2,
+            },
+            TokWithCtx {
+                tok: Comma,
+                cur_line: 2,
+                cur_column: 6,
+            },
+            TokWithCtx {
+                tok: Reg(Zero),
+                cur_line: 2,
+                cur_column: 8,
+            },
+            TokWithCtx {
+                tok: Comma,
+                cur_line: 2,
+                cur_column: 12,
+            },
+            TokWithCtx {
+                tok: Reg(Ra),
+                cur_line: 2,
+                cur_column: 14,
+            },
+        ];
+
+        for i in toks.into_iter() {
+            assert_eq!(l.next_with_ctx(), i);
         }
     }
 }
