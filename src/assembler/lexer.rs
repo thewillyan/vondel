@@ -89,7 +89,7 @@ impl<'a> Lexer<'a> {
         tok
     }
 
-    fn next_with_ctx(&mut self) -> TokWithCtx {
+    pub fn next_with_ctx(&mut self) -> TokWithCtx {
         self.skip_whitespace();
         self.ignore_comment();
         let cur_line = self.cur_line;
