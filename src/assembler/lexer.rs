@@ -247,6 +247,37 @@ mod tests {
     }
 
     #[test]
+    fn get_pseudoinstructions() {
+        use super::AsmToken::{Eof, PseudoIns};
+        use crate::assembler::tokens::PseudoInstruction::*;
+        let input = r"
+        mv neg seqz snez sltz sgtz beqz bnez blez bgez bltz bgtz bgt ble
+        ";
+        let mut l = Lexer::new(input);
+        let toks = vec![
+            PseudoIns(Mv),
+            PseudoIns(Neg),
+            PseudoIns(Seqz),
+            PseudoIns(Snez),
+            PseudoIns(Sltz),
+            PseudoIns(Sgtz),
+            PseudoIns(Beqz),
+            PseudoIns(Bnez),
+            PseudoIns(Blez),
+            PseudoIns(Bgez),
+            PseudoIns(Bltz),
+            PseudoIns(Bgtz),
+            PseudoIns(Bgt),
+            PseudoIns(Ble),
+            Eof,
+        ];
+
+        for i in toks.into_iter() {
+            assert_eq!(l.next_token(), i);
+        }
+    }
+
+    #[test]
     fn get_identifier() {
         let input = r"tubias, tubias2, tubias3";
         let mut l = Lexer::new(input);

@@ -70,10 +70,32 @@ pub enum Opcode {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum PseudoInstruction {
+    Mv,
+    Neg,
+    // Set Operations
+    Seqz,
+    Snez,
+    Sltz,
+    Sgtz,
+    // Branch Zero
+    Beqz,
+    Bnez,
+    Blez,
+    Bgez,
+    Bltz,
+    Bgtz,
+    // Branch If
+    Bgt,
+    Ble,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum AsmToken {
     Identifier(String),
     Reg(Register),
     Opcode(Opcode),
+    PseudoIns(PseudoInstruction),
     Comma,
     Colon,
     Illegal,
@@ -108,6 +130,22 @@ impl AsmToken {
             "bge" => AsmToken::Opcode(Opcode::Bge),
             "mul" => AsmToken::Opcode(Opcode::Mul),
             "halt" => AsmToken::Opcode(Opcode::Halt),
+
+            //PSEUDO INSTRUCTIONS
+            "mv" => AsmToken::PseudoIns(PseudoInstruction::Mv),
+            "neg" => AsmToken::PseudoIns(PseudoInstruction::Neg),
+            "seqz" => AsmToken::PseudoIns(PseudoInstruction::Seqz),
+            "snez" => AsmToken::PseudoIns(PseudoInstruction::Snez),
+            "sltz" => AsmToken::PseudoIns(PseudoInstruction::Sltz),
+            "sgtz" => AsmToken::PseudoIns(PseudoInstruction::Sgtz),
+            "beqz" => AsmToken::PseudoIns(PseudoInstruction::Beqz),
+            "bnez" => AsmToken::PseudoIns(PseudoInstruction::Bnez),
+            "blez" => AsmToken::PseudoIns(PseudoInstruction::Blez),
+            "bgez" => AsmToken::PseudoIns(PseudoInstruction::Bgez),
+            "bltz" => AsmToken::PseudoIns(PseudoInstruction::Bltz),
+            "bgtz" => AsmToken::PseudoIns(PseudoInstruction::Bgtz),
+            "bgt" => AsmToken::PseudoIns(PseudoInstruction::Bgt),
+            "ble" => AsmToken::PseudoIns(PseudoInstruction::Ble),
 
             //REGISTERS
             "zero" | "x0" => AsmToken::Reg(Register::Zero),
