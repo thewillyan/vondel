@@ -91,11 +91,21 @@ pub enum PseudoInstruction {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum PseudoOps {
+    Data,
+    Word,
+    Byte,
+    Text,
+    Global,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum AsmToken {
-    Identifier(String),
+    Label(String),
     Reg(Register),
     Opcode(Opcode),
     PseudoIns(PseudoInstruction),
+    PseudoOp(PseudoOps),
     Comma,
     Colon,
     Illegal,
@@ -105,6 +115,16 @@ pub enum AsmToken {
 impl AsmToken {
     pub fn name_to_tok(input: String) -> AsmToken {
         match input.as_str() {
+            //PseudoOps
+            pseudo if pseudo.starts_with('.') => match pseudo {
+                ".data" => AsmToken::PseudoOp(PseudoOps::Data),
+                ".word" => AsmToken::PseudoOp(PseudoOps::Word),
+                ".byte" => AsmToken::PseudoOp(PseudoOps::Byte),
+                ".text" => AsmToken::PseudoOp(PseudoOps::Text),
+                ".global" => AsmToken::PseudoOp(PseudoOps::Global),
+                _ => AsmToken::Illegal,
+            },
+
             //OPCODES
             "addi" => AsmToken::Opcode(Opcode::Addi),
             "slti" => AsmToken::Opcode(Opcode::Slti),
@@ -164,7 +184,7 @@ impl AsmToken {
             "s5" | "x13" => AsmToken::Reg(Register::S5),
             "s6" | "x14" => AsmToken::Reg(Register::S6),
             "t3" | "x15" => AsmToken::Reg(Register::T3),
-            _ => AsmToken::Identifier(input),
+            _ => AsmToken::Label(input),
         }
     }
 }

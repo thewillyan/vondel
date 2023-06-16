@@ -75,7 +75,7 @@ impl<'a> Lexer<'a> {
         match self.cur_char {
             ':' => AsmToken::Colon,
             ',' => AsmToken::Comma,
-            c if c.is_alphabetic() => self.read_identifier(),
+            c if c.is_alphabetic() || c == '.' || c == '_' => self.read_identifier(),
             '\0' => AsmToken::Eof,
             _ => AsmToken::Illegal,
         }
@@ -136,17 +136,17 @@ mod tests {
     fn skip_whitespace() {
         let input = "    \t\n tubias";
         let mut l = Lexer::new(input);
-        assert_eq!(l.next_token(), AsmToken::Identifier("tubias".to_string()));
+        assert_eq!(l.next_token(), AsmToken::Label("tubias".to_string()));
     }
 
     #[test]
     fn ignore_comments() {
         let input = "# this is a comment\n tubias ; another comment here \n another_tubias #comment until end";
         let mut l = Lexer::new(input);
-        assert_eq!(l.next_token(), AsmToken::Identifier("tubias".to_string()));
+        assert_eq!(l.next_token(), AsmToken::Label("tubias".to_string()));
         assert_eq!(
             l.next_token(),
-            AsmToken::Identifier("another_tubias".to_string())
+            AsmToken::Label("another_tubias".to_string())
         );
         assert_eq!(l.next_token(), AsmToken::Eof);
     }
@@ -278,15 +278,38 @@ mod tests {
     }
 
     #[test]
+    fn get_pseudo_ops() {
+        use super::AsmToken::{Eof, Illegal, PseudoOp};
+        use crate::assembler::tokens::PseudoOps::*;
+        let input = r"
+        .global .data .text .word .byte .tubias
+        ";
+        let mut l = Lexer::new(input);
+        let toks = vec![
+            PseudoOp(Global),
+            PseudoOp(Data),
+            PseudoOp(Text),
+            PseudoOp(Word),
+            PseudoOp(Byte),
+            Illegal,
+            Eof,
+        ];
+
+        for i in toks.into_iter() {
+            assert_eq!(l.next_token(), i);
+        }
+    }
+
+    #[test]
     fn get_identifier() {
         let input = r"tubias, tubias2, tubias3";
         let mut l = Lexer::new(input);
         let toks = vec![
-            AsmToken::Identifier("tubias".to_string()),
+            AsmToken::Label("tubias".to_string()),
             AsmToken::Comma,
-            AsmToken::Identifier("tubias2".to_string()),
+            AsmToken::Label("tubias2".to_string()),
             AsmToken::Comma,
-            AsmToken::Identifier("tubias3".to_string()),
+            AsmToken::Label("tubias3".to_string()),
             AsmToken::Eof,
         ];
 
@@ -315,7 +338,7 @@ mod tests {
                 cur_column: 4,
             },
             TokWithCtx {
-                tok: Identifier("tubias".to_string()),
+                tok: Label("tubias".to_string()),
                 cur_line: 1,
                 cur_column: 6,
             },
