@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct TokWithCtx {
     pub tok: AsmToken,
     pub cur_line: usize,
@@ -15,7 +15,7 @@ impl TokWithCtx {
     }
 }
 //RISC-V ABI
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Register {
     Zero,
     T0,
@@ -35,7 +35,7 @@ pub enum Register {
     T3,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Opcode {
     // Integer Register-Immediate Instructions
     Addi,
@@ -69,7 +69,7 @@ pub enum Opcode {
     Halt,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum PseudoInstruction {
     Mv,
     Neg,
@@ -90,7 +90,7 @@ pub enum PseudoInstruction {
     Ble,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum PseudoOps {
     Data,
     Word,
@@ -99,8 +99,9 @@ pub enum PseudoOps {
     Global,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum AsmToken {
+    Number(String),
     Label(String),
     Reg(Register),
     Opcode(Opcode),

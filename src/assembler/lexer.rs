@@ -71,11 +71,25 @@ impl<'a> Lexer<'a> {
         AsmToken::name_to_tok(ident)
     }
 
+    fn read_number(&mut self) -> AsmToken {
+        let mut num = String::from(self.cur_char);
+        while let Some(&c) = self.chars.peek() {
+            if c.is_numeric() {
+                num.push(c);
+                self.read_char();
+            } else {
+                break;
+            }
+        }
+        AsmToken::Number(num)
+    }
+
     fn tokenizer(&mut self) -> AsmToken {
         match self.cur_char {
             ':' => AsmToken::Colon,
             ',' => AsmToken::Comma,
             c if c.is_alphabetic() || c == '.' || c == '_' => self.read_identifier(),
+            c if c == '-' || c.is_numeric() => self.read_number(),
             '\0' => AsmToken::Eof,
             _ => AsmToken::Illegal,
         }
@@ -310,6 +324,21 @@ mod tests {
             AsmToken::Label("tubias2".to_string()),
             AsmToken::Comma,
             AsmToken::Label("tubias3".to_string()),
+            AsmToken::Eof,
+        ];
+
+        for t in toks.into_iter() {
+            assert_eq!(l.next_token(), t);
+        }
+    }
+
+    #[test]
+    fn get_numbers() {
+        let input = "1234 -123";
+        let mut l = Lexer::new(input);
+        let toks = vec![
+            AsmToken::Number(String::from("1234")),
+            AsmToken::Number(String::from("-123")),
             AsmToken::Eof,
         ];
 
