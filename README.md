@@ -1,4 +1,8 @@
 # Vondel
+![Build Status](https://img.shields.io/github/actions/workflow/status/thewillyan/vondel/rust.yml)
+![Issues](https://img.shields.io/github/issues/thewillyan/vondel)
+![Pull requests](https://img.shields.io/github/issues-pr/thewillyan/vondel)
+![License](https://img.shields.io/github/license/thewillyan/vondel)
 
 A simple computer architecture, ISA and Interpreter build with Rust.
 
