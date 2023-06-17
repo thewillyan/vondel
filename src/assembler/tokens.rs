@@ -118,7 +118,7 @@ pub enum AsmToken {
     Number(Rc<str>),
     Label(Rc<str>),
     Reg(Register),
-    Opcode(Opcode),
+    Opcode(Rc<Opcode>),
     PseudoIns(PseudoInstruction),
     PseudoOp(PseudoOps),
     Comma,
@@ -164,6 +164,20 @@ impl AsmToken {
         }
     }
 
+    pub fn get_instruction(&self, cur_line: usize, cur_column: usize) -> Result<Rc<Opcode>> {
+        match self {
+            AsmToken::Opcode(opcode) => Ok(Rc::clone(opcode)),
+            _ => {
+                bail!(ParserError::ExpectedToken {
+                    expected: format!("{:?}", "Instruction"),
+                    found: format!("{:?}", self),
+                    cur_line,
+                    cur_column
+                })
+            }
+        }
+    }
+
     pub fn name_to_tok(input: &str) -> AsmToken {
         match input {
             //PseudoOps
@@ -186,23 +200,23 @@ impl AsmToken {
             // "srli" => AsmToken::Opcode(Opcode::Srli),
             // "lui" => AsmToken::Opcode(Opcode::Lui),
             // "auipc" => AsmToken::Opcode(Opcode::Auipc),
-            "add" => AsmToken::Opcode(Opcode::Add),
-            "sub" => AsmToken::Opcode(Opcode::Sub),
-            "slt" => AsmToken::Opcode(Opcode::Slt),
-            "and" => AsmToken::Opcode(Opcode::And),
-            "or" => AsmToken::Opcode(Opcode::Or),
-            "sll" => AsmToken::Opcode(Opcode::Sll),
-            "srl" => AsmToken::Opcode(Opcode::Srl),
-            "nop" => AsmToken::Opcode(Opcode::Nop),
-            "jal" => AsmToken::Opcode(Opcode::Jal),
-            "beq" => AsmToken::Opcode(Opcode::Beq),
-            "bne" => AsmToken::Opcode(Opcode::Bne),
-            "blt" => AsmToken::Opcode(Opcode::Blt),
-            "bge" => AsmToken::Opcode(Opcode::Bge),
-            "mul" => AsmToken::Opcode(Opcode::Mul),
-            "halt" => AsmToken::Opcode(Opcode::Halt),
-            "read" => AsmToken::Opcode(Opcode::Read),
-            "write" => AsmToken::Opcode(Opcode::Write),
+            "add" => AsmToken::Opcode(Rc::new(Opcode::Add)),
+            "sub" => AsmToken::Opcode(Rc::new(Opcode::Sub)),
+            "slt" => AsmToken::Opcode(Rc::new(Opcode::Slt)),
+            "and" => AsmToken::Opcode(Rc::new(Opcode::And)),
+            "or" => AsmToken::Opcode(Rc::new(Opcode::Or)),
+            "sll" => AsmToken::Opcode(Rc::new(Opcode::Sll)),
+            "srl" => AsmToken::Opcode(Rc::new(Opcode::Srl)),
+            "nop" => AsmToken::Opcode(Rc::new(Opcode::Nop)),
+            "jal" => AsmToken::Opcode(Rc::new(Opcode::Jal)),
+            "beq" => AsmToken::Opcode(Rc::new(Opcode::Beq)),
+            "bne" => AsmToken::Opcode(Rc::new(Opcode::Bne)),
+            "blt" => AsmToken::Opcode(Rc::new(Opcode::Blt)),
+            "bge" => AsmToken::Opcode(Rc::new(Opcode::Bge)),
+            "mul" => AsmToken::Opcode(Rc::new(Opcode::Mul)),
+            "halt" => AsmToken::Opcode(Rc::new(Opcode::Halt)),
+            "read" => AsmToken::Opcode(Rc::new(Opcode::Read)),
+            "write" => AsmToken::Opcode(Rc::new(Opcode::Write)),
 
             //PSEUDO INSTRUCTIONS
             "mv" => AsmToken::PseudoIns(PseudoInstruction::Mv),

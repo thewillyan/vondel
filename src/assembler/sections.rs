@@ -23,24 +23,40 @@ pub struct DataWrited {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Sections {
+pub enum TextSegment {
     LabeledSection {
-        label: String,
-        instructions: Vec<Instruction>,
+        label: Rc<str>,
+        instructions: Rc<[Instruction]>,
     },
+    GlobalSection {
+        labels: Vec<Rc<str>>,
+    },
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Sections {
+    TextSection(Vec<TextSegment>),
     DataSection(Vec<DataWrited>),
 }
 
 impl Sections {
-    pub fn new_labeled_section(label: String, instructions: Vec<Instruction>) -> Self {
-        Sections::LabeledSection {
+    pub fn new_labeled_section(label: Rc<str>, instructions: Rc<[Instruction]>) -> TextSegment {
+        TextSegment::LabeledSection {
             label,
             instructions,
         }
     }
 
+    pub fn new_global_section(labels: Vec<Rc<str>>) -> TextSegment {
+        TextSegment::GlobalSection { labels }
+    }
+
     pub fn new_data_section(data: Vec<DataWrited>) -> Self {
         Sections::DataSection(data)
+    }
+
+    pub fn new_text_section(text: Vec<TextSegment>) -> Self {
+        Sections::TextSection(text)
     }
 
     pub fn new_data_writed(kind: DataKind, label: Rc<str>) -> DataWrited {

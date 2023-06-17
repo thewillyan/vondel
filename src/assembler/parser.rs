@@ -3,7 +3,10 @@ use super::sections::Sections;
 use std::mem::discriminant;
 use std::rc::Rc;
 
-use crate::assembler::{sections::DataWrited, tokens::PseudoOps};
+use crate::assembler::{
+    sections::{DataWrited, Instruction, TextSegment},
+    tokens::{Opcode, PseudoOps},
+};
 
 use super::tokens::AsmToken;
 use super::tokens::TokWithCtx;
@@ -126,7 +129,6 @@ impl Parser {
                 cur_column: self.cur_column
             }),
         };
-        self.next_token();
         Ok(res)
     }
 
@@ -136,15 +138,77 @@ impl Parser {
 
         while discriminant(&(*self.cur_tok)) == discriminant(&AsmToken::Label(Rc::from(""))) {
             data.push(self.parse_data_to_write()?);
+            self.next_token();
         }
 
         Ok(Sections::new_data_section(data))
+    }
+
+    fn parse_global_section(&mut self) -> Result<TextSegment> {
+        let mut res = Vec::new();
+        self.next_token();
+
+        while discriminant(&(*self.cur_tok)) == discriminant(&AsmToken::Label(Rc::from(""))) {
+            res.push(self.cur_tok.get_label(self.cur_line, self.cur_column)?);
+            self.next_token();
+        }
+        Ok(Sections::new_global_section(res))
+    }
+
+    fn get_instruction(&mut self) -> Result<Instruction> {
+        let ins = self
+            .cur_tok
+            .get_instruction(self.cur_line, self.cur_column)?;
+        match *ins {
+            Opcode::Add => todo!(),
+            _ => todo!(),
+        }
+        todo!()
+    }
+
+    fn parse_labeled_section(&mut self) -> Result<TextSegment> {
+        let label = self.cur_tok.get_label(self.cur_line, self.cur_column)?;
+        self.expect_peek(AsmToken::Colon)?;
+        self.next_token();
+        let mut ins = Vec::new();
+
+        while discriminant(&(*self.cur_tok))
+            == discriminant(&AsmToken::Opcode(Rc::new(Opcode::Add)))
+        {
+            ins.push(self.get_instruction()?);
+            self.next_token();
+        }
+
+        let rc_slice: Rc<[Instruction]> = Rc::from(ins.into_boxed_slice());
+        Ok(Sections::new_labeled_section(label, rc_slice))
+    }
+
+    fn parse_text_directive(&mut self) -> Result<Sections> {
+        let mut data = Vec::new();
+        self.next_token();
+        loop {
+            match *self.cur_tok {
+                AsmToken::PseudoOp(PseudoOps::Global) => {
+                    data.push(self.parse_global_section()?);
+                }
+                AsmToken::Label(_) => {
+                    data.push(self.parse_labeled_section()?);
+                }
+                // AsmToken::PseudoOp(PseudoOps::Text) => {
+                //     data.push(self.parse_text_directive()?);
+                // }
+                _ => break,
+            }
+        }
+
+        Ok(Sections::new_text_section(data))
     }
 
     fn parse_pseudo_ops(&mut self) -> Result<Sections> {
         let op = (*self.cur_tok).get_pseudo_op()?;
         let res = match op {
             PseudoOps::Data => self.parse_data_directive()?,
+            PseudoOps::Text => self.parse_text_directive()?,
             _ => todo!(),
         };
 
