@@ -11,7 +11,7 @@ pub struct Instruction {
 #[derive(Debug, PartialEq)]
 pub enum DataKind {
     Byte(u8),
-    Word(u32),
+    Word(i32),
 }
 
 #[derive(Debug, PartialEq)]
