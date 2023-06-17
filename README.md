@@ -62,7 +62,7 @@ involved a rather simple for now as you can see the diagram below:
 
 <div align="center">
 
-| ![Data path diagram](https://i.imgur.com/G2TAmzN.png) |
+| ![Data path diagram](https://i.imgur.com/WkBo8bD.png) |
 | :---------------------------------------------------: |
 | _The diagram of a single datapath (click to zoom)._   |
 
