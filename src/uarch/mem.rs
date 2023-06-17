@@ -116,13 +116,8 @@ impl CtrlStore {
     /// Get the next Microinstruction from the CtrlStore, in other words,
     /// fetch the MI at the position stored at MPC.
     ///
-    /// ### MI (57 bits):
-    ///
-    ///```
-    /// |   NEXT  |JAM|   ALU  |          C BUS         |MEM|  A  |  B  |
-    /// |---------|---|--------|------------------------|---|-----|-----|
-    /// |000000000|000|00000000|000000000000000000000000|000|00000|00000|
-    /// ```
+    /// A single microintruction is formated as shown in
+    /// [this diagram](https://i.imgur.com/tlHAPgL.png).
     pub fn get_mi(&self) -> u64 {
         self.firmware[self.mpc.get() as usize]
     }
