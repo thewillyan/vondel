@@ -111,6 +111,7 @@ pub enum AsmToken {
     Colon,
     Illegal,
     Eof,
+    Assign,
 }
 
 impl AsmToken {

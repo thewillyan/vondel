@@ -88,6 +88,13 @@ impl<'a> Lexer<'a> {
         match self.cur_char {
             ':' => AsmToken::Colon,
             ',' => AsmToken::Comma,
+            '<' => match self.chars.peek() {
+                Some(&'-') => {
+                    self.read_char();
+                    AsmToken::Assign
+                }
+                _ => AsmToken::Illegal,
+            },
             c if c.is_alphabetic() || c == '.' || c == '_' => self.read_identifier(),
             c if c == '-' || c.is_numeric() => self.read_number(),
             '\0' => AsmToken::Eof,
@@ -353,7 +360,7 @@ mod tests {
         use crate::assembler::tokens::Opcode::*;
         use crate::assembler::tokens::Register::*;
 
-        let input = "add, tubias ; comment\n addi, zero, t0";
+        let input = "add, tubias ; comment\n add zero, t0 <- t1";
         let mut l = Lexer::new(input);
         let toks = vec![
             TokWithCtx {
@@ -372,29 +379,34 @@ mod tests {
                 cur_column: 6,
             },
             TokWithCtx {
-                tok: Opcode(Addi),
+                tok: Opcode(Add),
                 cur_line: 2,
                 cur_column: 2,
             },
             TokWithCtx {
-                tok: Comma,
+                tok: Reg(Zero),
                 cur_line: 2,
                 cur_column: 6,
             },
             TokWithCtx {
-                tok: Reg(Zero),
-                cur_line: 2,
-                cur_column: 8,
-            },
-            TokWithCtx {
                 tok: Comma,
                 cur_line: 2,
-                cur_column: 12,
+                cur_column: 10,
             },
             TokWithCtx {
                 tok: Reg(T0),
                 cur_line: 2,
-                cur_column: 14,
+                cur_column: 12,
+            },
+            TokWithCtx {
+                tok: Assign,
+                cur_line: 2,
+                cur_column: 15,
+            },
+            TokWithCtx {
+                tok: Reg(T1),
+                cur_line: 2,
+                cur_column: 18,
             },
         ];
 
