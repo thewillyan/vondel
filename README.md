@@ -11,15 +11,15 @@ The name comes from the
 
 ## Microarchitecture
 
-The basic idea behind this design is to follow some tips from book _Structured
-Computer Organization - Andrew S. Tanenbaum_ while implementing a the ability to
+The basic idea behind this design is to follow some tips from the book _Structured
+Computer Organization - Andrew S. Tanenbaum_ while implementing the ability to
 perform operations even if the main clock is in a non-edge level in order to
 reduce clock cycles.
 
 For that we will use two [_datapaths_](https://en.wikipedia.org/wiki/Datapath)
 with one [_ALU_](https://en.wikipedia.org/wiki/Arithmetic_logic_unit) each, but
-but the clock trigger of one is the opposite of the other, that is, ALU1 is
-falling-edge triggered and ALU2 is rising-edge triggered. Futhermore,
+the clock trigger of one is the opposite of the other, that is, ALU1 is
+falling-edge triggered and ALU2 is rising-edge triggered. Furthermore,
 the clock signal received in ALU2 is a function of the clock signal
 of ALU1.
 
@@ -36,9 +36,9 @@ delay of _δ<sub>1</sub>_ as shown below:
 
 </div>
 
-In other words, ALU1 will init it's operation cycle on the falling-edge of
+In other words, ALU1 will start its operation cycle on the falling-edge of
 _α<sub>1</sub>_ and end the operation on the rising-edge, while ALU2 will
-init it's operation cycle on the rising-edge of _α<sub>2</sub>_ and end the
+start its operation cycle on the rising-edge of _α<sub>2</sub>_ and end the
 operation on the falling-edge, taking advantage of the main clock (_α<sub>1</sub>_)
 even when it is at high level.
 
@@ -52,7 +52,7 @@ way that the components are shared is shown below:
 
 |               ![Shared components diagram](https://i.imgur.com/tlHAPgL.png)               |
 | :---------------------------------------------------------------------------------------: |
-|_The datapaths share some components such as the Microprogram, RAM and a shared registers._|
+|_The datapaths share some components such as the Microprogram, RAM and shared registers._|
 
 </div>
 
