@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 #[derive(Debug, PartialEq, Clone)]
 pub struct TokWithCtx {
-    pub tok: AsmToken,
+    pub tok: Rc<AsmToken>,
     pub cur_line: usize,
     pub cur_column: usize,
 }
@@ -8,7 +10,7 @@ pub struct TokWithCtx {
 impl TokWithCtx {
     pub fn new(tok: AsmToken, cur_line: usize, cur_column: usize) -> Self {
         TokWithCtx {
-            tok,
+            tok: Rc::new(tok),
             cur_line,
             cur_column,
         }
@@ -17,22 +19,25 @@ impl TokWithCtx {
 //RISC-V ABI
 #[derive(Debug, PartialEq, Clone)]
 pub enum Register {
-    Zero,
+    Ra,
+    Sp,
+    Cpp,
+    Lv,
     T0,
     T1,
     T2,
+    T3,
     S0,
     S1,
-    A0,
-    A1,
-    A2,
-    A3,
     S2,
     S3,
     S4,
     S5,
     S6,
-    T3,
+    A0,
+    A1,
+    A2,
+    A3,
 }
 
 #[derive(Debug, PartialEq, Clone)]
@@ -53,6 +58,7 @@ pub enum Opcode {
     Slt,
     And,
     Or,
+    // Shift left 1 bit
     Sll,
     Srl,
     Nop,
@@ -65,6 +71,10 @@ pub enum Opcode {
     Bge,
     // Multiplication Operations
     Mul,
+    // Read and Write
+    // x ,addr ,rd
+    Read,
+    Write,
     // Halt
     Halt,
 }
@@ -152,6 +162,8 @@ impl AsmToken {
             "bge" => AsmToken::Opcode(Opcode::Bge),
             "mul" => AsmToken::Opcode(Opcode::Mul),
             "halt" => AsmToken::Opcode(Opcode::Halt),
+            "read" => AsmToken::Opcode(Opcode::Read),
+            "write" => AsmToken::Opcode(Opcode::Write),
 
             //PSEUDO INSTRUCTIONS
             "mv" => AsmToken::PseudoIns(PseudoInstruction::Mv),
@@ -170,22 +182,26 @@ impl AsmToken {
             "ble" => AsmToken::PseudoIns(PseudoInstruction::Ble),
 
             //REGISTERS
-            "zero" | "x0" => AsmToken::Reg(Register::Zero),
-            "t0" | "x1" => AsmToken::Reg(Register::T0),
-            "t1" | "x2" => AsmToken::Reg(Register::T1),
-            "t2" | "x3" => AsmToken::Reg(Register::T2),
-            "s0" | "fp" | "x4" => AsmToken::Reg(Register::S0),
-            "s1" | "x5" => AsmToken::Reg(Register::S1),
-            "a0" | "x6" => AsmToken::Reg(Register::A0),
-            "a1" | "x7" => AsmToken::Reg(Register::A1),
-            "a2" | "x8" => AsmToken::Reg(Register::A2),
-            "a3" | "x9" => AsmToken::Reg(Register::A3),
+            "ra" | "x0" => AsmToken::Reg(Register::Ra),
+            "sp" | "x1" => AsmToken::Reg(Register::Sp),
+            "cpp" | "x2" => AsmToken::Reg(Register::Cpp),
+            "lv" | "x3" => AsmToken::Reg(Register::Lv),
+            "t0" | "x4" => AsmToken::Reg(Register::T0),
+            "t1" | "x5" => AsmToken::Reg(Register::T1),
+            "t2" | "x6" => AsmToken::Reg(Register::T2),
+            "t3" | "x7" => AsmToken::Reg(Register::T3),
+            "s0" | "x8" => AsmToken::Reg(Register::S0),
+            "s1" | "x9" => AsmToken::Reg(Register::S1),
             "s2" | "x10" => AsmToken::Reg(Register::S2),
             "s3" | "x11" => AsmToken::Reg(Register::S3),
             "s4" | "x12" => AsmToken::Reg(Register::S4),
             "s5" | "x13" => AsmToken::Reg(Register::S5),
             "s6" | "x14" => AsmToken::Reg(Register::S6),
-            "t3" | "x15" => AsmToken::Reg(Register::T3),
+            "a0" | "x15" => AsmToken::Reg(Register::A0),
+            "a1" | "x16" => AsmToken::Reg(Register::A1),
+            "a2" | "x17" => AsmToken::Reg(Register::A2),
+            "a3" | "x18" => AsmToken::Reg(Register::A3),
+
             _ => AsmToken::Label(input),
         }
     }

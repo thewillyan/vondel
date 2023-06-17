@@ -139,7 +139,7 @@ impl<'a> Lexer<'a> {
         let mut toks = Vec::new();
         loop {
             let tok = self.next_with_ctx();
-            if tok.tok == AsmToken::Eof {
+            if *tok.tok == AsmToken::Eof {
                 toks.push(tok);
                 break;
             }
@@ -151,6 +151,8 @@ impl<'a> Lexer<'a> {
 
 #[cfg(test)]
 mod tests {
+    use std::rc::Rc;
+
     use super::*;
 
     #[test]
@@ -177,43 +179,57 @@ mod tests {
         use super::AsmToken::{Eof, Reg};
         use crate::assembler::tokens::Register::*;
         let input = r"
-        zero t0 t1 t2 s0 s1 a0 a1 a2 a3 s2 s3 s4 s5 s6 t3
-        x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15";
+        ra sp cpp lv
+        t0 t1 t2 t3
+        s0 s1 s2 s3 s4 s5 s6
+        a0 a1 a2 a3
+
+        x0 x1 x2 x3
+        x4 x5 x6 x7
+        x8 x9 x10 x11 x12 x13 x14
+        x15 x16 x17 x18
+        ";
         let mut l = Lexer::new(input);
 
         let toks = vec![
-            Reg(Zero),
+            Reg(Ra),
+            Reg(Sp),
+            Reg(Cpp),
+            Reg(Lv),
             Reg(T0),
             Reg(T1),
             Reg(T2),
+            Reg(T3),
             Reg(S0),
             Reg(S1),
-            Reg(A0),
-            Reg(A1),
-            Reg(A2),
-            Reg(A3),
             Reg(S2),
             Reg(S3),
             Reg(S4),
             Reg(S5),
             Reg(S6),
-            Reg(T3),
-            Reg(Zero),
-            Reg(T0),
-            Reg(T1),
-            Reg(T2),
-            Reg(S0),
-            Reg(S1),
             Reg(A0),
             Reg(A1),
             Reg(A2),
             Reg(A3),
+            Reg(Ra),
+            Reg(Sp),
+            Reg(Cpp),
+            Reg(Lv),
+            Reg(T0),
+            Reg(T1),
+            Reg(T2),
+            Reg(T3),
+            Reg(S0),
+            Reg(S1),
             Reg(S2),
             Reg(S3),
             Reg(S4),
             Reg(S5),
             Reg(S6),
-            Reg(T3),
+            Reg(A0),
+            Reg(A1),
+            Reg(A2),
+            Reg(A3),
             Eof,
         ];
 
@@ -360,53 +376,63 @@ mod tests {
         use crate::assembler::tokens::Opcode::*;
         use crate::assembler::tokens::Register::*;
 
-        let input = "add, tubias ; comment\n add zero, t0 <- t1";
+        let input = "add, tubias ; comment\n add ra, t0 <- t1\n read write";
         let mut l = Lexer::new(input);
         let toks = vec![
             TokWithCtx {
-                tok: Opcode(Add),
+                tok: Rc::new(Opcode(Add)),
                 cur_line: 1,
                 cur_column: 1,
             },
             TokWithCtx {
-                tok: Comma,
+                tok: Rc::new(Comma),
                 cur_line: 1,
                 cur_column: 4,
             },
             TokWithCtx {
-                tok: Label("tubias".to_string()),
+                tok: Rc::new(Label("tubias".to_string())),
                 cur_line: 1,
                 cur_column: 6,
             },
             TokWithCtx {
-                tok: Opcode(Add),
+                tok: Rc::new(Opcode(Add)),
                 cur_line: 2,
                 cur_column: 2,
             },
             TokWithCtx {
-                tok: Reg(Zero),
+                tok: Rc::new(Reg(Ra)),
                 cur_line: 2,
                 cur_column: 6,
             },
             TokWithCtx {
-                tok: Comma,
+                tok: Rc::new(Comma),
+                cur_line: 2,
+                cur_column: 8,
+            },
+            TokWithCtx {
+                tok: Rc::new(Reg(T0)),
                 cur_line: 2,
                 cur_column: 10,
             },
             TokWithCtx {
-                tok: Reg(T0),
+                tok: Rc::new(Assign),
                 cur_line: 2,
-                cur_column: 12,
+                cur_column: 13,
             },
             TokWithCtx {
-                tok: Assign,
+                tok: Rc::new(Reg(T1)),
                 cur_line: 2,
-                cur_column: 15,
+                cur_column: 16,
             },
             TokWithCtx {
-                tok: Reg(T1),
-                cur_line: 2,
-                cur_column: 18,
+                tok: Rc::new(Opcode(Read)),
+                cur_line: 3,
+                cur_column: 2,
+            },
+            TokWithCtx {
+                tok: Rc::new(Opcode(Write)),
+                cur_line: 3,
+                cur_column: 7,
             },
         ];
 
