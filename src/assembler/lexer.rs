@@ -1,4 +1,4 @@
-use std::{iter::Peekable, str::Chars};
+use std::{iter::Peekable, rc::Rc, str::Chars};
 
 use crate::assembler::tokens::{AsmToken, TokWithCtx};
 
@@ -68,7 +68,7 @@ impl<'a> Lexer<'a> {
                 break;
             }
         }
-        AsmToken::name_to_tok(ident)
+        AsmToken::name_to_tok(&ident)
     }
 
     fn read_number(&mut self) -> AsmToken {
@@ -81,7 +81,7 @@ impl<'a> Lexer<'a> {
                 break;
             }
         }
-        AsmToken::Number(num)
+        AsmToken::Number(Rc::from(num))
     }
 
     fn tokenizer(&mut self) -> AsmToken {
@@ -159,18 +159,15 @@ mod tests {
     fn skip_whitespace() {
         let input = "    \t\n tubias";
         let mut l = Lexer::new(input);
-        assert_eq!(l.next_token(), AsmToken::Label("tubias".to_string()));
+        assert_eq!(l.next_token(), AsmToken::Label(Rc::from("tubias")));
     }
 
     #[test]
     fn ignore_comments() {
         let input = "# this is a comment\n tubias ; another comment here \n another_tubias #comment until end";
         let mut l = Lexer::new(input);
-        assert_eq!(l.next_token(), AsmToken::Label("tubias".to_string()));
-        assert_eq!(
-            l.next_token(),
-            AsmToken::Label("another_tubias".to_string())
-        );
+        assert_eq!(l.next_token(), AsmToken::Label(Rc::from("tubias")));
+        assert_eq!(l.next_token(), AsmToken::Label(Rc::from("another_tubias")));
         assert_eq!(l.next_token(), AsmToken::Eof);
     }
 
@@ -342,11 +339,11 @@ mod tests {
         let input = r"tubias, tubias2, tubias3";
         let mut l = Lexer::new(input);
         let toks = vec![
-            AsmToken::Label("tubias".to_string()),
+            AsmToken::Label(Rc::from("tubias")),
             AsmToken::Comma,
-            AsmToken::Label("tubias2".to_string()),
+            AsmToken::Label(Rc::from("tubias2")),
             AsmToken::Comma,
-            AsmToken::Label("tubias3".to_string()),
+            AsmToken::Label(Rc::from("tubias3")),
             AsmToken::Eof,
         ];
 
@@ -360,8 +357,8 @@ mod tests {
         let input = "1234 -123";
         let mut l = Lexer::new(input);
         let toks = vec![
-            AsmToken::Number(String::from("1234")),
-            AsmToken::Number(String::from("-123")),
+            AsmToken::Number(Rc::from("1234")),
+            AsmToken::Number(Rc::from("-123")),
             AsmToken::Eof,
         ];
 
@@ -390,7 +387,7 @@ mod tests {
                 cur_column: 4,
             },
             TokWithCtx {
-                tok: Rc::new(Label("tubias".to_string())),
+                tok: Rc::new(Label(Rc::from("tubias"))),
                 cur_line: 1,
                 cur_column: 6,
             },

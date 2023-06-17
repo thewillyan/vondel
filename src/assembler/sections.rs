@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::assembler::tokens::{Opcode, Register};
 
 #[derive(Debug, PartialEq)]
@@ -17,7 +19,7 @@ pub enum DataKind {
 #[derive(Debug, PartialEq)]
 pub struct DataWrited {
     pub kind: DataKind,
-    pub label: String,
+    pub label: Rc<str>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -41,7 +43,7 @@ impl Sections {
         Sections::DataSection(data)
     }
 
-    pub fn new_data_writed(kind: DataKind, label: String) -> DataWrited {
+    pub fn new_data_writed(kind: DataKind, label: Rc<str>) -> DataWrited {
         DataWrited { kind, label }
     }
 }

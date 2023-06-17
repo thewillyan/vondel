@@ -1,3 +1,6 @@
+use super::parser::ParserError;
+use anyhow::{bail, Result};
+use clap::Parser;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -16,6 +19,7 @@ impl TokWithCtx {
         }
     }
 }
+
 //RISC-V ABI
 #[derive(Debug, PartialEq, Clone)]
 pub enum Register {
@@ -111,8 +115,8 @@ pub enum PseudoOps {
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum AsmToken {
-    Number(String),
-    Label(String),
+    Number(Rc<str>),
+    Label(Rc<str>),
     Reg(Register),
     Opcode(Opcode),
     PseudoIns(PseudoInstruction),
@@ -125,8 +129,43 @@ pub enum AsmToken {
 }
 
 impl AsmToken {
-    pub fn name_to_tok(input: String) -> AsmToken {
-        match input.as_str() {
+    pub fn get_pseudo_op(&self) -> Result<PseudoOps> {
+        match self {
+            AsmToken::PseudoOp(op) => Ok(op.clone()),
+            _ => bail!("Expected PseudoOp, got {:?}", self),
+        }
+    }
+
+    pub fn get_label(&self, cur_line: usize, cur_column: usize) -> Result<Rc<str>> {
+        match self {
+            AsmToken::Label(label) => Ok(Rc::clone(label)),
+            _ => {
+                bail!(ParserError::ExpectedToken {
+                    expected: format!("{:?}", AsmToken::Label(Rc::from(""))),
+                    found: format!("{:?}", self),
+                    cur_line,
+                    cur_column
+                })
+            }
+        }
+    }
+
+    pub fn get_number(&self, cur_line: usize, cur_column: usize) -> Result<Rc<str>> {
+        match self {
+            AsmToken::Number(number) => Ok(Rc::clone(number)),
+            _ => {
+                bail!(ParserError::ExpectedToken {
+                    expected: format!("{:?}", AsmToken::Number(Rc::from(""))),
+                    found: format!("{:?}", self),
+                    cur_line,
+                    cur_column
+                })
+            }
+        }
+    }
+
+    pub fn name_to_tok(input: &str) -> AsmToken {
+        match input {
             //PseudoOps
             pseudo if pseudo.starts_with('.') => match pseudo {
                 ".data" => AsmToken::PseudoOp(PseudoOps::Data),
@@ -202,7 +241,7 @@ impl AsmToken {
             "a2" | "x17" => AsmToken::Reg(Register::A2),
             "a3" | "x18" => AsmToken::Reg(Register::A3),
 
-            _ => AsmToken::Label(input),
+            _ => AsmToken::Label(Rc::from(input)),
         }
     }
 }
