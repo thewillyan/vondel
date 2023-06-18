@@ -217,7 +217,7 @@ mod tests {
         use crate::assembler::tokens::Opcode::*;
         let input = r"
         addi slti andi ori xori slli srli lui auipc
-        add sub slt and or sll srl nop
+        add sub slt and or sll sra sla nop not
         beq bne blt bge
         mul
         halt
@@ -240,8 +240,10 @@ mod tests {
             Opcode(Rc::new(And)),
             Opcode(Rc::new(Or)),
             Opcode(Rc::new(Sll)),
-            Opcode(Rc::new(Srl)),
+            Opcode(Rc::new(Sra)),
+            Opcode(Rc::new(Sla)),
             Opcode(Rc::new(Nop)),
+            Opcode(Rc::new(Not)),
             Opcode(Rc::new(Beq)),
             Opcode(Rc::new(Bne)),
             Opcode(Rc::new(Blt)),
