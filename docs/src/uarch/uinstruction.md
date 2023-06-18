@@ -9,6 +9,7 @@ A Vondel microinstruction has 64 bits the following format:
 |:-------:|:------:|:------:|:-------:|:------:|:------:|:------:|:---------:|
 | 9 bits  | 3 bits | 8 bits | 20 bits | 3 bits | 5 bits | 5 bits |  8 bits   |
 
+You can find a more detailed version of this diagram [here](https://i.imgur.com/O3SP6L2.png).
 
 ## NEXT
 
@@ -37,15 +38,95 @@ a jump is a bitwise or with MBR and the 8 LSB's from MPC.
 The `ALU` field actually controls 2 devices: the ALU itself and the shifter
 connected to its autput.
 
-TODO!
+The ALU has two input, A and B (that come from the A and B bus, respectively) and 
+it's controled by the 6 LSB's from the ALU field, they are:
+
+- F0 and F1 (Controls the ALU function)
+- ENA and ENB (Enables the input from A and B bus respectively)
+- INVA (Inverts the bits of A)
+- INC (Increments 1 to the ALU result)
+
+from MSB to LSB. The logic and arithmetic functions that ALU can
+operate are managed by F0 and F1 like this:
+
+| F0 | F1 | Function |
+| -- | -- | -------- |
+| 0  | 0  | A AND B  |
+| 0  | 1  | A OR B   |
+| 1  | 0  | NOT B    |
+| 1  | 1  | A + B    |
+
+Some useful combinations of ALU signal can be found below:
+
+| F0 | F1 | ENA | ENB | INVA | INC | Function |
+| -- | -- | --- | --- | ---- | --- | -------- |
+| 0 | 1 | 1 | 0 | 0 | 0 | A |
+| 0 | 1 | 0 | 1 | 0 | 0 | B |
+| 0 | 1 | 1 | 0 | 1 | 0 | not A |
+| 1 | 0 | 1 | 1 | 0 | 0 | not B |
+| 1 | 1 | 1 | 1 | 0 | 0 | A + B |
+| 1 | 1 | 1 | 1 | 0 | 1 | A + B + 1 |
+| 1 | 1 | 1 | 0 | 0 | 1 | A + 1 |
+| 1 | 1 | 0 | 1 | 0 | 1 | B + 1 |
+| 1 | 1 | 1 | 1 | 1 | 1 | B − A |
+| 1 | 1 | 0 | 1 | 1 | 0 | B − 1 |
+| 1 | 1 | 1 | 0 | 1 | 1 | −A |
+| 0 | 0 | 1 | 1 | 0 | 0 | A AND B |
+| 0 | 1 | 1 | 1 | 0 | 0 | A OR B |
+| 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 1 | 0 | 0 | 0 | 1 | 1 |
+| 1 | 1 | 0 | 0 | 1 | 0 | −1 |
+
+The shifter has 2 inputs: The value of the ALU operation (let's call it `X`) and
+the operation opcode that are which are the 2 MSB's from the ALU field. The
+operations and its opcode are as following:
+
+| Opcode | Operation         | Output   |
+| ------ | ----------------- | -------- |
+| `0b00` | None              | `X`      |
+| `0b01` | Shift Right 1 bit | `X >> 1` |
+| `0b10` | Shift Left 8 bits | `X << 8` |
+| `0b11` | Shift Left 1 bit  | `X << 1` |
 
 ## C BUS
 
-TODO!
+The `C BUS` field represents which registers gonna be writen with the value
+of the C BUS (which is the shifter output). This field has 20 bits because
+there are 20 registers connected to the C bus, each bit 1 represents that the
+register represented by that bit should be writen by the C BUS.
+
+The relation between a bit n and which register it's represents is shown below
+(from MSB to LSB):
+
+1. MDR
+2. MAR
+3. PC
+4. LV
+5. R0 
+6. R1
+7. R2 
+8. R3 
+9. R4 
+10. R5 
+11. R6 
+12. R7 
+13. R8 
+14. R9 
+15. R10
+16. R11
+17. R12
+18. R13
+19. R14
+20. R15
 
 ## MEM
 
-TODO!
+The memory field represents which memory operations gonna happen in the cycle.
+The bit 1 (MSB), 2 and 3 represents the operations of WRITE, READ and FETCH
+respectively.
+
+Each bit 1 in the field informs that the memory operation related to that
+field will be executed.
 
 ## A and B
 
@@ -58,7 +139,7 @@ The values of `A` and `B` and which register they enable (NONE,
 represents that none of them writes to the respective BUS, so the value of the
 bus is 0) is shown below:
 
-### Output to BUS A
+Output to BUS A:
 
 | ID | BIN | Register |
 | -- | --- | -------- |
@@ -89,7 +170,9 @@ bus is 0) is shown below:
 | 24 |11000| R15      |
 | .. | ... | NONE     |
 
-### Output to BUS B
+---
+
+Output to BUS B:
 
 | ID | BIN | Register |
 | -- | --- | -------- |
@@ -128,7 +211,7 @@ This constant is avalible as a shortcut in the `CtrlStore` struct.
 In this section we will show how some of the microinstruction of the Vondel
 Language are implemented in the microprogram.
 
-Operations summary:
+### Operations Summary
 
 - Arithmetic
   - [ADD](#add)
