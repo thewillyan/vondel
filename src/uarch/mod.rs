@@ -44,7 +44,7 @@ impl Computer {
 
     pub fn cycles(&self) -> f64 {
         let alts = self.clock.lock().expect("Cannot get the clock lock.").count as f64;
-        alts / 2.0
+        (alts / 2.0).ceil()
     }
 
     pub fn regs(&self) -> &Registers {
@@ -160,10 +160,9 @@ impl DataPath {
         let b_code = enable_out & 0b11111;
         self.state.b = match b_code {
             0b00000 => self.regs.mem.mdr(),
-            0b00001 => self.regs.sys.sp.get(),
-            0b00010 => self.regs.sys.lv.get(),
-            0b00011 => self.regs.sys.cpp.get(),
-            x => self.regs.gen.get(x as usize - 4).unwrap_or(0),
+            0b00001 => self.regs.sys.lv.get(),
+            0b00010 => self.regs.sys.cpp.get(),
+            x => self.regs.gen.get(x as usize - 3).unwrap_or(0),
         };
         enable_out >>= 5;
         mi >>= 5;
@@ -176,10 +175,9 @@ impl DataPath {
             0b0011 => self.regs.mem.mbr() as u32,
             0b0100 => self.regs.mem.mbr2() as u32 | 0xFFFF0000,
             0b0101 => self.regs.mem.mbr2() as u32,
-            0b0110 => self.regs.sys.sp.get(),
-            0b0111 => self.regs.sys.lv.get(),
-            0b1000 => self.regs.sys.cpp.get(),
-            x => self.regs.gen.get(x as usize - 9).unwrap_or(0),
+            0b0110 => self.regs.sys.lv.get(),
+            0b0111 => self.regs.sys.cpp.get(),
+            x => self.regs.gen.get(x as usize - 8).unwrap_or(0),
         };
         mi >>= 5;
 
@@ -192,8 +190,8 @@ impl DataPath {
         self.state.write = mem_code == 1;
         mi >>= 3;
 
-        self.state.enable_in = (mi & 0b111111111111111111111) as u32;
-        mi >>= 21;
+        self.state.enable_in = (mi & 0b11111111111111111111) as u32;
+        mi >>= 20;
         self.state.alu_entry = (mi & 0b11111111) as u8;
         mi >>= 8;
 
@@ -206,7 +204,7 @@ impl DataPath {
             .entry(self.state.alu_entry, self.state.a, self.state.b);
         let c_bus = self.alu.op();
 
-        // | MAR | PC | SP | LV | CPP | R0 | ... | R15 |
+        // | MAR | PC | LV | R0 | ... | R15 |
         for i in (0..16).rev() {
             let enb_in = (self.state.enable_in & 1) == 1;
             if enb_in {
@@ -215,21 +213,9 @@ impl DataPath {
             self.state.enable_in >>= 1;
         }
 
-        let enb_cpp_in = (self.state.enable_in & 1) == 1;
-        if enb_cpp_in {
-            self.regs.sys.cpp.set(c_bus);
-        }
-        self.state.enable_in >>= 1;
-
         let enb_lv_in = (self.state.enable_in & 1) == 1;
         if enb_lv_in {
             self.regs.sys.lv.set(c_bus);
-        }
-        self.state.enable_in >>= 1;
-
-        let enb_sp_in = (self.state.enable_in & 1) == 1;
-        if enb_sp_in {
-            self.regs.sys.sp.set(c_bus);
         }
         self.state.enable_in >>= 1;
 
@@ -242,6 +228,12 @@ impl DataPath {
         let enb_mar_in = (self.state.enable_in & 1) == 1;
         if enb_mar_in {
             self.regs.mem.update_mar(c_bus);
+        }
+        self.state.enable_in >>= 1;
+
+        let enb_mdr_in = (self.state.enable_in & 1) == 1;
+        if enb_mdr_in {
+            self.regs.mem.update_mdr(c_bus);
         }
 
         cs.update_mpc(self.state.cs_opcode, self.alu.z(), &mut self.regs.mem);

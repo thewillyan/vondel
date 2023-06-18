@@ -319,6 +319,10 @@ impl MemRegs {
     pub fn update_mar(&mut self, v: u32) {
         self.mar.set(v)
     }
+
+    pub fn update_mdr(&mut self, v: u32) {
+        self.mdr.set(v)
+    }
 }
 
 /// A Instruction Fetch Unit with 8 bytes of cache
@@ -366,16 +370,24 @@ impl Default for Ifu {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct SysRegs {
     pub lv: SharedReg<u32>,
-    pub sp: SharedReg<u32>,
     pub cpp: SharedReg<u32>,
 }
 
 impl SysRegs {
     pub fn new() -> Self {
         SysRegs::default()
+    }
+}
+
+impl Default for SysRegs {
+    fn default() -> Self {
+        SysRegs {
+            lv: SharedReg::default(),
+            cpp: SharedReg::new(RAM_ADDRS as u32 - 1),
+        }
     }
 }
 
@@ -420,7 +432,6 @@ impl Registers {
             ifu: Arc::clone(&regs.mem.ifu),
         };
         let sys = SysRegs {
-            sp: regs.sys.sp.clone(),
             lv: regs.sys.lv.clone(),
             cpp: regs.sys.cpp.clone(),
         };
