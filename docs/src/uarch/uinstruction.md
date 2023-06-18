@@ -98,26 +98,28 @@ register represented by that bit should be writen by the C BUS.
 The relation between a bit n and which register it's represents is shown below
 (from MSB to LSB):
 
-1. MDR
-2. MAR
-3. PC
-4. LV
-5. R0 
-6. R1
-7. R2 
-8. R3 
-9. R4 
-10. R5 
-11. R6 
-12. R7 
-13. R8 
-14. R9 
-15. R10
-16. R11
-17. R12
-18. R13
-19. R14
-20. R15
+| Bit | Register |
+| --- | -------- | 
+| 1   | MDR      |
+| 2   | MAR      |
+| 3   | PC       |
+| 4   | LV       |
+| 5   | R0       |
+| 6   | R1       |
+| 7   | R2       |
+| 8   | R3       |
+| 9   | R4       |
+| 10  | R5       |
+| 11  | R6       |
+| 12  | R7       |
+| 13  | R8       |
+| 14  | R9       |
+| 15  | R10      |
+| 16  | R11      |
+| 17  | R12      |
+| 18  | R13      |
+| 19  | R14      |
+| 20  | R15      |
 
 ## MEM
 
@@ -600,8 +602,6 @@ in `r1` and we aways make `r0 * r1`. This optimization is necessary because a
 multiplication is computed as sequential additions, and making less additions
 save some clock cycles.
 
-### Literal Immediate
-
 ### LUI
 
 Syntax: `lui [byte] -> r0, ..., rn`.
@@ -690,7 +690,7 @@ Action: Stores the value of `x | [byte]` on the registers `r0, ..., rn`.
 #### High Level
 
 ```
-andi r14, 0x00 -> r14
+ori r14, 0x00 -> r14
 ```
 
 #### Microprogram
