@@ -239,17 +239,6 @@ impl Parser {
         Ok(Sections::new_data_section(data))
     }
 
-    fn parse_global_section(&mut self) -> Result<TextSegment> {
-        let mut res = Vec::new();
-        self.next_token();
-
-        while discriminant(&(*self.cur_tok)) == discriminant(&AsmToken::Label(Rc::from(""))) {
-            res.push(self.get_label()?);
-            self.next_token();
-        }
-        Ok(Sections::new_global_section(res))
-    }
-
     fn get_instruction(&mut self) -> Result<Instruction> {
         let op = self.get_opcode()?;
 
@@ -309,7 +298,8 @@ impl Parser {
                 AsmToken::PseudoOp(ref v) => {
                     let v = Rc::clone(v);
                     if let PseudoOps::Global = *v {
-                        data.push(self.parse_global_section()?);
+                        self.next_token();
+                        data.push(TextSegment::new_global_section(self.get_label()?));
                     }
                 }
                 AsmToken::Label(_) => {
@@ -393,6 +383,30 @@ mod tests {
             Sections::new_data_writed(DataKind::Word(0), Rc::from("quotient")),
             Sections::new_data_writed(DataKind::Word(0), Rc::from("remainder")),
             Sections::new_data_writed(DataKind::Byte(77), Rc::from("address")),
+        ]);
+
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_global_section() -> Result<()> {
+        let input = r"
+.text
+.global _start
+.global main
+.global tubias
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![
+            Sections::new_global_section(Rc::from("_start")),
+            Sections::new_global_section(Rc::from("main")),
+            Sections::new_global_section(Rc::from("tubias")),
         ]);
 
         assert_eq!(program.sections.len(), 1);

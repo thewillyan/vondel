@@ -65,7 +65,7 @@ pub enum TextSegment {
         instructions: Vec<Instruction>,
     },
     GlobalSection {
-        labels: Vec<Rc<str>>,
+        label: Rc<str>,
     },
 }
 
@@ -76,6 +76,10 @@ impl TextSegment {
             instructions,
         }
     }
+
+    pub fn new_global_section(label: Rc<str>) -> TextSegment {
+        TextSegment::GlobalSection { label }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -85,10 +89,6 @@ pub enum Sections {
 }
 
 impl Sections {
-    pub fn new_global_section(labels: Vec<Rc<str>>) -> TextSegment {
-        TextSegment::GlobalSection { labels }
-    }
-
     pub fn new_data_section(data: Vec<DataWrited>) -> Self {
         Sections::DataSection(data)
     }
