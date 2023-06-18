@@ -128,7 +128,7 @@ impl CtrlStore {
     ///
     /// where `JMPC`, `JAMN` and `JAMZ` are 1-bit wide and `NEXT_ADDR` is
     /// 9-bit wide. The 4 bits represented by `...` are ignored.
-    pub fn update_mpc(&self, mut opcode: u16, z: bool, mem_regs: &mut MemRegs) {
+    pub fn update_mpc(&self, mut opcode: u16, z: bool, n: bool, mem_regs: &mut MemRegs) {
         // ignored 4 MSBs
         opcode &= 0b0000111111111111;
 
@@ -141,7 +141,7 @@ impl CtrlStore {
 
         let mut next_addr = opcode;
 
-        if jamn && !z {
+        if jamn && n {
             next_addr |= 0b0000000100000000;
         }
 

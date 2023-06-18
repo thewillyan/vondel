@@ -242,7 +242,12 @@ impl DataPath {
             self.regs.mem.update_mdr(c_bus);
         }
 
-        cs.update_mpc(self.state.cs_opcode, self.alu.z(), &mut self.regs.mem);
+        cs.update_mpc(
+            self.state.cs_opcode,
+            self.alu.z(),
+            self.alu.n(),
+            &mut self.regs.mem,
+        );
 
         // MEMORY
         if self.state.read {

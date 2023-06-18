@@ -7,6 +7,7 @@ pub struct Alu {
     b: u32,
     s: Shifter,
     z: Reg<bool>,
+    n: Reg<bool>,
 }
 
 impl Alu {
@@ -65,11 +66,16 @@ impl Alu {
             Func::Not => !self.b,
         };
         self.z.set(c == 0);
+        self.n.set((c >> 31) == 1);
         self.s.shift(c)
     }
 
     pub fn z(&self) -> bool {
         self.z.get()
+    }
+
+    pub fn n(&self) -> bool {
+        self.n.get()
     }
 }
 
@@ -195,5 +201,21 @@ pub mod test {
         let mut alu = Alu::default();
         alu.entry(0b11111101, A, B);
         assert_eq!((A + B + 1) >> 1 << 8, alu.op());
+    }
+
+    #[test]
+    fn is_zero() {
+        let mut alu = Alu::default();
+        alu.entry(0b00111111, A, A);
+        assert_eq!(0, alu.op());
+        assert!(alu.z());
+    }
+
+    #[test]
+    fn is_neg() {
+        let mut alu = Alu::default();
+        alu.entry(0b00111111, B, A);
+        assert_eq!(A as i32 - B as i32, alu.op() as i32);
+        assert!(alu.n());
     }
 }
