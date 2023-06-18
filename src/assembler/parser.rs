@@ -300,6 +300,7 @@ impl Parser {
                     if let PseudoOps::Global = *v {
                         self.next_token();
                         data.push(TextSegment::new_global_section(self.get_label()?));
+                        self.next_token();
                     }
                 }
                 AsmToken::Label(_) => {
@@ -404,9 +405,9 @@ mod tests {
         let program = create_program(input);
 
         let expected = Sections::TextSection(vec![
-            Sections::new_global_section(Rc::from("_start")),
-            Sections::new_global_section(Rc::from("main")),
-            Sections::new_global_section(Rc::from("tubias")),
+            TextSegment::new_global_section(Rc::from("_start")),
+            TextSegment::new_global_section(Rc::from("main")),
+            TextSegment::new_global_section(Rc::from("tubias")),
         ]);
 
         assert_eq!(program.sections.len(), 1);
