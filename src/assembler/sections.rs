@@ -18,8 +18,8 @@ pub struct DoubleOperandInstruction {
 
 #[derive(Debug, PartialEq)]
 pub struct SingleOperandInstruction {
-    pub opcode: Opcode,
-    pub rd: Rc<[Rc<Register>]>,
+    pub opcode: Rc<Opcode>,
+    pub rd: Vec<Rc<Register>>,
     pub rs1: Rc<Register>,
 }
 
@@ -27,7 +27,7 @@ pub struct SingleOperandInstruction {
 pub enum Instruction {
     DoubleOperand(DoubleOperandInstruction),
     SingleOperand(SingleOperandInstruction),
-    NoOperand(Opcode),
+    NoOperand(Rc<Opcode>),
 }
 
 impl Instruction {
@@ -43,6 +43,18 @@ impl Instruction {
             rs1,
             rs2,
         })
+    }
+
+    pub fn new_single_operand_instruction(
+        opcode: Rc<Opcode>,
+        rd: Vec<Rc<Register>>,
+        rs1: Rc<Register>,
+    ) -> Instruction {
+        Instruction::SingleOperand(SingleOperandInstruction { opcode, rd, rs1 })
+    }
+
+    pub fn new_no_operand_instruction(opcode: Rc<Opcode>) -> Instruction {
+        Instruction::NoOperand(opcode)
     }
 }
 

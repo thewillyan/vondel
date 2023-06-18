@@ -46,8 +46,10 @@ pub enum ParserError {
         cur_column: usize,
     },
 
-    #[error("Expected immediate or register, found: {found}\nContext: line {cur_line}, column {cur_column}")]
-    ExpectedImmediateOrRegister {
+    #[error(
+        "Expected to be in section, found: {found}\nContext: line {cur_line}, column {cur_column}"
+    )]
+    ExpectedToBeInSection {
         found: String,
         cur_line: usize,
         cur_column: usize,
@@ -89,6 +91,8 @@ impl Parser {
 
     fn next_token(&mut self) {
         self.cur_tok = Rc::clone(&self.peek_tok);
+        self.cur_line = self.toks[self.idx].cur_line;
+        self.cur_column = self.toks[self.idx].cur_column;
         if self.idx + 1 >= self.toks.len() {
             self.peek_tok = Rc::new(AsmToken::Eof);
         } else {
@@ -239,35 +243,51 @@ impl Parser {
         Ok(Sections::new_data_section(data))
     }
 
+    fn parse_instruction_til_rs1(&mut self) -> Result<(Vec<Rc<Register>>, Rc<Register>)> {
+        let mut dest_regs = Vec::new();
+        dest_regs.push(self.get_register()?);
+        while self.peek_token_is(AsmToken::Comma) {
+            self.next_token();
+            self.next_token();
+            dest_regs.push(self.get_register()?);
+        }
+        self.expect_peek(AsmToken::Assign)?;
+        self.next_token();
+        let rs1 = self.get_register()?;
+        Ok((dest_regs, rs1))
+    }
+
     fn get_instruction(&mut self) -> Result<Instruction> {
         let op = self.get_opcode()?;
 
         let res = match *op {
+            // Register Register Instructions
             Opcode::Add => {
-                let mut dest_regs = Vec::new();
-                dest_regs.push(self.get_register()?);
-                while self.peek_token_is(AsmToken::Comma) {
-                    self.next_token();
-                    self.next_token();
-                    dest_regs.push(self.get_register()?);
-                }
-                self.expect_peek(AsmToken::Assign)?;
                 self.next_token();
-                let rs1 = self.get_register()?;
-                self.next_token();
+                let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
-                let rs2 = match *self.cur_tok {
-                    AsmToken::Reg(ref r) => Value::Reg(Rc::clone(r)),
-                    AsmToken::Number(ref n) => Value::Immediate(n.parse::<u8>()?),
-                    _ => bail!(ParserError::ExpectedImmediateOrRegister {
-                        found: format!("{:?}", self.cur_tok),
-                        cur_line: self.cur_line,
-                        cur_column: self.cur_column
-                    }),
-                };
+                let rs2 = Value::Reg(self.get_register()?);
                 Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
             }
+            // Imediate Register Instructions
+            Opcode::Addi
+            | Opcode::Slti
+            | Opcode::Andi
+            | Opcode::Ori
+            | Opcode::Xori
+            | Opcode::Slli
+            | Opcode::Srli => {
+                self.next_token();
+                let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
+                self.expect_peek(AsmToken::Comma)?;
+                self.next_token();
+                let immediate = self.get_number()?.parse::<u8>()?;
+                let rs2 = Value::Immediate(immediate);
+                Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
+            }
+            // No Operand Instructions
+            Opcode::Halt => Instruction::new_no_operand_instruction(op),
             _ => todo!(),
         };
 
@@ -277,14 +297,13 @@ impl Parser {
     fn parse_labeled_section(&mut self) -> Result<TextSegment> {
         let label = self.get_label()?;
         self.expect_peek(AsmToken::Colon)?;
-        self.next_token();
         let mut ins = Vec::new();
 
-        while discriminant(&(*self.cur_tok))
+        while discriminant(&(*self.peek_tok))
             == discriminant(&AsmToken::Opcode(Rc::new(Opcode::Add)))
         {
-            ins.push(self.get_instruction()?);
             self.next_token();
+            ins.push(self.get_instruction()?);
         }
 
         Ok(TextSegment::new_labeled_section(label, ins))
@@ -297,10 +316,13 @@ impl Parser {
             match *self.cur_tok {
                 AsmToken::PseudoOp(ref v) => {
                     let v = Rc::clone(v);
-                    if let PseudoOps::Global = *v {
-                        self.next_token();
-                        data.push(TextSegment::new_global_section(self.get_label()?));
-                        self.next_token();
+                    match *v {
+                        PseudoOps::Global => {
+                            self.next_token();
+                            data.push(TextSegment::new_global_section(self.get_label()?));
+                            self.next_token();
+                        }
+                        _ => break,
                     }
                 }
                 AsmToken::Label(_) => {
@@ -318,7 +340,19 @@ impl Parser {
         let res = match *op {
             PseudoOps::Data => self.parse_data_directive()?,
             PseudoOps::Text => self.parse_text_directive()?,
-            _ => todo!(),
+            _ => {
+                let tok = Rc::clone(&op);
+                while discriminant(&(*self.cur_tok))
+                    != discriminant(&AsmToken::PseudoOp(Rc::from(PseudoOps::Text)))
+                {
+                    self.next_token();
+                }
+                bail!(ParserError::ExpectedToBeInSection {
+                    found: format!("{:?}", tok),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
         };
 
         Ok(res)
@@ -326,13 +360,12 @@ impl Parser {
 
     fn parse_shit(&mut self) -> Result<Sections> {
         let res = match *self.cur_tok {
-            AsmToken::PseudoOp(_) => self.parse_pseudo_ops()?,
             AsmToken::Illegal => bail!(ParserError::UnexpectedToken {
                 tok: format!("{:?}", self.cur_tok),
                 cur_line: self.cur_line,
                 cur_column: self.cur_column
             }),
-            _ => todo!(),
+            _ => self.parse_pseudo_ops()?,
         };
 
         Ok(res)
@@ -412,6 +445,134 @@ mod tests {
 
         assert_eq!(program.sections.len(), 1);
         assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_double_operand_rr_instruction() -> Result<()> {
+        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::tokens::Register::*;
+        let input = r"
+.text
+main:
+    add t0 <- t1, t2
+    add t1, t2, t3, s0 <- t1, t2
+    add t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
+
+.text
+error:
+    add t0 <- t1
+
+.text
+error2:
+    add <- t1, t2
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Add),
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Reg(Rc::from(T2)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Add),
+                    vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
+                    Rc::from(T1),
+                    Value::Reg(Rc::from(T2)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Add),
+                    vec![
+                        Rc::from(T1),
+                        Rc::from(T2),
+                        Rc::from(T3),
+                        Rc::from(S0),
+                        Rc::from(S1),
+                        Rc::from(S2),
+                        Rc::from(S3),
+                        Rc::from(S4),
+                        Rc::from(A0),
+                        Rc::from(A1),
+                        Rc::from(A2),
+                    ],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+            ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 5);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_double_operand_reg_imm_instruction() -> Result<()> {
+        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::tokens::Register::*;
+        let input = r"
+.text
+main:
+    addi t0 <- t1, 8
+    addi t1, t2, t3, s0 <- t1, 7
+    addi t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
+
+.text
+error:
+    addi t0 <- t1, t2
+
+.text
+error2:
+    addi <- t1, 7
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Addi),
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Addi),
+                    vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
+                    Rc::from(T1),
+                    Value::Immediate(7),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Addi),
+                    vec![
+                        Rc::from(T1),
+                        Rc::from(T2),
+                        Rc::from(T3),
+                        Rc::from(S0),
+                        Rc::from(S1),
+                        Rc::from(S2),
+                        Rc::from(S3),
+                        Rc::from(S4),
+                        Rc::from(A0),
+                        Rc::from(A1),
+                        Rc::from(A2),
+                    ],
+                    Rc::from(A0),
+                    Value::Immediate(200),
+                ),
+            ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 5);
         assert_eq!(program.sections[0], expected);
 
         Ok(())
