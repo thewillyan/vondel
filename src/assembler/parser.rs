@@ -475,8 +475,10 @@ mod tests {
 .text
 main:
     add t0 <- t1, t2
-    add t1, t2, t3, s0 <- t1, t2
-    add t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
+    sub t1, t2, t3, s0 <- t1, t2
+    mul t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
+    and t0 <- a0, a1
+    or t0 <- a0, a1
 
 .text
 error:
@@ -499,13 +501,13 @@ error2:
                     Value::Reg(Rc::from(T2)),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Add),
+                    Rc::new(Sub),
                     vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
                     Rc::from(T1),
                     Value::Reg(Rc::from(T2)),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Add),
+                    Rc::new(Mul),
                     vec![
                         Rc::from(T1),
                         Rc::from(T2),
@@ -519,6 +521,18 @@ error2:
                         Rc::from(A1),
                         Rc::from(A2),
                     ],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(And),
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Or),
+                    vec![Rc::from(T0)],
                     Rc::from(A0),
                     Value::Reg(Rc::from(A1)),
                 ),
@@ -590,6 +604,116 @@ error2:
         )]);
         assert_eq!(program.sections.len(), 1);
         assert_eq!(program.errors.len(), 5);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_single_operand_instruction() -> Result<()> {
+        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::tokens::Register::*;
+        let input = r"
+.text
+main:
+    not t0, t2 <- t1
+    sll t1, t2, t3, s0 <- t1
+    sra t1 <- t1
+    sla t1 <- t1
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_single_operand_instruction(
+                    Rc::new(Not),
+                    vec![Rc::from(T0), Rc::from(T2)],
+                    Rc::from(T1),
+                ),
+                Instruction::new_single_operand_instruction(
+                    Rc::new(Sll),
+                    vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
+                    Rc::from(T1),
+                ),
+                Instruction::new_single_operand_instruction(
+                    Rc::new(Sra),
+                    vec![Rc::from(T1)],
+                    Rc::from(T1),
+                ),
+                Instruction::new_single_operand_instruction(
+                    Rc::new(Sla),
+                    vec![Rc::from(T1)],
+                    Rc::from(T1),
+                ),
+            ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_branch_instruction() -> Result<()> {
+        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::tokens::Register::*;
+        let input = r"
+.text
+main:
+    beq t0, t1
+    bne t0, t1
+    blt t0, t1
+    bge t0, t1
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_branch_instruction(Rc::new(Beq), Rc::from(T0), Rc::from(T1)),
+                Instruction::new_branch_instruction(Rc::new(Bne), Rc::from(T0), Rc::from(T1)),
+                Instruction::new_branch_instruction(Rc::new(Blt), Rc::from(T0), Rc::from(T1)),
+                Instruction::new_branch_instruction(Rc::new(Bge), Rc::from(T0), Rc::from(T1)),
+            ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_no_operand_instruction() -> Result<()> {
+        use crate::assembler::tokens::Opcode::*;
+        let input = r"
+.text
+main:
+    halt
+    nop
+    jal
+    write
+    read
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_no_operand_instruction(Rc::new(Halt)),
+                Instruction::new_no_operand_instruction(Rc::new(Nop)),
+                Instruction::new_no_operand_instruction(Rc::new(Jal)),
+                Instruction::new_no_operand_instruction(Rc::new(Write)),
+                Instruction::new_no_operand_instruction(Rc::new(Read)),
+            ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
         assert_eq!(program.sections[0], expected);
 
         Ok(())
