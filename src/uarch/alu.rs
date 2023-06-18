@@ -41,15 +41,7 @@ impl Alu {
             _ => unreachable!(),
         };
 
-        let (sll, sra) = match opcode & 0b11000000 {
-            0b00000000 => (false, false),
-            0b01000000 => (false, true),
-            0b10000000 => (true, false),
-            0b11000000 => (true, true),
-            _ => unreachable!(),
-        };
-        self.s.sll = sll;
-        self.s.sra = sra;
+        self.s.entry = opcode >> 6;
     }
 
     pub fn op(&self) -> u32 {
@@ -95,19 +87,18 @@ impl Default for Func {
 
 #[derive(Debug, Default)]
 struct Shifter {
-    sll: bool,
-    sra: bool,
+    entry: u8,
 }
 
 impl Shifter {
-    fn shift(&self, mut entry: u32) -> u32 {
-        if self.sra {
-            entry >>= 1;
+    fn shift(&self, input: u32) -> u32 {
+        match self.entry {
+            0b00 => input,
+            0b01 => input >> 1,
+            0b10 => input << 8,
+            0b11 => input << 1,
+            _ => unreachable!("The shifter entry must have only 2 bits"),
         }
-        if self.sll {
-            entry <<= 8;
-        }
-        entry
     }
 }
 
@@ -190,17 +181,17 @@ pub mod test {
     }
 
     #[test]
+    fn sla() {
+        let mut alu = Alu::default();
+        alu.entry(0b11111101, A, B);
+        assert_eq!((A + B + 1) << 1, alu.op());
+    }
+
+    #[test]
     fn sra() {
         let mut alu = Alu::default();
         alu.entry(0b01111101, A, B);
         assert_eq!((A + B + 1) >> 1, alu.op());
-    }
-
-    #[test]
-    fn sra_and_sll() {
-        let mut alu = Alu::default();
-        alu.entry(0b11111101, A, B);
-        assert_eq!((A + B + 1) >> 1 << 8, alu.op());
     }
 
     #[test]
