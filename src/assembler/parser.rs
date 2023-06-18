@@ -54,6 +54,33 @@ pub enum ParserError {
         cur_line: usize,
         cur_column: usize,
     },
+
+    #[error(
+        "Register cannot be used in A Bus, found: {found}\nContext: line {cur_line}, column {cur_column}"
+    )]
+    RegisterCannotBeUsedInABus {
+        found: String,
+        cur_line: usize,
+        cur_column: usize,
+    },
+
+    #[error(
+        "Register cannot be used in B Bus, found: {found}\nContext: line {cur_line}, column {cur_column}"
+    )]
+    RegisterCannotBeUsedInBBus {
+        found: String,
+        cur_line: usize,
+        cur_column: usize,
+    },
+
+    #[error(
+        "Register cannot be used in C Bus, found: {found}\nContext: line {cur_line}, column {cur_column}"
+    )]
+    RegisterCannotBeUsedInCBus {
+        found: String,
+        cur_line: usize,
+        cur_column: usize,
+    },
 }
 
 #[derive(Debug, Default)]
@@ -159,7 +186,7 @@ impl Parser {
         Ok(number)
     }
 
-    fn get_register(&mut self) -> Result<Rc<Register>> {
+    fn get_register(&self) -> Result<Rc<Register>> {
         let reg = match *self.cur_tok {
             AsmToken::Reg(ref r) => Rc::clone(r),
             _ => {
@@ -204,6 +231,45 @@ impl Parser {
         Ok(pseudo_op)
     }
 
+    fn guard_a_bus(&mut self, reg: Rc<Register>) -> Result<Rc<Register>> {
+        match *reg {
+            Register::Mar => {
+                bail!(ParserError::RegisterCannotBeUsedInABus {
+                    found: format!("{:?}", reg),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+            _ => Ok(reg),
+        }
+    }
+
+    fn guard_b_bus(&mut self, reg: Rc<Register>) -> Result<Rc<Register>> {
+        match *reg {
+            Register::Mar | Register::Mbr | Register::Mbr2 | Register::Pc => {
+                bail!(ParserError::RegisterCannotBeUsedInBBus {
+                    found: format!("{:?}", reg),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+            _ => Ok(reg),
+        }
+    }
+
+    fn guard_c_bus(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
+        match *reg {
+            Register::Cpp | Register::Mbr | Register::Mbr2 => {
+                bail!(ParserError::RegisterCannotBeUsedInCBus {
+                    found: format!("{:?}", reg),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+            _ => Ok(reg),
+        }
+    }
+
     fn parse_data_to_write(&mut self) -> Result<DataWrited> {
         let label = self.get_label()?;
         self.expect_peek(AsmToken::Colon)?;
@@ -245,15 +311,15 @@ impl Parser {
 
     fn parse_instruction_til_rs1(&mut self) -> Result<(Vec<Rc<Register>>, Rc<Register>)> {
         let mut dest_regs = Vec::new();
-        dest_regs.push(self.get_register()?);
+        dest_regs.push(self.guard_c_bus(self.get_register()?)?);
         while self.peek_token_is(AsmToken::Comma) {
             self.next_token();
             self.next_token();
-            dest_regs.push(self.get_register()?);
+            dest_regs.push(self.guard_c_bus(self.get_register()?)?);
         }
         self.expect_peek(AsmToken::Assign)?;
         self.next_token();
-        let rs1 = self.get_register()?;
+        let rs1 = self.guard_a_bus(self.get_register()?)?;
         Ok((dest_regs, rs1))
     }
 
@@ -267,17 +333,11 @@ impl Parser {
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
-                let rs2 = Value::Reg(self.get_register()?);
+                let rs2 = Value::Reg(self.guard_b_bus(self.get_register()?)?);
                 Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
             }
             // Imediate Register Instructions
-            Opcode::Addi
-            | Opcode::Slti
-            | Opcode::Andi
-            | Opcode::Ori
-            | Opcode::Xori
-            | Opcode::Slli
-            | Opcode::Srli => {
+            Opcode::Addi | Opcode::Slti | Opcode::Andi | Opcode::Ori | Opcode::Xori => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -295,10 +355,10 @@ impl Parser {
             // Branch motherfucker
             Opcode::Beq | Opcode::Bne | Opcode::Blt | Opcode::Bge => {
                 self.next_token();
-                let rs1 = self.get_register()?;
+                let rs1 = self.guard_a_bus(self.get_register()?)?;
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
-                let rs2 = self.get_register()?;
+                let rs2 = self.guard_b_bus(self.get_register()?)?;
                 Instruction::new_branch_instruction(op, rs1, rs2)
             }
             // No Operand Instructions
