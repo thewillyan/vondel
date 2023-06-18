@@ -262,7 +262,7 @@ impl Parser {
 
         let res = match *op {
             // Register Register Instructions
-            Opcode::Add => {
+            Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::And | Opcode::Or => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -286,8 +286,25 @@ impl Parser {
                 let rs2 = Value::Immediate(immediate);
                 Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
             }
+            // Single Operand Instructions
+            Opcode::Not | Opcode::Sll | Opcode::Sra | Opcode::Sla => {
+                self.next_token();
+                let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
+                Instruction::new_single_operand_instruction(op, dest_regs, rs1)
+            }
+            // Branch motherfucker
+            Opcode::Beq | Opcode::Bne | Opcode::Blt | Opcode::Bge => {
+                self.next_token();
+                let rs1 = self.get_register()?;
+                self.expect_peek(AsmToken::Comma)?;
+                self.next_token();
+                let rs2 = self.get_register()?;
+                Instruction::new_branch_instruction(op, rs1, rs2)
+            }
             // No Operand Instructions
-            Opcode::Halt => Instruction::new_no_operand_instruction(op),
+            Opcode::Halt | Opcode::Nop | Opcode::Jal | Opcode::Write | Opcode::Read => {
+                Instruction::new_no_operand_instruction(op)
+            }
             _ => todo!(),
         };
 

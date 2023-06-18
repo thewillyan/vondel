@@ -24,9 +24,17 @@ pub struct SingleOperandInstruction {
 }
 
 #[derive(Debug, PartialEq)]
+pub struct BranchInstruction {
+    pub opcode: Rc<Opcode>,
+    pub rs1: Rc<Register>,
+    pub rs2: Rc<Register>,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Instruction {
     DoubleOperand(DoubleOperandInstruction),
     SingleOperand(SingleOperandInstruction),
+    Branch(BranchInstruction),
     NoOperand(Rc<Opcode>),
 }
 
@@ -55,6 +63,14 @@ impl Instruction {
 
     pub fn new_no_operand_instruction(opcode: Rc<Opcode>) -> Instruction {
         Instruction::NoOperand(opcode)
+    }
+
+    pub fn new_branch_instruction(
+        opcode: Rc<Opcode>,
+        rs1: Rc<Register>,
+        rs2: Rc<Register>,
+    ) -> Instruction {
+        Instruction::Branch(BranchInstruction { opcode, rs1, rs2 })
     }
 }
 
