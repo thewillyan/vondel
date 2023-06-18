@@ -155,6 +155,10 @@ impl DataPath {
 
     pub fn init_cycle(&mut self, cs: &CtrlStore) {
         let mut mi = cs.get_mi();
+        // IMMEDIATE
+        let immediate = (mi & 0b11111111) as u32;
+        mi >>= 8;
+
         // [ A | B ]
         let mut enable_out = (mi & 0b1111111111) as u16;
         let b_code = enable_out & 0b11111;
@@ -162,7 +166,8 @@ impl DataPath {
             0b00000 => self.regs.mem.mdr(),
             0b00001 => self.regs.sys.lv.get(),
             0b00010 => self.regs.sys.cpp.get(),
-            x => self.regs.gen.get(x as usize - 3).unwrap_or(0),
+            0b00011 => immediate,
+            x => self.regs.gen.get(x as usize - 4).unwrap_or(0),
         };
         enable_out >>= 5;
         mi >>= 5;
@@ -177,7 +182,8 @@ impl DataPath {
             0b0101 => self.regs.mem.mbr2() as u32,
             0b0110 => self.regs.sys.lv.get(),
             0b0111 => self.regs.sys.cpp.get(),
-            x => self.regs.gen.get(x as usize - 8).unwrap_or(0),
+            0b1000 => immediate,
+            x => self.regs.gen.get(x as usize - 9).unwrap_or(0),
         };
         mi >>= 5;
 
