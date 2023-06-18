@@ -1,5 +1,3 @@
-use super::parser::ParserError;
-use anyhow::{bail, Result};
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -22,10 +20,15 @@ impl TokWithCtx {
 //RISC-V ABI
 #[derive(Debug, PartialEq, Clone)]
 pub enum Register {
-    Ra,
-    Sp,
+    Mar,
+    Mdr,
+    Mbr,
+    Mbr2,
+    Pc,
     Cpp,
     Lv,
+    // General Purpose
+    Ra,
     T0,
     T1,
     T2,
@@ -51,10 +54,6 @@ pub enum Opcode {
     Andi,
     Ori,
     Xori,
-    Slli,
-    Srli,
-    Lui,
-    Auipc,
     // Integer Register-Register Operations
     Add,
     Sub,
@@ -148,10 +147,6 @@ impl AsmToken {
             "andi" => AsmToken::Opcode(Rc::new(Opcode::Andi)),
             "ori" => AsmToken::Opcode(Rc::new(Opcode::Ori)),
             "xori" => AsmToken::Opcode(Rc::new(Opcode::Xori)),
-            "slli" => AsmToken::Opcode(Rc::new(Opcode::Slli)),
-            "srli" => AsmToken::Opcode(Rc::new(Opcode::Srli)),
-            "lui" => AsmToken::Opcode(Rc::new(Opcode::Lui)),
-            "auipc" => AsmToken::Opcode(Rc::new(Opcode::Auipc)),
             "add" => AsmToken::Opcode(Rc::new(Opcode::Add)),
             "sub" => AsmToken::Opcode(Rc::new(Opcode::Sub)),
             "slt" => AsmToken::Opcode(Rc::new(Opcode::Slt)),
@@ -189,10 +184,16 @@ impl AsmToken {
             "ble" => AsmToken::PseudoIns(PseudoInstruction::Ble),
 
             //REGISTERS
-            "ra" => AsmToken::Reg(Rc::new(Register::Ra)),
-            "sp" => AsmToken::Reg(Rc::new(Register::Sp)),
+            "mar" => AsmToken::Reg(Rc::new(Register::Mar)),
+            "mdr" => AsmToken::Reg(Rc::new(Register::Mdr)),
+            "pc" => AsmToken::Reg(Rc::new(Register::Pc)),
+            "mbr" => AsmToken::Reg(Rc::new(Register::Mbr)),
+            "mbr2" => AsmToken::Reg(Rc::new(Register::Mbr2)),
             "cpp" => AsmToken::Reg(Rc::new(Register::Cpp)),
             "lv" => AsmToken::Reg(Rc::new(Register::Lv)),
+
+            // General Purpose
+            "ra" => AsmToken::Reg(Rc::new(Register::Ra)),
             "t0" => AsmToken::Reg(Rc::new(Register::T0)),
             "t1" => AsmToken::Reg(Rc::new(Register::T1)),
             "t2" => AsmToken::Reg(Rc::new(Register::T2)),

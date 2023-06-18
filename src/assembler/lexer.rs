@@ -176,18 +176,22 @@ mod tests {
         use super::AsmToken::{Eof, Reg};
         use crate::assembler::tokens::Register::*;
         let input = r"
-        ra sp cpp lv
-        t0 t1 t2 t3
+        mar mdr pc mbr mbr2 cpp lv
+        ra t0 t1 t2 t3
         s0 s1 s2 s3 s4 s5 s6
         a0 a1 a2 a3
         ";
         let mut l = Lexer::new(input);
 
         let toks = vec![
-            Reg(Rc::new(Ra)),
-            Reg(Rc::new(Sp)),
+            Reg(Rc::new(Mar)),
+            Reg(Rc::new(Mdr)),
+            Reg(Rc::new(Pc)),
+            Reg(Rc::new(Mbr)),
+            Reg(Rc::new(Mbr2)),
             Reg(Rc::new(Cpp)),
             Reg(Rc::new(Lv)),
+            Reg(Rc::new(Ra)),
             Reg(Rc::new(T0)),
             Reg(Rc::new(T1)),
             Reg(Rc::new(T2)),
@@ -216,7 +220,7 @@ mod tests {
         use super::AsmToken::{Eof, Opcode};
         use crate::assembler::tokens::Opcode::*;
         let input = r"
-        addi slti andi ori xori slli srli lui auipc
+        addi slti andi ori xori
         add sub slt and or sll sra sla nop not
         beq bne blt bge
         mul
@@ -230,10 +234,6 @@ mod tests {
             Opcode(Rc::new(Andi)),
             Opcode(Rc::new(Ori)),
             Opcode(Rc::new(Xori)),
-            Opcode(Rc::new(Slli)),
-            Opcode(Rc::new(Srli)),
-            Opcode(Rc::new(Lui)),
-            Opcode(Rc::new(Auipc)),
             Opcode(Rc::new(Add)),
             Opcode(Rc::new(Sub)),
             Opcode(Rc::new(Slt)),
