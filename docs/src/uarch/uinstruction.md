@@ -216,6 +216,7 @@ Language are implemented in the microprogram.
 - Arithmetic
   - [ADD](#add)
   - [SUB](#sub)
+  - [MUL](#mul)
 - Logic
   - [AND](#and)
   - [OR](#or)
@@ -229,6 +230,10 @@ Language are implemented in the microprogram.
    - [WRITE](#write)
 - Branch
   - [JAL](#jal)
+  - [BEQ](#beq)
+  - [BNE](#bne)
+  - [BLT](#blt)
+  - [BGT](#bgt)
 
 ### ADD
 
@@ -435,7 +440,7 @@ jal 0x0A
 #### Microprogram
 
 `JMPC` bit is used to nconditional branch, so we have to find some way of
-storing `0x0A` into MBR and then use `JMPC` to jump to that address`.
+storing `0x0A` into MBR and then use `JMPC` to jump to that address.
 For that the number 10 (`0x0A`) must be stored at memory and its address
 should be stored in PC. So, let's store 10 in the current address of the PC,
 by default the PC is 0, so let's store it there.
@@ -445,7 +450,7 @@ by default the PC is 0, so let's store it there.
 |:-|:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
 |0 |000000001|000|00000000|00000000000000000000|010|11111|11111|  00000000 |
 |1 |000000010|100|00000000|00000000000000000000|000|11111|11111|  00000000 |
-|- |    -    | - |    -   |         -          | - |  -  |  -  |  00000000 |
+|- |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
 |10|111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 In a nutshell the operations are the following:
@@ -453,12 +458,136 @@ In a nutshell the operations are the following:
 1. Fetch the memory.
 2. Set `JMPC` to 1.
 
+### BEQ
+
+Syntax: `beq x, y`.
+
+Action: Jump if the value of the register `x` is equal to the value of the
+register `y`.
+
+#### High Level
+
+```
+beq r14, r15
+```
+
+#### Microprogram
+
+|ID  |   NEXT  |JAM|   ALU  |       C BUS        |MEM|  A  |  B  | IMMEDIATE |
+|:-  |:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
+|0   |000000001|001|00111111|00000000000000000000|000|10111|10011|  00000000 |
+|-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
+|257 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+
+### BNE
+
+Syntax: `bne x, y`.
+
+Action: Jump if the value of the register `x` is **not** equal to the value of the
+register `y`.
+
+#### High Level
+
+```
+bne r14, r15
+```
+
+#### Microprogram
+
+|ID  |   NEXT  |JAM|   ALU  |       C BUS        |MEM|  A  |  B  | IMMEDIATE |
+|:-  |:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
+|0   |000000001|010|00111111|00000000000000000000|000|10111|10011|  00000000 |
+|1   |000000010|010|00111111|00000000000000000000|000|11000|10010|  00000000 |
+|-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
+|258 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+
+### BLT
+
+Syntax: `blt x, y`.
+
+Action: Jump if the value of the register `x` is less than the value of the
+register `y`.
+
+#### High Level
+
+```
+blt r14, r15
+```
+
+#### Microprogram
+
+|ID  |   NEXT  |JAM|   ALU  |       C BUS        |MEM|  A  |  B  | IMMEDIATE |
+|:-  |:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
+|0   |000000001|010|00111111|00000000000000000000|000|11000|10010|  00000000 |
+|-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
+|257 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+
+### BGT
+
+Syntax: `bgt x, y`.
+
+Action: Jump if the value of the register `x` is greater than the value of the
+register `y`.
+
+#### High Level
+
+```
+bgt r14, r15
+```
+
+#### Microprogram
+
+|ID  |   NEXT  |JAM|   ALU  |       C BUS        |MEM|  A  |  B  | IMMEDIATE |
+|:-  |:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
+|0   |000000001|010|00111111|00000000000000000000|000|10111|10011|  00000000 |
+|-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
+|257 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+
+
+### MUL
+Syntax: `mul x, y -> r0, ..., rn`.
+
+Action: Multiply the value of x by y .
+
+#### High Level
+
+```
+mul r6, r7 -> r13
+```
+
+#### Microprogram
+
+|ID  |   NEXT  |JAM|   ALU  |       C BUS        |MEM|  A  |  B  | IMMEDIATE |
+|:-  |:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
+|0   |000000001|010|00111111|00000000000000000000|000|10000|01010|  00000000 |
+|1   |000000010|000|00011000|00001000000000000000|000|10000|11111|  00000000 |
+|2   |000000011|000|00111111|00000100000000000100|000|01111|11111|  00000000 |
+|3   |000000100|001|00110110|00001000000000000000|000|01001|11111|  00000000 |
+|4   |000000011|000|00111100|00000000000000000100|000|10110|00101|  00000000 |
+|-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
+|257 |100000010|000|00011000|00001000000000000000|000|01111|11111|  00000000 |
+|258 |000000011|000|00111111|00000100000000000100|000|10000|11111|  00000000 |
+|-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
+|260 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+
+In a nutshell the operations are the following:
+
+1. Jump to `0b100000001` (257) if `r6 - r7` is negative.
+2. Case 1 (has not jumped), therefore `r6 >= r7`
+    1. Store the value of `r7` on `r0`
+    2. Store the value of `r6` on `r1` and `r13`
+    3. Store the value of `r0 - 1` into `r0` or jump to the `TERMINATE` code (260) if equals to 0.
+    4. Stores the value of `r13 + r1` into `r13`.
+3. Case 2 (has jumped), therefore `r6 < r7`
+    1. Store the value of `r6` on `r0`
+    2. Store the value of `r7` on `r1` and `r13` and goto the step 3 of the case 1.
+
+In another words, the smallest number is stored at `r0` and the greater is stored
+in `r1` and we aways make `r0 * r1`. This optimization is necessary because a
+multiplication is computed as sequential additions, and making less additions
+save some clock cycles.
+
 ### TODO
 
 - SLT
 - NOP
-- Beq
-- Bne
-- Blt
-- Bge
-- Mul
