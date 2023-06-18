@@ -198,6 +198,12 @@ Output to BUS B:
 | 19 |10011| R15      |
 | .. | ... | NONE     |
 
+## IMMEDIATE
+
+The immediate field allows us to send a arbitrary 8 bit number to the A or B
+bus, i.e if we set `0x08` in the IMMEDIATE field and enable the immediate input
+on the A and/or B bus, that `0x08` gonna be loaded in the corresponding bus.
+
 ## Terminate
 
 _TERMINATE_ is a special microinstruction to indicate that
@@ -234,6 +240,8 @@ Language are implemented in the microprogram.
   - [BNE](#bne)
   - [BLT](#blt)
   - [BGT](#bgt)
+- Immediate
+  - [ADDI](#addi)
 
 ### ADD
 
@@ -587,6 +595,49 @@ In another words, the smallest number is stored at `r0` and the greater is store
 in `r1` and we aways make `r0 * r1`. This optimization is necessary because a
 multiplication is computed as sequential additions, and making less additions
 save some clock cycles.
+
+### ADDI
+
+Syntax: `addi [byte] -> r0, ..., rn`.
+
+Action: Store the the immediate value of `byte` on the registers `r0, ..., rn`.
+
+#### High Level
+
+```
+addi 0xFF -> r15
+```
+
+This program stores 255 on r15.
+
+#### Microprogram
+
+|ID|   NEXT  |JAM|   ALU  |       C BUS        |MEM|  A  |  B  | IMMEDIATE |
+|:-|:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
+|0 |000000001|010|00011000|00000000000000000001|000|01000|11111|  11111111 |
+|1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+
+### Literal Immediate
+
+Syntax: `[operation] <[register], [byte] | [byte], [register]]>`.
+
+Action: Indicates that the corresponding byte should be a immediate.
+
+#### High Level
+
+```
+sub r14, 0x05 -> r14
+```
+
+This program subtracts 5 from r14, but 5 is not stored in any register (it is
+a _immediate value_).
+
+#### Microprogram
+
+|ID|   NEXT  |JAM|   ALU  |       C BUS        |MEM|  A  |  B  | IMMEDIATE |
+|:-|:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
+|0 |000000001|010|00111111|00000000000000000010|000|01000|10010|  00000101 |
+|1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 ### TODO
 
