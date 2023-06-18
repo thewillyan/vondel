@@ -50,7 +50,7 @@ from MSB to LSB. The logic and arithmetic functions that ALU can
 operate are managed by F0 and F1 like this:
 
 | F0 | F1 | Function |
-| -- | -- | -------- |
+|:--:|:--:|:---------|
 | 0  | 0  | A AND B  |
 | 0  | 1  | A OR B   |
 | 1  | 0  | NOT B    |
@@ -59,7 +59,7 @@ operate are managed by F0 and F1 like this:
 Some useful combinations of ALU signal can be found below:
 
 | F0 | F1 | ENA | ENB | INVA | INC | Function |
-| -- | -- | --- | --- | ---- | --- | -------- |
+|:--:|:--:|:---:|:---:|:----:|:---:|:---------|
 | 0 | 1 | 1 | 0 | 0 | 0 | A |
 | 0 | 1 | 0 | 1 | 0 | 0 | B |
 | 0 | 1 | 1 | 0 | 1 | 0 | not A |
