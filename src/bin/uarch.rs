@@ -35,7 +35,7 @@ pub fn main() {
     let firmware = CtrlStore::builder()
         .load(0, mcode)
         // end when JUMP
-        .set(0b100000110, CtrlStore::TERM)
+        .set(0b100000110, CtrlStore::TERMINATE)
         .build();
 
     let mut comp = Computer::new(mem, firmware);

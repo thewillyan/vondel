@@ -72,7 +72,7 @@ impl Cpu {
 
     pub fn run(&mut self, mem: &mut Ram, recver: mpsc::Receiver<ClkLevel>) {
         for trigger in recver {
-            if self.firmware.get_mi() == CtrlStore::TERM {
+            if self.firmware.get_mi() == CtrlStore::TERMINATE {
                 break;
             }
             self.thr.step(&trigger, mem, &self.firmware);

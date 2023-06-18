@@ -106,8 +106,8 @@ pub struct CtrlStore {
 }
 
 impl CtrlStore {
-    /// TERMINATE instruction
-    pub const TERM: u64 = 0b11111111111111111111111111111111111111;
+    /// The mucroinstruction that indicates that the program must stop.
+    pub const TERMINATE: u64 = u64::MAX;
 
     pub fn builder() -> CtrlStoreBuilder {
         CtrlStoreBuilder::default()
