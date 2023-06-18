@@ -9,7 +9,7 @@ A Vondel microinstruction has 64 bits the following format:
 |:-------:|:------:|:------:|:-------:|:------:|:------:|:------:|:---------:|
 | 9 bits  | 3 bits | 8 bits | 20 bits | 3 bits | 5 bits | 5 bits |  8 bits   |
 
-You can find a more detailed version of this diagram [here](https://i.imgur.com/O3SP6L2.png).
+You can find a more detailed version of this diagram [here](https://i.imgur.com/tlHAPgL.png).
 
 ## NEXT
 
@@ -499,6 +499,7 @@ bne r14, r15
 |0   |000000001|010|00111111|00000000000000000000|000|10111|10011|  00000000 |
 |1   |000000010|010|00111111|00000000000000000000|000|11000|10010|  00000000 |
 |-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
+|257 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 |258 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 ### BLT
