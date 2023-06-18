@@ -10,5 +10,6 @@
     - [Rust](./interpreter/evaluator/rust.md)
     - [Custom Draft]()
 - [Assembler](./chapter_1.md)
-- [UArch](./chapter_1.md)
+- [UArch](./uarch/README.md)
+  - [Microinstruction](./uarch/uinstruction.md)
 - [Comparision with Requested UArch](./chapter_1.md)
