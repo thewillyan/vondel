@@ -1,6 +1,5 @@
 use super::parser::ParserError;
 use anyhow::{bail, Result};
-use clap::Parser;
 use std::rc::Rc;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -117,10 +116,10 @@ pub enum PseudoOps {
 pub enum AsmToken {
     Number(Rc<str>),
     Label(Rc<str>),
-    Reg(Register),
+    Reg(Rc<Register>),
     Opcode(Rc<Opcode>),
     PseudoIns(PseudoInstruction),
-    PseudoOp(PseudoOps),
+    PseudoOp(Rc<PseudoOps>),
     Comma,
     Colon,
     Illegal,
@@ -129,64 +128,15 @@ pub enum AsmToken {
 }
 
 impl AsmToken {
-    pub fn get_pseudo_op(&self) -> Result<PseudoOps> {
-        match self {
-            AsmToken::PseudoOp(op) => Ok(op.clone()),
-            _ => bail!("Expected PseudoOp, got {:?}", self),
-        }
-    }
-
-    pub fn get_label(&self, cur_line: usize, cur_column: usize) -> Result<Rc<str>> {
-        match self {
-            AsmToken::Label(label) => Ok(Rc::clone(label)),
-            _ => {
-                bail!(ParserError::ExpectedToken {
-                    expected: format!("{:?}", AsmToken::Label(Rc::from(""))),
-                    found: format!("{:?}", self),
-                    cur_line,
-                    cur_column
-                })
-            }
-        }
-    }
-
-    pub fn get_number(&self, cur_line: usize, cur_column: usize) -> Result<Rc<str>> {
-        match self {
-            AsmToken::Number(number) => Ok(Rc::clone(number)),
-            _ => {
-                bail!(ParserError::ExpectedToken {
-                    expected: format!("{:?}", AsmToken::Number(Rc::from(""))),
-                    found: format!("{:?}", self),
-                    cur_line,
-                    cur_column
-                })
-            }
-        }
-    }
-
-    pub fn get_instruction(&self, cur_line: usize, cur_column: usize) -> Result<Rc<Opcode>> {
-        match self {
-            AsmToken::Opcode(opcode) => Ok(Rc::clone(opcode)),
-            _ => {
-                bail!(ParserError::ExpectedToken {
-                    expected: format!("{:?}", "Instruction"),
-                    found: format!("{:?}", self),
-                    cur_line,
-                    cur_column
-                })
-            }
-        }
-    }
-
     pub fn name_to_tok(input: &str) -> AsmToken {
         match input {
             //PseudoOps
             pseudo if pseudo.starts_with('.') => match pseudo {
-                ".data" => AsmToken::PseudoOp(PseudoOps::Data),
-                ".word" => AsmToken::PseudoOp(PseudoOps::Word),
-                ".byte" => AsmToken::PseudoOp(PseudoOps::Byte),
-                ".text" => AsmToken::PseudoOp(PseudoOps::Text),
-                ".global" => AsmToken::PseudoOp(PseudoOps::Global),
+                ".data" => AsmToken::PseudoOp(Rc::new(PseudoOps::Data)),
+                ".word" => AsmToken::PseudoOp(Rc::new(PseudoOps::Word)),
+                ".byte" => AsmToken::PseudoOp(Rc::new(PseudoOps::Byte)),
+                ".text" => AsmToken::PseudoOp(Rc::new(PseudoOps::Text)),
+                ".global" => AsmToken::PseudoOp(Rc::new(PseudoOps::Global)),
                 _ => AsmToken::Illegal,
             },
 
@@ -235,25 +185,25 @@ impl AsmToken {
             "ble" => AsmToken::PseudoIns(PseudoInstruction::Ble),
 
             //REGISTERS
-            "ra" | "x0" => AsmToken::Reg(Register::Ra),
-            "sp" | "x1" => AsmToken::Reg(Register::Sp),
-            "cpp" | "x2" => AsmToken::Reg(Register::Cpp),
-            "lv" | "x3" => AsmToken::Reg(Register::Lv),
-            "t0" | "x4" => AsmToken::Reg(Register::T0),
-            "t1" | "x5" => AsmToken::Reg(Register::T1),
-            "t2" | "x6" => AsmToken::Reg(Register::T2),
-            "t3" | "x7" => AsmToken::Reg(Register::T3),
-            "s0" | "x8" => AsmToken::Reg(Register::S0),
-            "s1" | "x9" => AsmToken::Reg(Register::S1),
-            "s2" | "x10" => AsmToken::Reg(Register::S2),
-            "s3" | "x11" => AsmToken::Reg(Register::S3),
-            "s4" | "x12" => AsmToken::Reg(Register::S4),
-            "s5" | "x13" => AsmToken::Reg(Register::S5),
-            "s6" | "x14" => AsmToken::Reg(Register::S6),
-            "a0" | "x15" => AsmToken::Reg(Register::A0),
-            "a1" | "x16" => AsmToken::Reg(Register::A1),
-            "a2" | "x17" => AsmToken::Reg(Register::A2),
-            "a3" | "x18" => AsmToken::Reg(Register::A3),
+            "ra" => AsmToken::Reg(Rc::new(Register::Ra)),
+            "sp" => AsmToken::Reg(Rc::new(Register::Sp)),
+            "cpp" => AsmToken::Reg(Rc::new(Register::Cpp)),
+            "lv" => AsmToken::Reg(Rc::new(Register::Lv)),
+            "t0" => AsmToken::Reg(Rc::new(Register::T0)),
+            "t1" => AsmToken::Reg(Rc::new(Register::T1)),
+            "t2" => AsmToken::Reg(Rc::new(Register::T2)),
+            "t3" => AsmToken::Reg(Rc::new(Register::T3)),
+            "s0" => AsmToken::Reg(Rc::new(Register::S0)),
+            "s1" => AsmToken::Reg(Rc::new(Register::S1)),
+            "s2" => AsmToken::Reg(Rc::new(Register::S2)),
+            "s3" => AsmToken::Reg(Rc::new(Register::S3)),
+            "s4" => AsmToken::Reg(Rc::new(Register::S4)),
+            "s5" => AsmToken::Reg(Rc::new(Register::S5)),
+            "s6" => AsmToken::Reg(Rc::new(Register::S6)),
+            "a0" => AsmToken::Reg(Rc::new(Register::A0)),
+            "a1" => AsmToken::Reg(Rc::new(Register::A1)),
+            "a2" => AsmToken::Reg(Rc::new(Register::A2)),
+            "a3" => AsmToken::Reg(Rc::new(Register::A3)),
 
             _ => AsmToken::Label(Rc::from(input)),
         }

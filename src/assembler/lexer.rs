@@ -180,53 +180,29 @@ mod tests {
         t0 t1 t2 t3
         s0 s1 s2 s3 s4 s5 s6
         a0 a1 a2 a3
-
-        x0 x1 x2 x3
-        x4 x5 x6 x7
-        x8 x9 x10 x11 x12 x13 x14
-        x15 x16 x17 x18
         ";
         let mut l = Lexer::new(input);
 
         let toks = vec![
-            Reg(Ra),
-            Reg(Sp),
-            Reg(Cpp),
-            Reg(Lv),
-            Reg(T0),
-            Reg(T1),
-            Reg(T2),
-            Reg(T3),
-            Reg(S0),
-            Reg(S1),
-            Reg(S2),
-            Reg(S3),
-            Reg(S4),
-            Reg(S5),
-            Reg(S6),
-            Reg(A0),
-            Reg(A1),
-            Reg(A2),
-            Reg(A3),
-            Reg(Ra),
-            Reg(Sp),
-            Reg(Cpp),
-            Reg(Lv),
-            Reg(T0),
-            Reg(T1),
-            Reg(T2),
-            Reg(T3),
-            Reg(S0),
-            Reg(S1),
-            Reg(S2),
-            Reg(S3),
-            Reg(S4),
-            Reg(S5),
-            Reg(S6),
-            Reg(A0),
-            Reg(A1),
-            Reg(A2),
-            Reg(A3),
+            Reg(Rc::new(Ra)),
+            Reg(Rc::new(Sp)),
+            Reg(Rc::new(Cpp)),
+            Reg(Rc::new(Lv)),
+            Reg(Rc::new(T0)),
+            Reg(Rc::new(T1)),
+            Reg(Rc::new(T2)),
+            Reg(Rc::new(T3)),
+            Reg(Rc::new(S0)),
+            Reg(Rc::new(S1)),
+            Reg(Rc::new(S2)),
+            Reg(Rc::new(S3)),
+            Reg(Rc::new(S4)),
+            Reg(Rc::new(S5)),
+            Reg(Rc::new(S6)),
+            Reg(Rc::new(A0)),
+            Reg(Rc::new(A1)),
+            Reg(Rc::new(A2)),
+            Reg(Rc::new(A3)),
             Eof,
         ];
 
@@ -320,11 +296,11 @@ mod tests {
         ";
         let mut l = Lexer::new(input);
         let toks = vec![
-            PseudoOp(Global),
-            PseudoOp(Data),
-            PseudoOp(Text),
-            PseudoOp(Word),
-            PseudoOp(Byte),
+            PseudoOp(Rc::new(Global)),
+            PseudoOp(Rc::new(Data)),
+            PseudoOp(Rc::new(Text)),
+            PseudoOp(Rc::new(Word)),
+            PseudoOp(Rc::new(Byte)),
             Illegal,
             Eof,
         ];
@@ -397,7 +373,7 @@ mod tests {
                 cur_column: 2,
             },
             TokWithCtx {
-                tok: Rc::new(Reg(Ra)),
+                tok: Rc::new(Reg(Rc::new(Ra))),
                 cur_line: 2,
                 cur_column: 6,
             },
@@ -407,7 +383,7 @@ mod tests {
                 cur_column: 8,
             },
             TokWithCtx {
-                tok: Rc::new(Reg(T0)),
+                tok: Rc::new(Reg(Rc::new(T0))),
                 cur_line: 2,
                 cur_column: 10,
             },
@@ -417,7 +393,7 @@ mod tests {
                 cur_column: 13,
             },
             TokWithCtx {
-                tok: Rc::new(Reg(T1)),
+                tok: Rc::new(Reg(Rc::new(T1))),
                 cur_line: 2,
                 cur_column: 16,
             },
