@@ -206,14 +206,6 @@ The immediate field allows us to send a arbitrary 8 bit number to the A or B
 bus, i.e if we set `0x08` in the IMMEDIATE field and enable the immediate input
 on the A and/or B bus, that `0x08` gonna be loaded in the corresponding bus.
 
-## Terminate
-
-_TERMINATE_ is a special microinstruction to indicate that
-the program has ended. In this design this opcode is achieved by seting all
-bits of the microinstruction to 1.
-
-This constant is avalible as a shortcut in the `CtrlStore` struct.
-
 ## Instruction Implementations
 
 In this section we will show how some of the microinstruction of the Vondel
@@ -250,6 +242,7 @@ Language are implemented in the microprogram.
   - [ORI](#ori)
 - Other
   - [MOV](#mov)
+  - [HALT](#halt)
 
 ### ADD
 
@@ -720,3 +713,11 @@ mov r14 -> r15, r13
 |:-|:-------:|:-:|:------:|:------------------:|:-:|:---:|:---:|:---------:|
 |0 |000000001|000|00011000|00000000000000000101|000|01110|11111|  00000000 |
 |1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+
+## HALT
+
+_HALT_ is a special microinstruction to indicate that
+the program has ended. In this design this opcode is achieved by seting all 64
+bits of the microinstruction to 1.
+
+This constant is avalible as a shortcut in the `CtrlStore` struct.
