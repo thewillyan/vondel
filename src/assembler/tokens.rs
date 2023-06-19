@@ -49,7 +49,9 @@ pub enum Register {
 #[derive(Debug, PartialEq, Clone)]
 pub enum Opcode {
     // Integer Register-Immediate Instructions
+    Lui,
     Addi,
+    Subi,
     Slti,
     Andi,
     Ori,
@@ -61,6 +63,7 @@ pub enum Opcode {
     And,
     Or,
     Not,
+    Mov,
     // Shift left 1 bit
     Sll,
     Sla,
@@ -142,7 +145,9 @@ impl AsmToken {
             },
 
             //OPCODES
+            "lui" => AsmToken::Opcode(Rc::new(Opcode::Lui)),
             "addi" => AsmToken::Opcode(Rc::new(Opcode::Addi)),
+            "subi" => AsmToken::Opcode(Rc::new(Opcode::Subi)),
             "slti" => AsmToken::Opcode(Rc::new(Opcode::Slti)),
             "andi" => AsmToken::Opcode(Rc::new(Opcode::Andi)),
             "ori" => AsmToken::Opcode(Rc::new(Opcode::Ori)),
@@ -153,6 +158,7 @@ impl AsmToken {
             "and" => AsmToken::Opcode(Rc::new(Opcode::And)),
             "or" => AsmToken::Opcode(Rc::new(Opcode::Or)),
             "not" => AsmToken::Opcode(Rc::new(Opcode::Not)),
+            "mov" => AsmToken::Opcode(Rc::new(Opcode::Mov)),
             "sll" => AsmToken::Opcode(Rc::new(Opcode::Sll)),
             "sra" => AsmToken::Opcode(Rc::new(Opcode::Sra)),
             "sla" => AsmToken::Opcode(Rc::new(Opcode::Sla)),

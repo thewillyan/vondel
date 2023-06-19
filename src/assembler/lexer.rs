@@ -220,8 +220,8 @@ mod tests {
         use super::AsmToken::{Eof, Opcode};
         use crate::assembler::tokens::Opcode::*;
         let input = r"
-        addi slti andi ori xori
-        add sub slt and or sll sra sla nop not
+        lui addi subi slti andi ori xori
+        add sub slt and or sll sra sla nop not mov
         beq bne blt bge
         mul
         halt
@@ -229,7 +229,9 @@ mod tests {
         ";
         let mut l = Lexer::new(input);
         let toks = vec![
+            Opcode(Rc::new(Lui)),
             Opcode(Rc::new(Addi)),
+            Opcode(Rc::new(Subi)),
             Opcode(Rc::new(Slti)),
             Opcode(Rc::new(Andi)),
             Opcode(Rc::new(Ori)),
@@ -244,6 +246,7 @@ mod tests {
             Opcode(Rc::new(Sla)),
             Opcode(Rc::new(Nop)),
             Opcode(Rc::new(Not)),
+            Opcode(Rc::new(Mov)),
             Opcode(Rc::new(Beq)),
             Opcode(Rc::new(Bne)),
             Opcode(Rc::new(Blt)),

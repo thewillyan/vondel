@@ -20,7 +20,7 @@ pub struct DoubleOperandInstruction {
 pub struct SingleOperandInstruction {
     pub opcode: Rc<Opcode>,
     pub rd: Vec<Rc<Register>>,
-    pub rs1: Rc<Register>,
+    pub rs1: Value,
 }
 
 #[derive(Debug, PartialEq)]
@@ -56,7 +56,7 @@ impl Instruction {
     pub fn new_single_operand_instruction(
         opcode: Rc<Opcode>,
         rd: Vec<Rc<Register>>,
-        rs1: Rc<Register>,
+        rs1: Value,
     ) -> Instruction {
         Instruction::SingleOperand(SingleOperandInstruction { opcode, rd, rs1 })
     }

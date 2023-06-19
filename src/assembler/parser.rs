@@ -309,14 +309,21 @@ impl Parser {
         Ok(Sections::new_data_section(data))
     }
 
-    fn parse_instruction_til_rs1(&mut self) -> Result<(Vec<Rc<Register>>, Rc<Register>)> {
+    fn get_dest_regs(&mut self) -> Result<Vec<Rc<Register>>> {
         let mut dest_regs = Vec::new();
+
         dest_regs.push(self.guard_c_bus(self.get_register()?)?);
         while self.peek_token_is(AsmToken::Comma) {
             self.next_token();
             self.next_token();
             dest_regs.push(self.guard_c_bus(self.get_register()?)?);
         }
+
+        Ok(dest_regs)
+    }
+
+    fn parse_instruction_til_rs1(&mut self) -> Result<(Vec<Rc<Register>>, Rc<Register>)> {
+        let dest_regs = self.get_dest_regs()?;
         self.expect_peek(AsmToken::Assign)?;
         self.next_token();
         let rs1 = self.guard_a_bus(self.get_register()?)?;
@@ -328,7 +335,7 @@ impl Parser {
 
         let res = match *op {
             // Register Register Instructions
-            Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::And | Opcode::Or => {
+            Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::And | Opcode::Or | Opcode::Slt => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -337,7 +344,12 @@ impl Parser {
                 Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
             }
             // Imediate Register Instructions
-            Opcode::Addi | Opcode::Slti | Opcode::Andi | Opcode::Ori | Opcode::Xori => {
+            Opcode::Addi
+            | Opcode::Slti
+            | Opcode::Andi
+            | Opcode::Ori
+            | Opcode::Xori
+            | Opcode::Subi => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -346,10 +358,20 @@ impl Parser {
                 let rs2 = Value::Immediate(immediate);
                 Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
             }
+            Opcode::Lui => {
+                self.next_token();
+                let dest_regs = self.get_dest_regs()?;
+                self.expect_peek(AsmToken::Assign)?;
+                self.next_token();
+                let immediate = self.get_number()?.parse::<u8>()?;
+                let rs1 = Value::Immediate(immediate);
+                Instruction::new_single_operand_instruction(op, dest_regs, rs1)
+            }
             // Single Operand Instructions
-            Opcode::Not | Opcode::Sll | Opcode::Sra | Opcode::Sla => {
+            Opcode::Not | Opcode::Sll | Opcode::Sra | Opcode::Sla | Opcode::Mov => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
+                let rs1 = Value::Reg(rs1);
                 Instruction::new_single_operand_instruction(op, dest_regs, rs1)
             }
             // Branch motherfucker
@@ -365,7 +387,6 @@ impl Parser {
             Opcode::Halt | Opcode::Nop | Opcode::Jal | Opcode::Write | Opcode::Read => {
                 Instruction::new_no_operand_instruction(op)
             }
-            _ => todo!(),
         };
 
         Ok(res)
@@ -671,6 +692,7 @@ error2:
 
     #[test]
     fn parse_single_operand_instruction() -> Result<()> {
+        use crate::assembler::sections::Value;
         use crate::assembler::tokens::Opcode::*;
         use crate::assembler::tokens::Register::*;
         let input = r"
@@ -690,22 +712,22 @@ main:
                 Instruction::new_single_operand_instruction(
                     Rc::new(Not),
                     vec![Rc::from(T0), Rc::from(T2)],
-                    Rc::from(T1),
+                    Value::Reg(Rc::from(T1)),
                 ),
                 Instruction::new_single_operand_instruction(
                     Rc::new(Sll),
                     vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
-                    Rc::from(T1),
+                    Value::Reg(Rc::from(T1)),
                 ),
                 Instruction::new_single_operand_instruction(
                     Rc::new(Sra),
                     vec![Rc::from(T1)],
-                    Rc::from(T1),
+                    Value::Reg(Rc::from(T1)),
                 ),
                 Instruction::new_single_operand_instruction(
                     Rc::new(Sla),
                     vec![Rc::from(T1)],
-                    Rc::from(T1),
+                    Value::Reg(Rc::from(T1)),
                 ),
             ],
         )]);
