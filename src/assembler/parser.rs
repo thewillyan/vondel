@@ -555,6 +555,7 @@ main:
     mul t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
     and t0 <- a0, a1
     or t0 <- a0, a1
+    slt t0 <- a0, a1
 
 .text
 error:
@@ -612,6 +613,12 @@ error2:
                     Rc::from(A0),
                     Value::Reg(Rc::from(A1)),
                 ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Slt),
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);
@@ -629,8 +636,10 @@ error2:
 .text
 main:
     addi t0 <- t1, 8
-    addi t1, t2, t3, s0 <- t1, 7
-    addi t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
+    slti t1, t2, t3, s0 <- t1, 7
+    andi t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
+    ori t0 <- t1, 8
+    subi t0 <- t1, 8
 
 .text
 error:
@@ -653,13 +662,13 @@ error2:
                     Value::Immediate(8),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Addi),
+                    Rc::new(Slti),
                     vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
                     Rc::from(T1),
                     Value::Immediate(7),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Addi),
+                    Rc::new(Andi),
                     vec![
                         Rc::from(T1),
                         Rc::from(T2),
@@ -676,6 +685,18 @@ error2:
                     Rc::from(A0),
                     Value::Immediate(200),
                 ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Ori),
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Subi),
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);
@@ -686,7 +707,7 @@ error2:
     }
 
     #[test]
-    fn parse_single_operand_instruction() -> Result<()> {
+    fn parse_single_operand_rr_instruction() -> Result<()> {
         use crate::assembler::sections::Value;
         use crate::assembler::tokens::Opcode::*;
         use crate::assembler::tokens::Register::*;
@@ -697,6 +718,7 @@ main:
     sll t1, t2, t3, s0 <- t1
     sra t1 <- t1
     sla t1 <- t1
+    mov t3, t2 <- t1
         ";
 
         let program = create_program(input);
@@ -724,7 +746,40 @@ main:
                     vec![Rc::from(T1)],
                     Value::Reg(Rc::from(T1)),
                 ),
+                Instruction::new_single_operand_instruction(
+                    Rc::new(Mov),
+                    vec![Rc::from(T3), Rc::from(T2)],
+                    Value::Reg(Rc::from(T1)),
+                ),
             ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_single_operand_imm_instruction() -> Result<()> {
+        use crate::assembler::sections::Value;
+        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::tokens::Register::*;
+        let input = r"
+.text
+main:
+    lui t0, t2, t1, ra <- 200
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![Instruction::new_single_operand_instruction(
+                Rc::new(Lui),
+                vec![Rc::from(T0), Rc::from(T2), Rc::from(T1), Rc::from(Ra)],
+                Value::Immediate(200),
+            )],
         )]);
         assert_eq!(program.sections.len(), 1);
         assert_eq!(program.errors.len(), 0);
