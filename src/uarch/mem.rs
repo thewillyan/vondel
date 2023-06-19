@@ -338,7 +338,7 @@ impl Ifu {
         if self.cache.len() < 4 {
             let word = mem.get(self.imar);
             self.imar += 1;
-            for &b in word.to_le_bytes().iter().rev() {
+            for b in word.to_le_bytes() {
                 self.cache.push_back(b);
             }
         }
