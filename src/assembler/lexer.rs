@@ -176,7 +176,7 @@ mod tests {
         use super::AsmToken::{Eof, Reg};
         use crate::assembler::tokens::Register::*;
         let input = r"
-        mar mdr pc mbr mbr2 cpp lv
+        mar mdr pc mbr mbru mbr2 mbr2u cpp lv
         ra t0 t1 t2 t3
         s0 s1 s2 s3 s4 s5 s6
         a0 a1 a2 a3
@@ -188,7 +188,9 @@ mod tests {
             Reg(Rc::new(Mdr)),
             Reg(Rc::new(Pc)),
             Reg(Rc::new(Mbr)),
+            Reg(Rc::new(Mbru)),
             Reg(Rc::new(Mbr2)),
+            Reg(Rc::new(Mbr2u)),
             Reg(Rc::new(Cpp)),
             Reg(Rc::new(Lv)),
             Reg(Rc::new(Ra)),

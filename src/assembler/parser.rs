@@ -246,7 +246,12 @@ impl Parser {
 
     fn guard_b_bus(&mut self, reg: Rc<Register>) -> Result<Rc<Register>> {
         match *reg {
-            Register::Mar | Register::Mbr | Register::Mbr2 | Register::Pc => {
+            Register::Mar
+            | Register::Mbr
+            | Register::Mbr2
+            | Register::Pc
+            | Register::Mbru
+            | Register::Mbr2u => {
                 bail!(ParserError::RegisterCannotBeUsedInBBus {
                     found: format!("{:?}", reg),
                     cur_line: self.cur_line,
@@ -259,7 +264,7 @@ impl Parser {
 
     fn guard_c_bus(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
         match *reg {
-            Register::Cpp | Register::Mbr | Register::Mbr2 => {
+            Register::Cpp | Register::Mbr | Register::Mbr2 | Register::Mbru | Register::Mbr2u => {
                 bail!(ParserError::RegisterCannotBeUsedInCBus {
                     found: format!("{:?}", reg),
                     cur_line: self.cur_line,
