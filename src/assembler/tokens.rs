@@ -55,7 +55,6 @@ pub enum Opcode {
     Slti,
     Andi,
     Ori,
-    Xori,
     // Integer Register-Register Operations
     Add,
     Sub,
@@ -151,7 +150,6 @@ impl AsmToken {
             "slti" => AsmToken::Opcode(Rc::new(Opcode::Slti)),
             "andi" => AsmToken::Opcode(Rc::new(Opcode::Andi)),
             "ori" => AsmToken::Opcode(Rc::new(Opcode::Ori)),
-            "xori" => AsmToken::Opcode(Rc::new(Opcode::Xori)),
             "add" => AsmToken::Opcode(Rc::new(Opcode::Add)),
             "sub" => AsmToken::Opcode(Rc::new(Opcode::Sub)),
             "slt" => AsmToken::Opcode(Rc::new(Opcode::Slt)),

@@ -344,12 +344,7 @@ impl Parser {
                 Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
             }
             // Imediate Register Instructions
-            Opcode::Addi
-            | Opcode::Slti
-            | Opcode::Andi
-            | Opcode::Ori
-            | Opcode::Xori
-            | Opcode::Subi => {
+            Opcode::Addi | Opcode::Slti | Opcode::Andi | Opcode::Ori | Opcode::Subi => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
