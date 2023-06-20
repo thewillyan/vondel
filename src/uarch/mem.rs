@@ -469,4 +469,37 @@ mod tests {
         assert_eq!(ram.get(1), 2);
         assert_eq!(ram.get(2), 3);
     }
+
+    #[test]
+    fn test_ctrl_store_builder_set() {
+        let builder = CtrlStoreBuilder::default();
+        let modified_builder = builder.set(0, 42);
+        let ctrl_store = modified_builder.build();
+        assert_eq!(ctrl_store.firmware[0], 42);
+    }
+
+    #[test]
+    fn test_ctrl_store_builder_load() {
+        let builder = CtrlStoreBuilder::default();
+        let modified_builder = builder.load(0, [42, 43, 44]);
+        let ctrl_store = modified_builder.build();
+        assert_eq!(ctrl_store.firmware[0], 42);
+        assert_eq!(ctrl_store.firmware[1], 43);
+        assert_eq!(ctrl_store.firmware[2], 44);
+    }
+
+    #[test]
+    fn test_ctrl_store_builder_set_mpc() {
+        let builder = CtrlStoreBuilder::default();
+        let modified_builder = builder.set_mpc(42);
+        let ctrl_store = modified_builder.build();
+        assert_eq!(ctrl_store.mpc.get(), 42 & 0b0000000111111111);
+    }
+
+    #[test]
+    fn test_ctrl_store_builder_default() {
+        let builder = CtrlStoreBuilder::default();
+        assert_eq!(builder.firmware, [0; CS_ADDRS]);
+        assert_eq!(builder.mpc, 0);
+    }
 }
