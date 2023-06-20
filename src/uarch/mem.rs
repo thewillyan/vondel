@@ -283,7 +283,7 @@ impl MemRegs {
         let mut ifu = self.ifu.lock().expect("failed to get the IFU lock");
         ifu.consume_mbr();
         ifu.load(&self.mbr, &self.mbr2);
-        self.pc.set(self.pc.get() + 2);
+        self.pc.set(self.pc.get() + 1);
         val
     }
 

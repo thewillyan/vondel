@@ -12,4 +12,5 @@
 - [Assembler](./chapter_1.md)
 - [UArch](./uarch/README.md)
   - [Microinstruction](./uarch/uinstruction.md)
+    - [Implementations](./uarch/implementations.md)
 - [Comparision with Requested UArch](./chapter_1.md)
