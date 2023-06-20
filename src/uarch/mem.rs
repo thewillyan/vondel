@@ -443,3 +443,30 @@ impl Registers {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ram_get() {
+        let mut ram = Ram::new();
+        ram.set(0, 42);
+        assert_eq!(ram.get(0), 42);
+    }
+
+    #[test]
+    fn test_ram_set() {
+        let mut ram = Ram::new();
+        ram.set(0, 42);
+        assert_eq!(ram.get(0), 42);
+    }
+
+    #[test]
+    fn test_ram_load() {
+        let mut ram = Ram::new();
+        ram.load(0, vec![1, 2, 3]);
+        assert_eq!(ram.get(0), 1);
+        assert_eq!(ram.get(1), 2);
+        assert_eq!(ram.get(2), 3);
+    }
+}
