@@ -12,7 +12,7 @@ const CS_ADDRS: usize = 2usize.pow(9);
 
 #[derive(Debug)]
 pub struct Ram {
-    data: Arc<Mutex<Box<[u32; RAM_ADDRS]>>>,
+    data: Arc<Mutex<Box<[u32]>>>,
 }
 
 impl Ram {
@@ -42,7 +42,7 @@ impl Ram {
 impl Default for Ram {
     fn default() -> Self {
         Self {
-            data: Arc::new(Mutex::new(Box::new([0; RAM_ADDRS]))),
+            data: Arc::new(Mutex::new(vec![0; RAM_ADDRS].into_boxed_slice())),
         }
     }
 }
@@ -442,3 +442,4 @@ impl Registers {
         Self { mem, sys, gen }
     }
 }
+
