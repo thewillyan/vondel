@@ -502,4 +502,31 @@ mod tests {
         assert_eq!(builder.firmware, [0; CS_ADDRS]);
         assert_eq!(builder.mpc, 0);
     }
+
+    #[test]
+    fn test_shared_reg_new() {
+        let shared_reg = SharedReg::new(42);
+        assert_eq!(shared_reg.get(), 42);
+    }
+
+    #[test]
+    fn test_shared_reg_default() {
+        let shared_reg = SharedReg::<u32>::default();
+        assert_eq!(shared_reg.get(), 0);
+    }
+
+    #[test]
+    fn test_shared_reg_set() {
+        let shared_reg = SharedReg::new(42);
+        shared_reg.set(84);
+        assert_eq!(shared_reg.get(), 84);
+    }
+
+    #[test]
+    fn test_shared_reg_clone() {
+        let shared_reg = SharedReg::new(42);
+        #[allow(clippy::redundant_clone)]
+        let cloned_reg = shared_reg.clone();
+        assert_eq!(cloned_reg.get(), 42);
+    }
 }
