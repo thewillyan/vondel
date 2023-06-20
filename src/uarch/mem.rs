@@ -529,4 +529,78 @@ mod tests {
         let cloned_reg = shared_reg.clone();
         assert_eq!(cloned_reg.get(), 42);
     }
+
+    #[test]
+    fn test_fetch_less_than_4_bytes() {
+        let mut ifu = Ifu::default();
+        let mut ram = Ram::default();
+        ram.load(0, vec![42]);
+
+        ifu.fetch(&ram);
+
+        assert_eq!(ifu.cache.len(), 4);
+        assert_eq!(ifu.cache[0], 42);
+        assert_eq!(ifu.cache[1], 0);
+        assert_eq!(ifu.cache[2], 0);
+        assert_eq!(ifu.cache[3], 0);
+    }
+
+    #[test]
+    fn test_fetch_more_than_4_bytes() {
+        let mut ifu = Ifu::default();
+        let mut ram = Ram::default();
+        ram.load(0, vec![42]);
+
+        ifu.cache = VecDeque::from(vec![1, 2, 3, 4, 5, 6, 7]);
+        ifu.fetch(&ram);
+
+        assert_eq!(ifu.cache.len(), 7);
+        assert_eq!(ifu.cache[0], 1);
+        assert_eq!(ifu.cache[1], 2);
+        assert_eq!(ifu.cache[2], 3);
+        assert_eq!(ifu.cache[3], 4);
+        assert_eq!(ifu.cache[4], 5);
+        assert_eq!(ifu.cache[5], 6);
+        assert_eq!(ifu.cache[6], 7);
+    }
+
+    #[test]
+    fn test_load() {
+        let mut ifu = Ifu::default();
+        let mbr = SharedReg::new(0);
+        let mbr2 = SharedReg::new(0);
+        ifu.cache = VecDeque::from(vec![1, 2, 3, 4]);
+        ifu.load(&mbr, &mbr2);
+
+        assert_eq!(mbr.get(), 1);
+        assert_eq!(mbr2.get(), 0x0201);
+    }
+
+    #[test]
+    fn test_consume_mbr() {
+        let mut ifu = Ifu {
+            cache: VecDeque::from(vec![1, 2, 3, 4]),
+            ..Default::default()
+        };
+        ifu.consume_mbr();
+
+        assert_eq!(ifu.cache.len(), 3);
+        assert_eq!(ifu.cache[0], 2);
+        assert_eq!(ifu.cache[1], 3);
+        assert_eq!(ifu.cache[2], 4);
+    }
+
+    #[test]
+    fn test_consume_mbr2() {
+        let mut ifu = Ifu {
+            cache: VecDeque::from(vec![1, 2, 3, 4]),
+            ..Default::default()
+        };
+
+        ifu.consume_mbr2();
+
+        assert_eq!(ifu.cache.len(), 2);
+        assert_eq!(ifu.cache[0], 3);
+        assert_eq!(ifu.cache[1], 4);
+    }
 }
