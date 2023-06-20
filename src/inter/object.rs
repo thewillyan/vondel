@@ -56,5 +56,3 @@ impl fmt::Display for Object {
         write!(f, "{}", buf)
     }
 }
-
-
