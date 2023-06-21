@@ -12,7 +12,7 @@ const CS_ADDRS: usize = 2usize.pow(9);
 
 #[derive(Debug)]
 pub struct Ram {
-    data: Arc<Mutex<Box<[u32; RAM_ADDRS]>>>,
+    data: Arc<Mutex<Box<[u32]>>>,
 }
 
 impl Ram {
@@ -42,7 +42,7 @@ impl Ram {
 impl Default for Ram {
     fn default() -> Self {
         Self {
-            data: Arc::new(Mutex::new(Box::new([0; RAM_ADDRS]))),
+            data: Arc::new(Mutex::new(vec![0; RAM_ADDRS].into_boxed_slice())),
         }
     }
 }
@@ -440,5 +440,215 @@ impl Registers {
         };
 
         Self { mem, sys, gen }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ram_get() {
+        let mut ram = Ram::new();
+        ram.set(0, 42);
+        assert_eq!(ram.get(0), 42);
+    }
+
+    #[test]
+    fn test_ram_set() {
+        let mut ram = Ram::new();
+        ram.set(0, 42);
+        assert_eq!(ram.get(0), 42);
+    }
+
+    #[test]
+    fn test_ram_load() {
+        let mut ram = Ram::new();
+        ram.load(0, vec![1, 2, 3]);
+        assert_eq!(ram.get(0), 1);
+        assert_eq!(ram.get(1), 2);
+        assert_eq!(ram.get(2), 3);
+    }
+
+    #[test]
+    fn test_ctrl_store_builder_set() {
+        let builder = CtrlStoreBuilder::default();
+        let modified_builder = builder.set(0, 42);
+        let ctrl_store = modified_builder.build();
+        assert_eq!(ctrl_store.firmware[0], 42);
+    }
+
+    #[test]
+    fn test_ctrl_store_builder_load() {
+        let builder = CtrlStoreBuilder::default();
+        let modified_builder = builder.load(0, [42, 43, 44]);
+        let ctrl_store = modified_builder.build();
+        assert_eq!(ctrl_store.firmware[0], 42);
+        assert_eq!(ctrl_store.firmware[1], 43);
+        assert_eq!(ctrl_store.firmware[2], 44);
+    }
+
+    #[test]
+    fn test_ctrl_store_builder_set_mpc() {
+        let builder = CtrlStoreBuilder::default();
+        let modified_builder = builder.set_mpc(42);
+        let ctrl_store = modified_builder.build();
+        assert_eq!(ctrl_store.mpc.get(), 42 & 0b0000000111111111);
+    }
+
+    #[test]
+    fn test_ctrl_store_builder_default() {
+        let builder = CtrlStoreBuilder::default();
+        assert_eq!(builder.firmware, [0; CS_ADDRS]);
+        assert_eq!(builder.mpc, 0);
+    }
+
+    #[test]
+    fn test_shared_reg_new() {
+        let shared_reg = SharedReg::new(42);
+        assert_eq!(shared_reg.get(), 42);
+    }
+
+    #[test]
+    fn test_shared_reg_default() {
+        let shared_reg = SharedReg::<u32>::default();
+        assert_eq!(shared_reg.get(), 0);
+    }
+
+    #[test]
+    fn test_shared_reg_set() {
+        let shared_reg = SharedReg::new(42);
+        shared_reg.set(84);
+        assert_eq!(shared_reg.get(), 84);
+    }
+
+    #[test]
+    fn test_shared_reg_clone() {
+        let shared_reg = SharedReg::new(42);
+        #[allow(clippy::redundant_clone)]
+        let cloned_reg = shared_reg.clone();
+        assert_eq!(cloned_reg.get(), 42);
+    }
+
+    #[test]
+    fn test_fetch_less_than_4_bytes() {
+        let mut ifu = Ifu::default();
+        let mut ram = Ram::default();
+        ram.load(0, vec![42]);
+
+        ifu.fetch(&ram);
+
+        assert_eq!(ifu.cache.len(), 4);
+        assert_eq!(ifu.cache[0], 42);
+        assert_eq!(ifu.cache[1], 0);
+        assert_eq!(ifu.cache[2], 0);
+        assert_eq!(ifu.cache[3], 0);
+    }
+
+    #[test]
+    fn test_fetch_more_than_4_bytes() {
+        let mut ifu = Ifu::default();
+        let mut ram = Ram::default();
+        ram.load(0, vec![42]);
+
+        ifu.cache = VecDeque::from(vec![1, 2, 3, 4, 5, 6, 7]);
+        ifu.fetch(&ram);
+
+        assert_eq!(ifu.cache.len(), 7);
+        assert_eq!(ifu.cache[0], 1);
+        assert_eq!(ifu.cache[1], 2);
+        assert_eq!(ifu.cache[2], 3);
+        assert_eq!(ifu.cache[3], 4);
+        assert_eq!(ifu.cache[4], 5);
+        assert_eq!(ifu.cache[5], 6);
+        assert_eq!(ifu.cache[6], 7);
+    }
+
+    #[test]
+    fn test_load() {
+        let mut ifu = Ifu::default();
+        let mbr = SharedReg::new(0);
+        let mbr2 = SharedReg::new(0);
+        ifu.cache = VecDeque::from(vec![1, 2, 3, 4]);
+        ifu.load(&mbr, &mbr2);
+
+        assert_eq!(mbr.get(), 1);
+        assert_eq!(mbr2.get(), 0x0201);
+    }
+
+    #[test]
+    fn test_consume_mbr() {
+        let mut ifu = Ifu {
+            cache: VecDeque::from(vec![1, 2, 3, 4]),
+            ..Default::default()
+        };
+        ifu.consume_mbr();
+
+        assert_eq!(ifu.cache.len(), 3);
+        assert_eq!(ifu.cache[0], 2);
+        assert_eq!(ifu.cache[1], 3);
+        assert_eq!(ifu.cache[2], 4);
+    }
+
+    #[test]
+    fn test_consume_mbr2() {
+        let mut ifu = Ifu {
+            cache: VecDeque::from(vec![1, 2, 3, 4]),
+            ..Default::default()
+        };
+
+        ifu.consume_mbr2();
+
+        assert_eq!(ifu.cache.len(), 2);
+        assert_eq!(ifu.cache[0], 3);
+        assert_eq!(ifu.cache[1], 4);
+    }
+
+    #[test]
+    fn test_mbr() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+        ram.set(0, 42);
+        mem_regs.fetch(&ram);
+        let value = mem_regs.mbr();
+
+        assert_eq!(value, 42);
+        assert_eq!(mem_regs.pc(), 1);
+    }
+
+    #[test]
+    fn test_mbr2() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+        ram.load(0, [5, 6]);
+        mem_regs.fetch(&ram);
+        let value = mem_regs.mbr2();
+
+        assert_eq!(value, 5);
+        assert_eq!(mem_regs.pc(), 2);
+    }
+
+    #[test]
+    fn test_read() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+        ram.set(10, 52);
+
+        mem_regs.update_mar(10);
+        mem_regs.read(&ram);
+
+        assert_eq!(mem_regs.mdr(), 52);
+    }
+
+    #[test]
+    fn test_write() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+
+        mem_regs.update_mar(10);
+        mem_regs.update_mdr(42);
+        mem_regs.write(&mut ram);
+
+        assert_eq!(ram.get(10), 42);
     }
 }
