@@ -603,4 +603,52 @@ mod tests {
         assert_eq!(ifu.cache[0], 3);
         assert_eq!(ifu.cache[1], 4);
     }
+
+    #[test]
+    fn test_mbr() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+        ram.set(0, 42);
+        mem_regs.fetch(&ram);
+        let value = mem_regs.mbr();
+
+        assert_eq!(value, 42);
+        assert_eq!(mem_regs.pc(), 1);
+    }
+
+    #[test]
+    fn test_mbr2() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+        ram.load(0, [5, 6]);
+        mem_regs.fetch(&ram);
+        let value = mem_regs.mbr2();
+
+        assert_eq!(value, 5);
+        assert_eq!(mem_regs.pc(), 2);
+    }
+
+    #[test]
+    fn test_read() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+        ram.set(10, 52);
+
+        mem_regs.update_mar(10);
+        mem_regs.read(&ram);
+
+        assert_eq!(mem_regs.mdr(), 52);
+    }
+
+    #[test]
+    fn test_write() {
+        let mut mem_regs = MemRegs::new();
+        let mut ram = Ram::new();
+
+        mem_regs.update_mar(10);
+        mem_regs.update_mdr(42);
+        mem_regs.write(&mut ram);
+
+        assert_eq!(ram.get(10), 42);
+    }
 }
