@@ -1,13 +1,12 @@
 use anyhow::{bail, Result};
 use std::rc::Rc;
 
-use crate::uarch::mem::CtrlStoreBuilder;
 use crate::{
     assembler::{
         sections::{Instruction, Sections, TextSegment, Value},
         tokens::{Opcode, Register},
     },
-    uarch::mem::CtrlStore,
+    uarch::mem::{CtrlStore, CtrlStoreBuilder},
 };
 
 pub struct AsmEvaluator {}
@@ -106,67 +105,122 @@ impl AsmEvaluator {
     ) {
         let c_code = Self::get_c_code(rd);
         match opcode {
-            Opcode::Add => {
-                let mut mi = Microinstruction::new(cs_state.addr() + 1);
+            Opcode::Add | Opcode::Addi => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00111100;
                 mi.a = Self::reg_a_code(rs1.as_ref());
-                mi.b = match rs2 {
-                    Value::Reg(r) => Self::reg_b_code(r),
-                    Value::Immediate(imm) => {
-                        mi.immediate = *imm;
-                        Microinstruction::IMM_B
-                    }
-                };
+                (mi.b, mi.immediate) = Self::val_b_code(rs2);
                 cs_state.add_instr(mi.get());
             }
-            Opcode::Sub => {
-                let mut mi = Microinstruction::new(cs_state.addr() + 1);
+            Opcode::Sub | Opcode::Subi => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00111111;
                 mi.b = Self::reg_b_code(rs1.as_ref());
-                mi.a = match rs2 {
-                    Value::Reg(r) => Self::reg_a_code(r),
-                    Value::Immediate(imm) => {
-                        mi.immediate = *imm;
-                        Microinstruction::IMM_A
-                    }
-                };
+                (mi.a, mi.immediate) = Self::val_a_code(rs2);
                 cs_state.add_instr(mi.get());
+            }
+            Opcode::Mul => {
+                cs_state.add_complex_instr(|cs, addr| {
+                    // Temp registers usage:
+                    // - T0: gonna store the min(rs1, rs2)
+                    // - T1: gonna store the max(rs1, rs2)
+                    let mut next_addr = addr + 1;
+                    let mut mi_list = Vec::new();
+
+                    let branched_addr = next_addr | 0b100000000;
+                    let mut branched_mi_list = Vec::new();
+
+                    let mut mi = Microinstruction::new(next_addr);
+                    // JUMP if rs1 > rs2
+                    mi.jam = 0b010;
+                    mi.alu = 0b00111111;
+                    mi.a = Self::reg_a_code(rs1);
+                    (mi.b, mi.immediate) = Self::val_b_code(rs2);
+                    mi_list.push(mi.get());
+
+                    // HAS NOT JUMPED, therefore rs1 <= rs2
+                    // mv t0 <- rs1
+                    next_addr += 1;
+                    let mut mi = Microinstruction::new(next_addr);
+                    mi.alu = 0b00011000;
+                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T0)]);
+                    mi.a = Self::reg_a_code(rs1);
+                    mi_list.push(mi.get());
+                    // mv t1, t2, rd <- rs2
+                    next_addr += 1;
+                    let mut mi = Microinstruction::new(next_addr);
+                    mi.alu = 0b00011000;
+                    mi.c_bus =
+                        Self::get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
+                            | c_code;
+                    mi.a = match rs2 {
+                        Value::Reg(r) => Self::reg_a_code(r),
+                        Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
+                    };
+                    let loop_addr = next_addr;
+                    mi_list.push(mi.get());
+
+                    // HAS JUMPED, therefore rs1 > rs2
+                    // mv t0 <- rs2
+                    let mut mi = Microinstruction::new(branched_addr + 1);
+                    mi.alu = 0b00011000;
+                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T0)]);
+                    mi.a = match rs2 {
+                        Value::Reg(r) => Self::reg_a_code(r),
+                        Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
+                    };
+                    branched_mi_list.push(mi.get());
+                    // mv t1, t2, rd <- rs1
+                    let mut mi = Microinstruction::new(loop_addr);
+                    mi.alu = 0b00011000;
+                    mi.c_bus =
+                        Self::get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
+                            | c_code;
+                    mi.a = Self::reg_a_code(rs1);
+                    branched_mi_list.push(mi.get());
+                    cs.load_words(branched_addr, branched_mi_list);
+
+                    // Intersection between the cases: t1 + .. + t1, t0-times
+                    next_addr += 1;
+                    // t0 <- t0 - 1 (special case because we subtract 1 without ussing immediate)
+                    let mut mi = Microinstruction::new(next_addr);
+                    mi.jam = 0b001;
+                    mi.alu = 0b00110110;
+                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T0)]);
+                    mi.b = Self::reg_b_code(&Register::T0);
+                    mi_list.push(mi.get());
+                    // add t1, rd <- t1 + t2
+                    let mut mi = Microinstruction::new(loop_addr);
+                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T1)]) | c_code;
+                    mi.alu = 0b00111100;
+                    mi.a = Self::reg_a_code(&Register::T1);
+                    mi.b = Self::reg_b_code(&Register::T2);
+                    mi_list.push(mi.get());
+
+                    cs.load_words(addr, mi_list);
+                    next_addr | 0b100000000
+                });
             }
             _ => unimplemented!(),
         }
     }
 
-    /// Returns the c bus field content of the MI. (20 bits)
-    fn get_c_code(regs: &Vec<Rc<Register>>) -> u32 {
-        let mut c_code = 0;
-        for reg in regs {
-            match reg.as_ref() {
-                Register::Mdr => c_code |= 1 << 19,
-                Register::Mar => c_code |= 1 << 18,
-                Register::Pc => c_code |= 1 << 17,
-                Register::Lv => c_code |= 1 << 16,
-                Register::Ra => c_code |= 1 << 15,
-                Register::T0 => c_code |= 1 << 14,
-                Register::T1 => c_code |= 1 << 13,
-                Register::T2 => c_code |= 1 << 12,
-                Register::T3 => c_code |= 1 << 11,
-                Register::S0 => c_code |= 1 << 10,
-                Register::S1 => c_code |= 1 << 9,
-                Register::S2 => c_code |= 1 << 8,
-                Register::S3 => c_code |= 1 << 7,
-                Register::S4 => c_code |= 1 << 6,
-                Register::S5 => c_code |= 1 << 5,
-                Register::S6 => c_code |= 1 << 4,
-                Register::A0 => c_code |= 1 << 3,
-                Register::A1 => c_code |= 1 << 2,
-                Register::A2 => c_code |= 1 << 1,
-                Register::A3 => c_code |= 1,
-                _ => unreachable!("Cannot write on other registers!"),
-            }
+    /// Returns a pair of (A bus code, Immediate).
+    fn val_a_code(val: &Value) -> (u8, u8) {
+        match val {
+            Value::Reg(r) => (Self::reg_a_code(r), 0),
+            Value::Immediate(imm) => (Microinstruction::IMM_A, *imm),
         }
-        c_code
+    }
+
+    /// Returns a pair of (B bus code, Immediate).
+    fn val_b_code(val: &Value) -> (u8, u8) {
+        match val {
+            Value::Reg(r) => (Self::reg_b_code(r), 0),
+            Value::Immediate(imm) => (Microinstruction::IMM_B, *imm),
+        }
     }
 
     fn reg_a_code(reg: &Register) -> u8 {
@@ -223,6 +277,37 @@ impl AsmEvaluator {
             _ => unreachable!("Cannot write other registers to the B bus!"),
         }
     }
+
+    /// Returns the c bus field content of the MI. (20 bits)
+    fn get_c_code(regs: &Vec<Rc<Register>>) -> u32 {
+        let mut c_code = 0;
+        for reg in regs {
+            match reg.as_ref() {
+                Register::Mdr => c_code |= 1 << 19,
+                Register::Mar => c_code |= 1 << 18,
+                Register::Pc => c_code |= 1 << 17,
+                Register::Lv => c_code |= 1 << 16,
+                Register::Ra => c_code |= 1 << 15,
+                Register::T0 => c_code |= 1 << 14,
+                Register::T1 => c_code |= 1 << 13,
+                Register::T2 => c_code |= 1 << 12,
+                Register::T3 => c_code |= 1 << 11,
+                Register::S0 => c_code |= 1 << 10,
+                Register::S1 => c_code |= 1 << 9,
+                Register::S2 => c_code |= 1 << 8,
+                Register::S3 => c_code |= 1 << 7,
+                Register::S4 => c_code |= 1 << 6,
+                Register::S5 => c_code |= 1 << 5,
+                Register::S6 => c_code |= 1 << 4,
+                Register::A0 => c_code |= 1 << 3,
+                Register::A1 => c_code |= 1 << 2,
+                Register::A2 => c_code |= 1 << 1,
+                Register::A3 => c_code |= 1,
+                _ => unreachable!("Cannot write on other registers!"),
+            }
+        }
+        c_code
+    }
 }
 
 #[derive(Default)]
@@ -240,9 +325,13 @@ impl CsState {
         self.curr_addr
     }
 
+    pub fn next_addr(&self) -> u16 {
+        (self.curr_addr & 0b011111111) + 1
+    }
+
     pub fn add_instr(&mut self, inst: u64) {
         let b = self.builder.set_word(self.curr_addr, inst);
-        self.curr_addr += 1;
+        self.curr_addr = self.next_addr();
     }
 
     /// Add a complex instructions from a functions that returns the address which
@@ -284,8 +373,8 @@ impl Microinstruction {
             alu: 0,
             c_bus: 0,
             mem: 0,
-            a: u8::MAX,
-            b: u8::MAX,
+            a: 0b11111,
+            b: 0b11111,
             immediate: 0,
         }
     }
@@ -293,6 +382,7 @@ impl Microinstruction {
     /// Get value of the Microinstruction
     pub fn get(&self) -> u64 {
         let mut mi = self.next as u64;
+
         mi <<= 3;
         mi |= self.jam as u64;
 
@@ -317,6 +407,7 @@ impl Microinstruction {
     }
 }
 
+#[allow(clippy::unusual_byte_groupings)]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -377,11 +468,11 @@ mod tests {
     }
 
     #[test]
-    fn add_with_immediate() {
+    fn basic_addi() {
         // add a0, a1 <- t0, 5
         let instructions = vec![
             Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Add),
+                Rc::new(Opcode::Addi),
                 vec![Rc::new(Register::A0), Rc::new(Register::A1)],
                 Rc::new(Register::T0),
                 Value::Immediate(5),
@@ -427,11 +518,11 @@ mod tests {
     }
 
     #[test]
-    fn sub_with_immediate() {
+    fn basic_subi() {
         // add a0, a1 <- t0, 7
         let instructions = vec![
             Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Sub),
+                Rc::new(Opcode::Subi),
                 vec![Rc::new(Register::A0), Rc::new(Register::A1)],
                 Rc::new(Register::T0),
                 Value::Immediate(7),
@@ -592,6 +683,61 @@ mod tests {
         assert_eq!(firmware[1], Microinstruction::HALT);
         for i in 2..=255 {
             assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn mul() {
+        // mul a0 <- a1, a2
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Mul),
+                vec![Rc::new(Register::A0)],
+                Rc::new(Register::A1),
+                Value::Reg(Rc::new(Register::A2)),
+            ),
+            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::eval(&secs).firmware();
+
+        let no_branch_mcode: Vec<u64> = vec![
+            // JUMP if a1 > a2 (a2 - a1 < 0)
+            0b000000001_010_00111111_00000000000000000000_000_10110_10010_00000000,
+            // CASE 1 (has not branched)
+            // Copy a1 into t0
+            0b000000010_000_00011000_00000100000000000000_000_10110_11111_00000000,
+            // Copy a2 into t1, t2, a0
+            0b000000011_000_00011000_00000011000000001000_000_10111_11111_00000000,
+            // Intersection between the cases: r13 + .. + r13, r14-times
+            // t0 <- t0 - 1 or JUMP if (t0 - 1) = 0
+            0b000000100_001_00110110_00000100000000000000_000_11111_00101_00000000,
+            // a0, t1 <- t1 + t2
+            0b000000011_000_00111100_00000010000000001000_000_01011_00111_00000000,
+        ];
+
+        for (addr, &mi) in no_branch_mcode.iter().enumerate() {
+            // println!("addr:     {:09b}", addr);
+            // eprintln!("expected: {:061b}", mi);
+            // eprintln!("got:      {:061b}", firmware[addr]);
+            assert_eq!(mi, firmware[addr]);
+        }
+
+        let brached_mcode: Vec<u64> = vec![
+            // CASE 2: has branched
+            // Copy a2 into t0
+            0b100000010_000_00011000_00000100000000000000_000_10111_11111_00000000,
+            // Copy a1 into t1, t2, a0
+            0b000000011_000_00011000_00000011000000001000_000_10110_11111_00000000,
+        ];
+
+        for (addr, &mi) in brached_mcode.iter().enumerate() {
+            let addr = addr + 0b100000001;
+            // println!("addr:     {:09b}", addr);
+            // eprintln!("expected: {:061b}", mi);
+            // eprintln!("got:      {:061b}", firmware[addr]);
+            assert_eq!(mi, firmware[addr]);
         }
     }
 }
