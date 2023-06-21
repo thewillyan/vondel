@@ -28,6 +28,7 @@ pub struct BranchInstruction {
     pub opcode: Rc<Opcode>,
     pub rs1: Rc<Register>,
     pub rs2: Rc<Register>,
+    pub label: Rc<str>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -69,8 +70,14 @@ impl Instruction {
         opcode: Rc<Opcode>,
         rs1: Rc<Register>,
         rs2: Rc<Register>,
+        label: Rc<str>,
     ) -> Instruction {
-        Instruction::Branch(BranchInstruction { opcode, rs1, rs2 })
+        Instruction::Branch(BranchInstruction {
+            opcode,
+            rs1,
+            rs2,
+            label,
+        })
     }
 }
 
