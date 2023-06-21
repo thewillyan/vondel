@@ -12,9 +12,6 @@ use crate::{
 pub struct AsmEvaluator {}
 
 impl AsmEvaluator {
-    const IMM_A: u8 = 0b01000;
-    const IMM_B: u8 = 0b00011;
-
     pub fn new() -> Self {
         Self {}
     }
@@ -84,7 +81,21 @@ impl AsmEvaluator {
                     Value::Reg(r) => Self::reg_b_code(r),
                     Value::Immediate(imm) => {
                         mi.immediate = *imm;
-                        Self::IMM_B
+                        Microinstruction::IMM_B
+                    }
+                };
+                cs_state.add_instr(mi.get());
+            }
+            Opcode::Sub => {
+                let mut mi = Microinstruction::new(cs_state.addr() + 1);
+                mi.c_bus = c_code;
+                mi.alu = 0b00111111;
+                mi.b = Self::reg_b_code(rs1.as_ref());
+                mi.a = match rs2 {
+                    Value::Reg(r) => Self::reg_a_code(r),
+                    Value::Immediate(imm) => {
+                        mi.immediate = *imm;
+                        Microinstruction::IMM_A
                     }
                 };
                 cs_state.add_instr(mi.get());
@@ -226,6 +237,8 @@ struct Microinstruction {
 
 impl Microinstruction {
     pub const HALT: u64 = u64::MAX;
+    pub const IMM_A: u8 = 0b01000;
+    pub const IMM_B: u8 = 0b00011;
 
     /// Creates a new microinstruction.
     pub fn new(next_addr: u16) -> Self {
@@ -297,6 +310,81 @@ mod tests {
         let firmware = AsmEvaluator::eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00111100_00000000000000001100_01010_10011_00000000;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn add_with_immediate() {
+        // add a0, a1 <- t0, 5
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Add),
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Immediate(5),
+            ),
+            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_00111100_00000000000000001100_01010_00011_00000101;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn basic_sub() {
+        // sub a0, a1 <- t0, a3
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Sub),
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Reg(Rc::new(Register::A3)),
+            ),
+            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_00111111_00000000000000001100_11000_00101_00000000;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn sub_with_immediate() {
+        // add a0, a1 <- t0, 7
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Sub),
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Immediate(7),
+            ),
+            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_00111111_00000000000000001100_01000_00101_00000111;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
