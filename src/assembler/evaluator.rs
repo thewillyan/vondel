@@ -73,7 +73,7 @@ impl AsmEvaluator {
         cs_state: &mut CsState,
     ) {
         let c_code = Self::get_c_code(rd);
-        let mut mi = Microinstruction::new(cs_state.addr() + 1);
+        let mut mi = Microinstruction::new(cs_state.next_addr());
         mi.a = match rs1 {
             Value::Immediate(v) => {
                 mi.immediate = *v;
