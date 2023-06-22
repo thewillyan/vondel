@@ -243,10 +243,8 @@ impl AsmEvaluator {
                     // - T0: gonna store the min(rs1, rs2)
                     // - T1: gonna store the max(rs1, rs2)
                     let mut next_addr = addr + 1;
-                    let mut mi_list = Vec::new();
-
                     let branched_addr = next_addr | 0b100000000;
-                    let mut branched_mi_list = Vec::new();
+                    let mut mi_list = Vec::new();
 
                     let mut mi = Microinstruction::new(next_addr);
                     // JUMP if rs1 > rs2
@@ -277,25 +275,6 @@ impl AsmEvaluator {
                     let loop_addr = next_addr;
                     mi_list.push(mi.get());
 
-                    // HAS JUMPED, therefore rs1 > rs2
-                    // mv t0 <- rs2
-                    let mut mi = Microinstruction::new(branched_addr + 1);
-                    mi.alu = 0b00011000;
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
-                    mi.a = match rs2 {
-                        Value::Reg(r) => self.reg_a_code(r),
-                        Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
-                    };
-                    branched_mi_list.push(mi.get());
-                    // mv t1, t2, rd <- rs1
-                    let mut mi = Microinstruction::new(loop_addr);
-                    mi.alu = 0b00011000;
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
-                        | c_code;
-                    mi.a = self.reg_a_code(rs1);
-                    branched_mi_list.push(mi.get());
-                    cs.load_words(branched_addr, branched_mi_list);
-
                     // Intersection between the cases: t1 + .. + t1, t0-times
                     next_addr += 1;
                     // t0 <- t0 - 1 (special case because we subtract 1 without ussing immediate)
@@ -311,6 +290,24 @@ impl AsmEvaluator {
                     mi.alu = 0b00111100;
                     mi.a = self.reg_a_code(&Register::T1);
                     mi.b = self.reg_b_code(&Register::T2);
+                    mi_list.push(mi.get());
+
+                    // HAS JUMPED, therefore rs1 > rs2
+                    // mv t0 <- rs2
+                    let mut mi = Microinstruction::new(next_addr + 1);
+                    mi.alu = 0b00011000;
+                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
+                    mi.a = match rs2 {
+                        Value::Reg(r) => self.reg_a_code(r),
+                        Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
+                    };
+                    cs.set_word(branched_addr, mi.get());
+                    // mv t1, t2, rd <- rs1
+                    let mut mi = Microinstruction::new(loop_addr);
+                    mi.alu = 0b00011000;
+                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
+                        | c_code;
+                    mi.a = self.reg_a_code(rs1);
                     mi_list.push(mi.get());
 
                     cs.load_words(addr, mi_list);
@@ -833,6 +830,16 @@ mod tests {
             0b000000100_001_00110110_00000100000000000000_000_11111_00101_00000000,
             // a0, t1 <- t1 + t2
             0b000000011_000_00111100_00000010000000001000_000_01011_00111_00000000,
+
+            // CASE 2.1
+            // Copy a1 into t1, t2, a0 and go to loop
+            0b000000011_000_00011000_00000011000000001000_000_10110_11111_00000000,
+        ];
+
+        let brached_mcode: Vec<u64> = vec![
+            // CASE 2: has branched
+            // Copy a2 into t0 as go to CASE 2.1
+            0b000000101_000_00011000_00000100000000000000_000_10111_11111_00000000,
         ];
 
         for (addr, &mi) in no_branch_mcode.iter().enumerate() {
@@ -841,14 +848,6 @@ mod tests {
             // eprintln!("got:      {:061b}", firmware[addr]);
             assert_eq!(mi, firmware[addr]);
         }
-
-        let brached_mcode: Vec<u64> = vec![
-            // CASE 2: has branched
-            // Copy a2 into t0
-            0b100000010_000_00011000_00000100000000000000_000_10111_11111_00000000,
-            // Copy a1 into t1, t2, a0
-            0b000000011_000_00011000_00000011000000001000_000_10110_11111_00000000,
-        ];
 
         for (addr, &mi) in brached_mcode.iter().enumerate() {
             let addr = addr + 0b100000001;
