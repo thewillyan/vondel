@@ -255,81 +255,76 @@ impl AsmEvaluator {
                 cs_state.add_instr(mi.get());
             }
             Opcode::Mul => {
+                // Temp registers usage:
+                // - T0: gonna store the min(rs1, rs2)
+                // - T1: gonna store the max(rs1, rs2)
+                let branched_addr = cs_state.next_addr() | 0b100000000;
+
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                // JUMP if rs1 > rs2
+                mi.jam = 0b010;
+                mi.alu = 0b00111111;
+                mi.a = self.reg_a_code(rs1);
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
+                cs_state.add_instr(mi.get());
+
+                // HAS NOT JUMPED, therefore rs1 <= rs2
+                // mv t0 <- rs1
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.alu = 0b00011000;
+                mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
+                mi.a = self.reg_a_code(rs1);
+                cs_state.add_instr(mi.get());
+                // mv t1, t2, rd <- rs2
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.alu = 0b00011000;
+                mi.c_bus =
+                    self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)]) | c_code;
+                mi.a = match rs2 {
+                    Value::Reg(r) => self.reg_a_code(r),
+                    Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
+                };
+                let loop_addr = cs_state.next_addr();
+                cs_state.add_instr(mi.get());
+
+                // Intersection between the cases: t1 + .. + t1, t0-times
+                // t0 <- t0 - 1 (special case because we subtract 1 without ussing immediate)
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.jam = 0b001;
+                mi.alu = 0b00110110;
+                mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
+                mi.b = self.reg_b_code(&Register::T0);
+                cs_state.add_instr(mi.get());
+                // add t1, rd <- t1 + t2
+                let mut mi = Microinstruction::new(loop_addr);
+                mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1)]) | c_code;
+                mi.alu = 0b00111100;
+                mi.a = self.reg_a_code(&Register::T1);
+                mi.b = self.reg_b_code(&Register::T2);
+                cs_state.add_instr(mi.get());
+
+                // HAS JUMPED, therefore rs1 > rs2
+                // mv t0 <- rs2
+                let mut mi = Microinstruction::new(cs_state.next_addr() - 1);
+                mi.alu = 0b00011000;
+                mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
+                mi.a = match rs2 {
+                    Value::Reg(r) => self.reg_a_code(r),
+                    Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
+                };
                 cs_state.add_complex_instr(|cs, addr| {
-                    // Temp registers usage:
-                    // - T0: gonna store the min(rs1, rs2)
-                    // - T1: gonna store the max(rs1, rs2)
-                    let mut next_addr = addr + 1;
-                    let branched_addr = next_addr | 0b100000000;
-                    let mut mi_list = Vec::new();
-
-                    let mut mi = Microinstruction::new(next_addr);
-                    // JUMP if rs1 > rs2
-                    mi.jam = 0b010;
-                    mi.alu = 0b00111111;
-                    mi.a = self.reg_a_code(rs1);
-                    (mi.b, mi.immediate) = self.val_b_code(rs2);
-                    mi_list.push(mi.get());
-
-                    // HAS NOT JUMPED, therefore rs1 <= rs2
-                    // mv t0 <- rs1
-                    next_addr += 1;
-                    let mut mi = Microinstruction::new(next_addr);
-                    mi.alu = 0b00011000;
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
-                    mi.a = self.reg_a_code(rs1);
-                    mi_list.push(mi.get());
-                    // mv t1, t2, rd <- rs2
-                    next_addr += 1;
-                    let mut mi = Microinstruction::new(next_addr);
-                    mi.alu = 0b00011000;
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
-                        | c_code;
-                    mi.a = match rs2 {
-                        Value::Reg(r) => self.reg_a_code(r),
-                        Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
-                    };
-                    let loop_addr = next_addr;
-                    mi_list.push(mi.get());
-
-                    // Intersection between the cases: t1 + .. + t1, t0-times
-                    next_addr += 1;
-                    // t0 <- t0 - 1 (special case because we subtract 1 without ussing immediate)
-                    let mut mi = Microinstruction::new(next_addr);
-                    mi.jam = 0b001;
-                    mi.alu = 0b00110110;
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
-                    mi.b = self.reg_b_code(&Register::T0);
-                    mi_list.push(mi.get());
-                    // add t1, rd <- t1 + t2
-                    let mut mi = Microinstruction::new(loop_addr);
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1)]) | c_code;
-                    mi.alu = 0b00111100;
-                    mi.a = self.reg_a_code(&Register::T1);
-                    mi.b = self.reg_b_code(&Register::T2);
-                    mi_list.push(mi.get());
-
-                    // HAS JUMPED, therefore rs1 > rs2
-                    // mv t0 <- rs2
-                    let mut mi = Microinstruction::new(next_addr + 1);
-                    mi.alu = 0b00011000;
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
-                    mi.a = match rs2 {
-                        Value::Reg(r) => self.reg_a_code(r),
-                        Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
-                    };
                     cs.set_word(branched_addr, mi.get());
-                    // mv t1, t2, rd <- rs1
-                    let mut mi = Microinstruction::new(loop_addr);
-                    mi.alu = 0b00011000;
-                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
-                        | c_code;
-                    mi.a = self.reg_a_code(rs1);
-                    mi_list.push(mi.get());
-
-                    cs.load_words(addr, mi_list);
-                    next_addr | 0b100000000
+                    addr
                 });
+                // mv t1, t2, rd <- rs1
+                let mut mi = Microinstruction::new(loop_addr);
+                mi.alu = 0b00011000;
+                mi.c_bus =
+                    self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)]) | c_code;
+                mi.a = self.reg_a_code(rs1);
+                cs_state.add_instr(mi.get());
+
+                cs_state.add_complex_instr(|_, _| (loop_addr + 1) | 0b100000000);
             }
             _ => unimplemented!(),
         }
@@ -872,6 +867,7 @@ mod tests {
             // eprintln!("got:      {:061b}", firmware[addr]);
             assert_eq!(mi, firmware[addr]);
         }
+        assert_eq!(Microinstruction::HALT, firmware[0b100000100]);
     }
 
     #[test]
