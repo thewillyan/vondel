@@ -1,5 +1,5 @@
 use anyhow::{bail, Result};
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     assembler::{
@@ -9,57 +9,124 @@ use crate::{
     uarch::mem::{CtrlStore, CtrlStoreBuilder},
 };
 
-pub struct AsmEvaluator {}
+use super::sections::{DataKind, DataWrited, BranchInstruction};
+
+pub struct AsmEvaluator {
+    values: HashMap<Rc<str>, u8>,
+    addr: HashMap<Rc<str>, u8>,
+    ram: Vec<u32>,
+    unreachable: Vec<(Rc<str>, u8, Microinstruction)>,
+    ilc: u8,
+}
 
 impl AsmEvaluator {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            values: HashMap::new(),
+            addr: HashMap::new(),
+            ram: Vec::new(),
+            unreachable: Vec::new(),
+            ilc: 0,
+        }
     }
 
-    pub fn eval(secs: &Sections) -> CtrlStore {
+    pub fn eval(&mut self, secs: &Sections) -> CtrlStore {
         let mut cs_state = CsState::new();
 
         match secs {
             Sections::TextSection(txt_segs) => {
                 for seg in txt_segs {
-                    Self::eval_txt_seg(seg, &mut cs_state);
+                    self.eval_txt_seg(seg, &mut cs_state);
                 }
             }
-            Sections::DataSection(_data) => unimplemented!(),
+            Sections::DataSection(data) => self.eval_data_seg(data),
         }
 
         cs_state.build_cs()
     }
 
-    pub fn eval_txt_seg(txt_seg: &TextSegment, state: &mut CsState) {
+    fn eval_data_seg(&mut self, datas: &[DataWrited]) {
+        for d in datas.iter() {
+            let label = Rc::clone(&d.label);
+            match d.kind {
+                DataKind::Byte(b) => {self.values.insert(label, b);},
+                DataKind::Word(w) => {
+                    self.values.insert(label, self.ram.len() as u8);
+                    self.ram.push(w as u32);
+                }
+            }
+        }
+    }
+
+    fn eval_txt_seg(&mut self, txt_seg: &TextSegment, state: &mut CsState) {
         match txt_seg {
             // ignoring labels for now
             TextSegment::LabeledSection {
-                label: _,
+                label,
                 instructions,
             } => {
+                self.addr.insert(Rc::clone(&label), self.ilc);
                 for inst in instructions {
-                    Self::eval_inst(inst, state);
+                    self.eval_inst(inst, state);
                 }
             }
             TextSegment::GlobalSection { label: _ } => unimplemented!(),
         }
     }
 
-    pub fn eval_inst(inst: &Instruction, state: &mut CsState) {
+    fn eval_inst(&mut self, inst: &Instruction, state: &mut CsState) {
         match inst {
             Instruction::DoubleOperand(inst) => {
-                Self::eval_double_op_inst(&inst.opcode, &inst.rd, &inst.rs1, &inst.rs2, state);
+                self.eval_double_op_inst(&inst.opcode, &inst.rd, &inst.rs1, &inst.rs2, state);
             }
             Instruction::SingleOperand(ins) => {
-                Self::eval_single_op_inst(&ins.opcode, &ins.rd, &ins.rs1, state);
+                self.eval_single_op_inst(&ins.opcode, &ins.rd, &ins.rs1, state);
             }
-            Instruction::NoOperand(opcode) => Self::eval_no_op_inst(opcode.as_ref(), state),
-            _ => unimplemented!(),
+            Instruction::NoOperand(opcode) => self.eval_no_op_inst(opcode.as_ref(), state),
+            Instruction::Branch(ins) => {
+                self.eval_branch_inst(ins, state);
+            }
         }
     }
 
-    fn eval_no_op_inst(opcode: &Opcode, state: &mut CsState) {
+    fn add_instr_to_cs(&mut self, mi: Microinstruction, state: &mut CsState){
+        state.add_instr(mi.get());
+        self.ilc = state.curr_addr as u8;
+    }
+
+    fn eval_branch_inst(&mut self, ins: &BranchInstruction, state: &mut CsState){
+        let label = Rc::clone(&ins.label);
+
+        let mut lui = Microinstruction::new(state.next_addr());
+        lui.c_bus = self.get_c_code(&vec![Rc::new(Register::Pc)]);
+        lui.a = Microinstruction::IMM_A;
+
+        match self.addr.get(&ins.label){
+            Some(v) => {
+                lui.immediate = *v;
+            },
+            None => {
+                self.unreachable.push((label, state.curr_addr as u8, lui.clone()));
+            },
+        }
+
+        self.add_instr_to_cs(lui, state);
+
+        match *(ins.opcode){
+            Opcode::Beq => {
+                let mut mi = Microinstruction::new(state.next_addr());
+                mi.a = self.reg_a_code(&ins.rs1);
+                mi.b = self.reg_b_code(&ins.rs2);
+                mi.jam = 0b001;
+                mi.alu = 0b00111111;
+                self.add_instr_to_cs(mi, state);
+                257 jal
+            }
+            _ => unreachable!("There is no other 'no operand' opcode"),
+        }
+    }
+
+    fn eval_no_op_inst(&mut self, opcode: &Opcode, state: &mut CsState) {
         match opcode {
             Opcode::Halt => state.add_instr(Microinstruction::HALT),
             _ => unreachable!("There is no other 'no operand' opcode"),
@@ -67,19 +134,20 @@ impl AsmEvaluator {
     }
 
     fn eval_single_op_inst(
+        &mut self,
         op: &Opcode,
         rd: &Vec<Rc<Register>>,
         rs1: &Value,
         cs_state: &mut CsState,
     ) {
-        let c_code = Self::get_c_code(rd);
+        let c_code = self.get_c_code(rd);
         let mut mi = Microinstruction::new(cs_state.next_addr());
         mi.a = match rs1 {
             Value::Immediate(v) => {
                 mi.immediate = *v;
                 Microinstruction::IMM_A
             }
-            Value::Reg(r) => Self::reg_a_code(r.as_ref()),
+            Value::Reg(r) => self.reg_a_code(r.as_ref()),
         };
         mi.c_bus = c_code;
         mi.b = Microinstruction::NO_B;
@@ -97,28 +165,29 @@ impl AsmEvaluator {
     }
 
     fn eval_double_op_inst(
+        &mut self,
         opcode: &Opcode,
         rd: &Vec<Rc<Register>>,
         rs1: &Rc<Register>,
         rs2: &Value,
         cs_state: &mut CsState,
     ) {
-        let c_code = Self::get_c_code(rd);
+        let c_code = self.get_c_code(rd);
         match opcode {
             Opcode::Add | Opcode::Addi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00111100;
-                mi.a = Self::reg_a_code(rs1.as_ref());
-                (mi.b, mi.immediate) = Self::val_b_code(rs2);
+                mi.a = self.reg_a_code(rs1.as_ref());
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
             }
             Opcode::Sub | Opcode::Subi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00111111;
-                mi.b = Self::reg_b_code(rs1.as_ref());
-                (mi.a, mi.immediate) = Self::val_a_code(rs2);
+                mi.b = self.reg_b_code(rs1.as_ref());
+                (mi.a, mi.immediate) = self.val_a_code(rs2);
                 cs_state.add_instr(mi.get());
             }
             Opcode::Mul => {
@@ -136,8 +205,8 @@ impl AsmEvaluator {
                     // JUMP if rs1 > rs2
                     mi.jam = 0b010;
                     mi.alu = 0b00111111;
-                    mi.a = Self::reg_a_code(rs1);
-                    (mi.b, mi.immediate) = Self::val_b_code(rs2);
+                    mi.a = self.reg_a_code(rs1);
+                    (mi.b, mi.immediate) = self.val_b_code(rs2);
                     mi_list.push(mi.get());
 
                     // HAS NOT JUMPED, therefore rs1 <= rs2
@@ -145,18 +214,18 @@ impl AsmEvaluator {
                     next_addr += 1;
                     let mut mi = Microinstruction::new(next_addr);
                     mi.alu = 0b00011000;
-                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T0)]);
-                    mi.a = Self::reg_a_code(rs1);
+                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
+                    mi.a = self.reg_a_code(rs1);
                     mi_list.push(mi.get());
                     // mv t1, t2, rd <- rs2
                     next_addr += 1;
                     let mut mi = Microinstruction::new(next_addr);
                     mi.alu = 0b00011000;
                     mi.c_bus =
-                        Self::get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
+                        self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
                             | c_code;
                     mi.a = match rs2 {
-                        Value::Reg(r) => Self::reg_a_code(r),
+                        Value::Reg(r) => self.reg_a_code(r),
                         Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
                     };
                     let loop_addr = next_addr;
@@ -166,9 +235,9 @@ impl AsmEvaluator {
                     // mv t0 <- rs2
                     let mut mi = Microinstruction::new(branched_addr + 1);
                     mi.alu = 0b00011000;
-                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T0)]);
+                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
                     mi.a = match rs2 {
-                        Value::Reg(r) => Self::reg_a_code(r),
+                        Value::Reg(r) => self.reg_a_code(r),
                         Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
                     };
                     branched_mi_list.push(mi.get());
@@ -176,9 +245,9 @@ impl AsmEvaluator {
                     let mut mi = Microinstruction::new(loop_addr);
                     mi.alu = 0b00011000;
                     mi.c_bus =
-                        Self::get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
+                        self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)])
                             | c_code;
-                    mi.a = Self::reg_a_code(rs1);
+                    mi.a = self.reg_a_code(rs1);
                     branched_mi_list.push(mi.get());
                     cs.load_words(branched_addr, branched_mi_list);
 
@@ -188,15 +257,15 @@ impl AsmEvaluator {
                     let mut mi = Microinstruction::new(next_addr);
                     mi.jam = 0b001;
                     mi.alu = 0b00110110;
-                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T0)]);
-                    mi.b = Self::reg_b_code(&Register::T0);
+                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
+                    mi.b = self.reg_b_code(&Register::T0);
                     mi_list.push(mi.get());
                     // add t1, rd <- t1 + t2
                     let mut mi = Microinstruction::new(loop_addr);
-                    mi.c_bus = Self::get_c_code(&vec![Rc::new(Register::T1)]) | c_code;
+                    mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1)]) | c_code;
                     mi.alu = 0b00111100;
-                    mi.a = Self::reg_a_code(&Register::T1);
-                    mi.b = Self::reg_b_code(&Register::T2);
+                    mi.a = self.reg_a_code(&Register::T1);
+                    mi.b = self.reg_b_code(&Register::T2);
                     mi_list.push(mi.get());
 
                     cs.load_words(addr, mi_list);
@@ -208,22 +277,22 @@ impl AsmEvaluator {
     }
 
     /// Returns a pair of (A bus code, Immediate).
-    fn val_a_code(val: &Value) -> (u8, u8) {
+    fn val_a_code(&self, val: &Value) -> (u8, u8) {
         match val {
-            Value::Reg(r) => (Self::reg_a_code(r), 0),
+            Value::Reg(r) => (self.reg_a_code(r), 0),
             Value::Immediate(imm) => (Microinstruction::IMM_A, *imm),
         }
     }
 
     /// Returns a pair of (B bus code, Immediate).
-    fn val_b_code(val: &Value) -> (u8, u8) {
+    fn val_b_code(&self, val: &Value) -> (u8, u8) {
         match val {
-            Value::Reg(r) => (Self::reg_b_code(r), 0),
+            Value::Reg(r) => (self.reg_b_code(r), 0),
             Value::Immediate(imm) => (Microinstruction::IMM_B, *imm),
         }
     }
 
-    fn reg_a_code(reg: &Register) -> u8 {
+    fn reg_a_code(&self, reg: &Register) -> u8 {
         match reg {
             Register::Mdr => 0,
             Register::Pc => 1,
@@ -253,7 +322,7 @@ impl AsmEvaluator {
         }
     }
 
-    pub fn reg_b_code(reg: &Register) -> u8 {
+    pub fn reg_b_code(&self, reg: &Register) -> u8 {
         match reg {
             Register::Mdr => 0,
             Register::Lv => 1,
@@ -279,7 +348,7 @@ impl AsmEvaluator {
     }
 
     /// Returns the c bus field content of the MI. (20 bits)
-    fn get_c_code(regs: &Vec<Rc<Register>>) -> u32 {
+    fn get_c_code(&self, regs: &Vec<Rc<Register>>) -> u32 {
         let mut c_code = 0;
         for reg in regs {
             match reg.as_ref() {
@@ -313,7 +382,7 @@ impl AsmEvaluator {
 #[derive(Default)]
 pub struct CsState {
     builder: CtrlStoreBuilder,
-    curr_addr: u16,
+    pub curr_addr: u16,
 }
 
 impl CsState {
@@ -348,6 +417,7 @@ impl CsState {
     }
 }
 
+#[derive(Clone)]
 struct Microinstruction {
     pub next: u16,
     pub jam: u8,
@@ -421,7 +491,7 @@ mod tests {
             Rc::new(Register::S5),
             Rc::new(Register::Ra),
         ];
-        assert_eq!(0b10001000000000110001, AsmEvaluator::get_c_code(&regs));
+        assert_eq!(0b10001000000000110001, AsmEvaluator::new().get_c_code(&regs));
     }
 
     #[test]
@@ -456,7 +526,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00111100_00000000000000001100_000_01010_10011_00000000;
 
@@ -481,7 +551,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00111100_00000000000000001100_000_01010_00011_00000101;
 
@@ -506,7 +576,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00111111_00000000000000001100_000_11000_00101_00000000;
 
@@ -531,7 +601,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00111111_00000000000000001100_000_01000_00101_00000111;
 
@@ -554,7 +624,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00011000_00000000000000000001_000_01000_11111_00000001;
@@ -578,7 +648,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00011000_00000000000000000001_000_00000_11111_00000000;
@@ -602,7 +672,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_00011010_00000000000000000011_000_00000_11111_00000000;
@@ -626,7 +696,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_10011000_00000000000000000011_000_00000_11111_00000000;
@@ -650,7 +720,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_11011000_00000000000000000011_000_00000_11111_00000000;
@@ -674,7 +744,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = 0b000000001_000_01011000_00000000000000000011_000_00000_11111_00000000;
@@ -700,7 +770,7 @@ mod tests {
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::eval(&secs).firmware();
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         let no_branch_mcode: Vec<u64> = vec![
             // JUMP if a1 > a2 (a2 - a1 < 0)
