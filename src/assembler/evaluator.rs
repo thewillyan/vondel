@@ -67,7 +67,7 @@ impl AsmEvaluator {
                 label,
                 instructions,
             } => {
-                self.addr.insert(Rc::clone(&label), self.ilc);
+                self.addr.insert(Rc::clone(label), self.ilc);
                 for inst in instructions {
                     self.eval_inst(inst, state);
                 }
@@ -88,7 +88,24 @@ impl AsmEvaluator {
             Instruction::Branch(ins) => {
                 self.eval_branch_inst(ins, state);
             }
+            Instruction::Jal(label) => {
+                self.eval_jal_inst(label, state);
+            }
         }
+    }
+
+    fn eval_jal_inst(&mut self, label: &Rc<str>, state: &mut CsState) {
+        let mut mi = Microinstruction::new(state.next_addr());
+        match self.addr.get(label) {
+            Some(v) => {
+                mi.next = *v as u16;
+            }
+            None => {
+                self.unreachable
+                    .push((Rc::clone(label), state.curr_addr as u8, mi.clone()));
+            }
+        }
+        state.add_instr(mi.get());
     }
 
     fn add_instr_to_cs(&mut self, mi: Microinstruction, state: &mut CsState) {
@@ -830,7 +847,6 @@ mod tests {
             0b000000100_001_00110110_00000100000000000000_000_11111_00101_00000000,
             // a0, t1 <- t1 + t2
             0b000000011_000_00111100_00000010000000001000_000_01011_00111_00000000,
-
             // CASE 2.1
             // Copy a1 into t1, t2, a0 and go to loop
             0b000000011_000_00011000_00000011000000001000_000_10110_11111_00000000,
@@ -920,6 +936,37 @@ mod tests {
             eprintln!("addr:     {:09b}", addr);
             eprintln!("expected: {:061b}", mi);
             eprintln!("got:      {:061b}", firmware[addr]);
+            assert_eq!(firmware[addr], *mi);
+        }
+
+        for i in expected.len()..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn jal() {
+        let instructions = vec![
+            Instruction::new_jal_instruction(Rc::from("tubias")),
+            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+        ];
+        let tubias = TextSegment::new_labeled_section(
+            "tubias".into(),
+            vec![Instruction::new_no_operand_instruction(Rc::new(
+                Opcode::Halt,
+            ))],
+        );
+        let main = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![tubias, main]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+
+        let expected = [
+            Microinstruction::HALT,
+            0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000,
+            Microinstruction::HALT,
+        ];
+
+        for (addr, mi) in expected.iter().enumerate() {
             assert_eq!(firmware[addr], *mi);
         }
 

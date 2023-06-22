@@ -386,8 +386,14 @@ impl Parser {
                 let label = self.get_label()?;
                 Instruction::new_branch_instruction(op, rs1, rs2, label)
             }
+            // Jal
+            Opcode::Jal => {
+                self.next_token();
+                let label = self.get_label()?;
+                Instruction::new_jal_instruction(label)
+            }
             // No Operand Instructions
-            Opcode::Halt | Opcode::Nop | Opcode::Jal | Opcode::Write | Opcode::Read => {
+            Opcode::Halt | Opcode::Nop | Opcode::Write | Opcode::Read => {
                 Instruction::new_no_operand_instruction(op)
             }
         };
@@ -856,7 +862,6 @@ main:
 main:
     halt
     nop
-    jal
     write
     read
         ";
@@ -868,10 +873,30 @@ main:
             vec![
                 Instruction::new_no_operand_instruction(Rc::new(Halt)),
                 Instruction::new_no_operand_instruction(Rc::new(Nop)),
-                Instruction::new_no_operand_instruction(Rc::new(Jal)),
                 Instruction::new_no_operand_instruction(Rc::new(Write)),
                 Instruction::new_no_operand_instruction(Rc::new(Read)),
             ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_jal() -> Result<()> {
+        let input = r"
+.text
+main:
+    jal tubias
+        ";
+
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![Instruction::new_jal_instruction(Rc::from("tubias"))],
         )]);
         assert_eq!(program.sections.len(), 1);
         assert_eq!(program.errors.len(), 0);

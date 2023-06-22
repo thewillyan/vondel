@@ -37,6 +37,7 @@ pub enum Instruction {
     SingleOperand(SingleOperandInstruction),
     Branch(BranchInstruction),
     NoOperand(Rc<Opcode>),
+    Jal(Rc<str>),
 }
 
 impl Instruction {
@@ -64,6 +65,10 @@ impl Instruction {
 
     pub fn new_no_operand_instruction(opcode: Rc<Opcode>) -> Instruction {
         Instruction::NoOperand(opcode)
+    }
+
+    pub fn new_jal_instruction(label: Rc<str>) -> Instruction {
+        Instruction::Jal(label)
     }
 
     pub fn new_branch_instruction(
