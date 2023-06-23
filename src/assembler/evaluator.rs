@@ -18,7 +18,7 @@ pub struct AsmEvaluator {
     values: HashMap<Rc<str>, u8>,
     addr: HashMap<Rc<str>, u8>,
     ram: Vec<u32>,
-    unreachable: Vec<(Rc<str>, u8, Microinstruction)>,
+    unreachable: Vec<(Rc<str>, u16, Microinstruction)>,
 }
 
 impl AsmEvaluator {
@@ -124,7 +124,7 @@ impl AsmEvaluator {
                 .expect("Should be defined before");
 
             micro.next = addr as u16;
-            state.set_instr(cs_addr as u16, micro.get());
+            state.set_instr(cs_addr, micro.get());
         }
     }
 
@@ -154,7 +154,7 @@ impl AsmEvaluator {
             }
             None => {
                 self.unreachable
-                    .push((Rc::clone(label), state.curr_addr as u8, mi.clone()));
+                    .push((Rc::clone(label), state.curr_addr, mi.clone()));
             }
         }
         state.add_instr(mi.get());
@@ -163,30 +163,39 @@ impl AsmEvaluator {
     fn eval_branch_inst(&mut self, ins: &BranchInstruction, state: &mut CsState) {
         let label = Rc::clone(&ins.label);
 
-        let mut lui = Microinstruction::new(state.next_addr());
-        lui.c_bus = self.get_c_code(&vec![Rc::new(Register::Pc)]);
-        lui.a = Microinstruction::IMM_A;
+        let mut first = Microinstruction::new(state.next_addr());
+        let branched_addr = state.next_addr() | 0b100000000;
+        first.a = self.reg_a_code(&ins.rs1);
+        first.b = self.reg_b_code(&ins.rs2);
+        first.alu = 0b00111111;
 
-        match self.addr.get(&ins.label) {
+        match *(ins.opcode) {
+            Opcode::Beq => first.jam = 0b001,
+            Opcode::Bne => first.jam = 0b011,
+            Opcode::Blt => {
+                first.jam = 0b010;
+                first.a = self.reg_a_code(&ins.rs2);
+                first.b = self.reg_b_code(&ins.rs1);
+            }
+            Opcode::Bge => first.jam = 0b010,
+            _ => unreachable!("There is no other 'no operand' opcode"),
+        }
+
+        state.add_instr(first.get());
+
+        let mut branched = Microinstruction::new(branched_addr);
+
+        match self.addr.get(&label) {
             Some(v) => {
-                lui.immediate = *v;
+                branched.next = *v as u16;
             }
             None => {
                 self.unreachable
-                    .push((label, state.curr_addr as u8, lui.clone()));
+                    .push((label, branched_addr, branched.clone()));
             }
         }
 
-        match *(ins.opcode) {
-            Opcode::Beq => {
-                let mut mi = Microinstruction::new(state.next_addr());
-                mi.a = self.reg_a_code(&ins.rs1);
-                mi.b = self.reg_b_code(&ins.rs2);
-                mi.jam = 0b001;
-                mi.alu = 0b00111111;
-            }
-            _ => unreachable!("There is no other 'no operand' opcode"),
-        }
+        state.set_instr(branched_addr, branched.get());
     }
 
     fn eval_no_op_inst(&mut self, opcode: &Opcode, state: &mut CsState) {
@@ -1017,5 +1026,261 @@ mod tests {
         for i in expected.len()..=255 {
             assert_eq!(firmware[i], 0);
         }
+    }
+
+    #[test]
+    fn beq() {
+        let done = TextSegment::new_labeled_section(
+            "done".into(),
+            vec![Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Add),
+                vec![Rc::new(Register::A0)],
+                Rc::new(Register::A1),
+                Value::Reg(Rc::new(Register::A2)),
+            )],
+        );
+        let main = TextSegment::new_labeled_section(
+            "main".into(),
+            vec![
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Opcode::Add),
+                    vec![Rc::new(Register::A0)],
+                    Rc::new(Register::A1),
+                    Value::Reg(Rc::new(Register::A2)),
+                ),
+                Instruction::new_branch_instruction(
+                    Rc::new(Opcode::Beq),
+                    Rc::new(Register::A1),
+                    Rc::new(Register::A2),
+                    Rc::from("done"),
+                ),
+            ],
+        );
+        let secs = Sections::new_text_section(vec![done, main]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+
+        let no_branch_mcode: Vec<u64> = vec![
+            // add a0 <- a1, a2
+            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // add a0 <- a1, a2
+            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // beq a1 == a2, done
+            0b000000011_001_00111111_00000000000000000000_000_10110_10010_00000000,
+        ];
+
+        let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
+
+        for (addr, &mi) in no_branch_mcode.iter().enumerate() {
+            assert_eq!(mi, firmware[addr]);
+        }
+
+        let branched_addr = 3 | 0b100000000;
+        assert_eq!(branched_mcode, firmware[branched_addr]);
+    }
+
+    #[test]
+    fn bne() {
+        let done = TextSegment::new_labeled_section(
+            "done".into(),
+            vec![Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Add),
+                vec![Rc::new(Register::A0)],
+                Rc::new(Register::A1),
+                Value::Reg(Rc::new(Register::A2)),
+            )],
+        );
+        let main = TextSegment::new_labeled_section(
+            "main".into(),
+            vec![
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Opcode::Add),
+                    vec![Rc::new(Register::A0)],
+                    Rc::new(Register::A1),
+                    Value::Reg(Rc::new(Register::A2)),
+                ),
+                Instruction::new_branch_instruction(
+                    Rc::new(Opcode::Bne),
+                    Rc::new(Register::A2),
+                    Rc::new(Register::A3),
+                    Rc::from("done"),
+                ),
+            ],
+        );
+        let secs = Sections::new_text_section(vec![done, main]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+
+        let no_branch_mcode: Vec<u64> = vec![
+            // add a0 <- a1, a2
+            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // add a0 <- a1, a2
+            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // bgt a2, a3, done
+            0b000000011_011_00111111_00000000000000000000_000_10111_10011_00000000,
+        ];
+
+        let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
+
+        for (addr, &mi) in no_branch_mcode.iter().enumerate() {
+            assert_eq!(mi, firmware[addr]);
+        }
+
+        let branched_addr = 3 | 0b100000000;
+        assert_eq!(branched_mcode, firmware[branched_addr]);
+    }
+
+    #[test]
+    fn blt() {
+        let done = TextSegment::new_labeled_section(
+            "done".into(),
+            vec![Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Add),
+                vec![Rc::new(Register::A0)],
+                Rc::new(Register::A1),
+                Value::Reg(Rc::new(Register::A2)),
+            )],
+        );
+        let main = TextSegment::new_labeled_section(
+            "main".into(),
+            vec![
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Opcode::Add),
+                    vec![Rc::new(Register::A0)],
+                    Rc::new(Register::A1),
+                    Value::Reg(Rc::new(Register::A2)),
+                ),
+                Instruction::new_branch_instruction(
+                    Rc::new(Opcode::Blt),
+                    Rc::new(Register::A2),
+                    Rc::new(Register::A3),
+                    Rc::from("done"),
+                ),
+            ],
+        );
+        let secs = Sections::new_text_section(vec![done, main]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+
+        let no_branch_mcode: Vec<u64> = vec![
+            // add a0 <- a1, a2
+            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // add a0 <- a1, a2
+            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // blt a2, a3, done
+            0b000000011_010_00111111_00000000000000000000_000_11000_10010_00000000,
+        ];
+
+        let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
+
+        for (addr, &mi) in no_branch_mcode.iter().enumerate() {
+            assert_eq!(mi, firmware[addr]);
+        }
+
+        let branched_addr = 3 | 0b100000000;
+        assert_eq!(branched_mcode, firmware[branched_addr]);
+    }
+
+    #[test]
+    fn bgt() {
+        let done = TextSegment::new_labeled_section(
+            "done".into(),
+            vec![Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Add),
+                vec![Rc::new(Register::A0)],
+                Rc::new(Register::A1),
+                Value::Reg(Rc::new(Register::A2)),
+            )],
+        );
+        let main = TextSegment::new_labeled_section(
+            "main".into(),
+            vec![
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Opcode::Add),
+                    vec![Rc::new(Register::A0)],
+                    Rc::new(Register::A1),
+                    Value::Reg(Rc::new(Register::A2)),
+                ),
+                Instruction::new_branch_instruction(
+                    Rc::new(Opcode::Bge),
+                    Rc::new(Register::A2),
+                    Rc::new(Register::A3),
+                    Rc::from("done"),
+                ),
+            ],
+        );
+        let secs = Sections::new_text_section(vec![done, main]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+
+        let no_branch_mcode: Vec<u64> = vec![
+            // add a0 <- a1, a2
+            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // add a0 <- a1, a2
+            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // bgt a2, a3, done
+            0b000000011_010_00111111_00000000000000000000_000_10111_10011_00000000,
+        ];
+
+        let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
+
+        for (addr, &mi) in no_branch_mcode.iter().enumerate() {
+            assert_eq!(mi, firmware[addr]);
+        }
+
+        let branched_addr = 3 | 0b100000000;
+        assert_eq!(branched_mcode, firmware[branched_addr]);
+    }
+
+    #[test]
+    fn resolve_unreachable() {
+        let main = TextSegment::new_labeled_section(
+            "main".into(),
+            vec![
+                Instruction::new_double_operand_instruction(
+                    Rc::new(Opcode::Add),
+                    vec![Rc::new(Register::A0)],
+                    Rc::new(Register::A1),
+                    Value::Reg(Rc::new(Register::A2)),
+                ),
+                Instruction::new_branch_instruction(
+                    Rc::new(Opcode::Beq),
+                    Rc::new(Register::A2),
+                    Rc::new(Register::A3),
+                    Rc::from("unresolved"),
+                ),
+            ],
+        );
+        let unresolved = TextSegment::new_labeled_section(
+            "unresolved".into(),
+            vec![Instruction::new_double_operand_instruction(
+                Rc::new(Opcode::Add),
+                vec![Rc::new(Register::A0)],
+                Rc::new(Register::A1),
+                Value::Reg(Rc::new(Register::A2)),
+            )],
+        );
+
+        let mut evaluator = AsmEvaluator::new();
+        let mut state = CsState::new();
+        evaluator.eval_txt_seg(&main, &mut state);
+        evaluator.eval_txt_seg(&unresolved, &mut state);
+        evaluator.resolve_unreachable(&mut state);
+
+        let firmware = state.build_cs().firmware();
+
+        let no_branch_mcode: Vec<u64> = vec![
+            // add a0 <- a1, a2
+            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            // beq a2, a3, done
+            0b000000010_001_00111111_00000000000000000000_000_10111_10011_00000000,
+            // add a0 <- a1, a2
+            0b000000011_000_00111100_00000000000000001000_000_10110_10010_00000000,
+        ];
+
+        let branched_mcode = 0b000000010_000_00000000_00000000000000000000_000_11111_11111_00000000;
+
+        for (addr, &mi) in no_branch_mcode.iter().enumerate() {
+            assert_eq!(mi, firmware[addr]);
+        }
+
+        let branched_addr = 2 | 0b100000000;
+        assert_eq!(branched_mcode, firmware[branched_addr]);
     }
 }
