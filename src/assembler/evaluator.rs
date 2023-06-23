@@ -221,7 +221,7 @@ impl AsmEvaluator {
                 first.a = self.reg_a_code(&ins.rs2);
                 first.b = self.reg_b_code(&ins.rs1);
             }
-            Opcode::Bge => first.jam = 0b010,
+            Opcode::Bgt => first.jam = 0b010,
             _ => unreachable!("There is no other 'no operand' opcode"),
         }
 
@@ -1232,7 +1232,7 @@ mod tests {
                     Value::Reg(Rc::new(Register::A2)),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Opcode::Bge),
+                    Rc::new(Opcode::Bgt),
                     Rc::new(Register::A2),
                     Rc::new(Register::A3),
                     Rc::from("done"),

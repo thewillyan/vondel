@@ -76,7 +76,7 @@ pub enum Opcode {
     Beq,
     Bne,
     Blt,
-    Bge,
+    Bgt,
     // Multiplication Operations
     Mul,
     // Read and Write
@@ -145,7 +145,7 @@ impl AsmToken {
             "beq" => AsmToken::Opcode(Rc::new(Opcode::Beq)),
             "bne" => AsmToken::Opcode(Rc::new(Opcode::Bne)),
             "blt" => AsmToken::Opcode(Rc::new(Opcode::Blt)),
-            "bge" => AsmToken::Opcode(Rc::new(Opcode::Bge)),
+            "bgt" => AsmToken::Opcode(Rc::new(Opcode::Bgt)),
             "mul" => AsmToken::Opcode(Rc::new(Opcode::Mul)),
             "halt" => AsmToken::Opcode(Rc::new(Opcode::Halt)),
             "read" => AsmToken::Opcode(Rc::new(Opcode::Read)),

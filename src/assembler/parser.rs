@@ -376,7 +376,7 @@ impl Parser {
                 Instruction::new_single_operand_instruction(op, dest_regs, rs1)
             }
             // Branch motherfucker
-            Opcode::Beq | Opcode::Bne | Opcode::Blt | Opcode::Bge => {
+            Opcode::Beq | Opcode::Bne | Opcode::Blt | Opcode::Bgt => {
                 self.next_token();
                 let rs1 = self.guard_a_bus(self.get_register()?)?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -844,7 +844,7 @@ main:
     beq t0, t1, main
     bne t0, t1, kkk
     blt t0, t1, tubias
-    bge t0, t1, gepeto
+    bgt t0, t1, gepeto
         ";
 
         let program = create_program(input);
@@ -871,7 +871,7 @@ main:
                     Rc::from("tubias"),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Bge),
+                    Rc::new(Bgt),
                     Rc::from(T0),
                     Rc::from(T1),
                     Rc::from("gepeto"),

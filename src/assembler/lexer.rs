@@ -224,7 +224,7 @@ mod tests {
         let input = r"
         lui addi subi slti andi ori
         add sub slt and or sll sra sla nop not mov
-        beq bne blt bge
+        beq bne blt bgt
         mul
         halt
 
@@ -251,7 +251,7 @@ mod tests {
             Opcode(Rc::new(Beq)),
             Opcode(Rc::new(Bne)),
             Opcode(Rc::new(Blt)),
-            Opcode(Rc::new(Bge)),
+            Opcode(Rc::new(Bgt)),
             Opcode(Rc::new(Mul)),
             Opcode(Rc::new(Halt)),
             Eof,
