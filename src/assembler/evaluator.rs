@@ -307,6 +307,22 @@ impl AsmEvaluator {
                 (mi.a, mi.immediate) = self.val_a_code(rs2);
                 cs_state.add_instr(mi.get());
             }
+            Opcode::And | Opcode::Andi => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.c_bus = c_code;
+                mi.alu = 0b00011000;
+                mi.a = self.reg_a_code(rs1.as_ref());
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
+                cs_state.add_instr(mi.get());
+            }
+            Opcode::Or | Opcode::Ori => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.c_bus = c_code;
+                mi.alu = 0b00011100;
+                mi.a = self.reg_a_code(rs1.as_ref());
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
+                cs_state.add_instr(mi.get());
+            }
             Opcode::Mul => {
                 // Temp registers usage:
                 // - T0: gonna store the min(rs1, rs2)
