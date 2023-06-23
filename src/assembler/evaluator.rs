@@ -3,6 +3,8 @@ use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     assembler::{
+        lexer::Lexer,
+        parser::{Parser, Program},
         sections::{Instruction, Sections, TextSegment, Value},
         tokens::{Opcode, Register},
     },
@@ -11,6 +13,7 @@ use crate::{
 
 use super::sections::{BranchInstruction, DataKind, DataWrited};
 
+#[derive(Default)]
 pub struct AsmEvaluator {
     values: HashMap<Rc<str>, u8>,
     addr: HashMap<Rc<str>, u8>,
@@ -30,6 +33,43 @@ impl AsmEvaluator {
         }
     }
 
+    pub fn evaluate_buffer(&mut self, buf: &str) -> Result<(CtrlStore, &[u32])> {
+        let toks = Lexer::new(buf).get_deez_toks_w_ctx();
+        let program = Parser::new(toks.into()).get_deez_program();
+
+        self.eval_program(program)
+    }
+
+    pub fn eval_program(&mut self, prog: Program) -> Result<(CtrlStore, &[u32])> {
+        if !prog.errors.is_empty() {
+            eprintln!("Errors found while parsing the program.");
+            for err in prog.errors {
+                eprintln!("{}", err);
+            }
+            bail!("Errors found while parsing the program.");
+        }
+
+        let mut data = Vec::new();
+        let mut text = Vec::new();
+
+        for sec in prog.sections {
+            match sec {
+                Sections::TextSection(t) => {
+                    text.extend(t);
+                }
+                Sections::DataSection(d) => data.extend(d),
+            }
+        }
+
+        let mut cs = CsState::new();
+
+        data.iter().for_each(|d| self.eval_data_seg(d));
+        text.iter().for_each(|t| self.eval_txt_seg(t, &mut cs));
+        self.resolve_unreachable(&mut cs);
+
+        Ok((cs.build_cs(), &self.ram))
+    }
+
     pub fn eval(&mut self, secs: &Sections) -> CtrlStore {
         let mut cs_state = CsState::new();
 
@@ -39,23 +79,25 @@ impl AsmEvaluator {
                     self.eval_txt_seg(seg, &mut cs_state);
                 }
             }
-            Sections::DataSection(data) => self.eval_data_seg(data),
+            Sections::DataSection(data) => {
+                for seg in data {
+                    self.eval_data_seg(seg);
+                }
+            }
         }
 
         cs_state.build_cs()
     }
 
-    fn eval_data_seg(&mut self, datas: &[DataWrited]) {
-        for d in datas.iter() {
-            let label = Rc::clone(&d.label);
-            match d.kind {
-                DataKind::Byte(b) => {
-                    self.values.insert(label, b);
-                }
-                DataKind::Word(w) => {
-                    self.values.insert(label, self.ram.len() as u8);
-                    self.ram.push(w as u32);
-                }
+    fn eval_data_seg(&mut self, data: &DataWrited) {
+        let label = Rc::clone(&data.label);
+        match data.kind {
+            DataKind::Byte(b) => {
+                self.values.insert(label, b);
+            }
+            DataKind::Word(w) => {
+                self.values.insert(label, self.ram.len() as u8);
+                self.ram.push(w as u32);
             }
         }
     }
@@ -73,6 +115,19 @@ impl AsmEvaluator {
                 }
             }
             TextSegment::GlobalSection { label: _ } => unimplemented!(),
+        }
+    }
+
+    fn resolve_unreachable(&mut self, state: &mut CsState) {
+        for (label, cs_addr, micro) in self.unreachable.drain(..) {
+            let addr = *self
+                .addr
+                .get(label.as_ref())
+                .expect("Should be defined before");
+
+            //TODO: Not well defined
+
+            state.set_instr(cs_addr as u16, micro.get());
         }
     }
 
@@ -455,6 +510,10 @@ impl CsState {
     pub fn add_instr(&mut self, inst: u64) {
         let b = self.builder.set_word(self.curr_addr, inst);
         self.curr_addr = self.next_addr();
+    }
+
+    pub fn set_instr(&mut self, addr: u16, inst: u64) {
+        self.builder.set_word(addr, inst);
     }
 
     /// Add a complex instructions from a functions that returns the address which
