@@ -341,7 +341,7 @@ impl Parser {
 
         let res = match *op {
             // Register Register Instructions
-            Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::And | Opcode::Or | Opcode::Slt => {
+            Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::And | Opcode::Or => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -350,7 +350,7 @@ impl Parser {
                 Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
             }
             // Imediate Register Instructions
-            Opcode::Addi | Opcode::Slti | Opcode::Andi | Opcode::Ori | Opcode::Subi => {
+            Opcode::Addi | Opcode::Andi | Opcode::Ori | Opcode::Subi => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -601,7 +601,6 @@ main:
     mul t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
     and t0 <- a0, a1
     or t0 <- a0, a1
-    slt t0 <- a0, a1
 
 .text
 error:
@@ -659,12 +658,6 @@ error2:
                     Rc::from(A0),
                     Value::Reg(Rc::from(A1)),
                 ),
-                Instruction::new_double_operand_instruction(
-                    Rc::new(Slt),
-                    vec![Rc::from(T0)],
-                    Rc::from(A0),
-                    Value::Reg(Rc::from(A1)),
-                ),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);
@@ -682,7 +675,6 @@ error2:
 .text
 main:
     addi t0 <- t1, 8
-    slti t1, t2, t3, s0 <- t1, 7
     andi t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
     ori t0 <- t1, 8
     subi t0 <- t1, 8
@@ -706,12 +698,6 @@ error2:
                     vec![Rc::from(T0)],
                     Rc::from(T1),
                     Value::Immediate(8),
-                ),
-                Instruction::new_double_operand_instruction(
-                    Rc::new(Slti),
-                    vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
-                    Rc::from(T1),
-                    Value::Immediate(7),
                 ),
                 Instruction::new_double_operand_instruction(
                     Rc::new(Andi),
@@ -893,7 +879,6 @@ main:
 main:
     halt
     nop
-    read
         ";
 
         let program = create_program(input);
@@ -903,7 +888,6 @@ main:
             vec![
                 Instruction::new_no_operand_instruction(Rc::new(Halt)),
                 Instruction::new_no_operand_instruction(Rc::new(Nop)),
-                Instruction::new_no_operand_instruction(Rc::new(Read)),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);

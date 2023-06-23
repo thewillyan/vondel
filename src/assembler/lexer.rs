@@ -222,8 +222,8 @@ mod tests {
         use super::AsmToken::{Eof, Opcode};
         use crate::assembler::tokens::Opcode::*;
         let input = r"
-        lui addi subi slti andi ori
-        add sub slt and or sll sra sla nop not mov
+        lui addi subi andi ori
+        add sub and or sll sra sla nop not mov
         beq bne blt bgt
         mul
         halt
@@ -234,12 +234,10 @@ mod tests {
             Opcode(Rc::new(Lui)),
             Opcode(Rc::new(Addi)),
             Opcode(Rc::new(Subi)),
-            Opcode(Rc::new(Slti)),
             Opcode(Rc::new(Andi)),
             Opcode(Rc::new(Ori)),
             Opcode(Rc::new(Add)),
             Opcode(Rc::new(Sub)),
-            Opcode(Rc::new(Slt)),
             Opcode(Rc::new(And)),
             Opcode(Rc::new(Or)),
             Opcode(Rc::new(Sll)),
