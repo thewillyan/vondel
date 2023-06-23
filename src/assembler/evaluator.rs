@@ -5,7 +5,7 @@ use crate::{
     assembler::{
         lexer::Lexer,
         parser::{Parser, Program},
-        sections::{Instruction, Sections, TextSegment, Value},
+        sections::{ImmediateOrLabel, Instruction, Sections, TextSegment, Value},
         tokens::{Opcode, Register},
     },
     uarch::mem::{CtrlStore, CtrlStoreBuilder},
@@ -143,7 +143,39 @@ impl AsmEvaluator {
             Instruction::Jal(label) => {
                 self.eval_jal_inst(label, state);
             }
+            Instruction::WriteInstruction(addr, rd) => {
+                self.eval_write_inst(addr, rd, state);
+            }
         }
+    }
+
+    fn eval_write_inst(&mut self, addr: &ImmediateOrLabel, rd: &Rc<Register>, state: &mut CsState) {
+        // if rd.len() != 1 {
+        //     unreachable!(
+        //         "Write instruction should not have more than \
+        //                          one register as a parameter."
+        //     )
+        // }
+        //
+        // let mut mi = Microinstruction::new(cs_state.next_addr());
+        // mi.c_bus = self.get_c_code(&vec![Rc::new(Register::Mdr)]);
+        // mi.alu = 0b00011000;
+        // mi.a = self.reg_a_code(&rd[0]);
+        // cs_state.add_instr(mi.get());
+        //
+        // let mut mi = Microinstruction::new(cs_state.next_addr());
+        // mi.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
+        // mi.alu = 0b00011000;
+        // mi.mem = 0b100;
+        // match rs1 {
+        //     Value::Immediate(imm) => {
+        //         mi.immediate = *imm;
+        //         mi.a = Microinstruction::IMM_A;
+        //     }
+        //     _ => unreachable!("Should not receive a register as a parameter."),
+        // }
+        // cs_state.add_instr(mi.get());
+        todo!()
     }
 
     fn eval_jal_inst(&mut self, label: &Rc<str>, state: &mut CsState) {
@@ -232,33 +264,6 @@ impl AsmEvaluator {
                 mi.c_bus = c_code;
                 mi.alu = 0b00011000;
                 mi.a = self.reg_a_code(&Register::Mdr);
-                cs_state.add_instr(mi.get());
-            }
-            Opcode::Write => {
-                if rd.len() != 1 {
-                    unreachable!(
-                        "Write instruction should not have more than \
-                                 one register as a parameter."
-                    )
-                }
-
-                let mut mi = Microinstruction::new(cs_state.next_addr());
-                mi.c_bus = self.get_c_code(&vec![Rc::new(Register::Mdr)]);
-                mi.alu = 0b00011000;
-                mi.a = self.reg_a_code(&rd[0]);
-                cs_state.add_instr(mi.get());
-
-                let mut mi = Microinstruction::new(cs_state.next_addr());
-                mi.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
-                mi.alu = 0b00011000;
-                mi.mem = 0b100;
-                match rs1 {
-                    Value::Immediate(imm) => {
-                        mi.immediate = *imm;
-                        mi.a = Microinstruction::IMM_A;
-                    }
-                    _ => unreachable!("Should not receive a register as a parameter."),
-                }
                 cs_state.add_instr(mi.get());
             }
             _ => {

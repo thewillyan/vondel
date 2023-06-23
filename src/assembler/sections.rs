@@ -9,6 +9,12 @@ pub enum Value {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum ImmediateOrLabel {
+    Immediate(u8),
+    Label(Rc<str>),
+}
+
+#[derive(Debug, PartialEq)]
 pub struct DoubleOperandInstruction {
     pub opcode: Rc<Opcode>,
     pub rd: Vec<Rc<Register>>,
@@ -37,6 +43,7 @@ pub enum Instruction {
     SingleOperand(SingleOperandInstruction),
     Branch(BranchInstruction),
     NoOperand(Rc<Opcode>),
+    WriteInstruction(ImmediateOrLabel, Rc<Register>),
     Jal(Rc<str>),
 }
 
@@ -69,6 +76,13 @@ impl Instruction {
 
     pub fn new_jal_instruction(label: Rc<str>) -> Instruction {
         Instruction::Jal(label)
+    }
+
+    pub fn new_write_instruction(
+        immediate_or_label: ImmediateOrLabel,
+        rd: Rc<Register>,
+    ) -> Instruction {
+        Instruction::WriteInstruction(immediate_or_label, rd)
     }
 
     pub fn new_branch_instruction(

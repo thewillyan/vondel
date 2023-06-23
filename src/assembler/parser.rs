@@ -4,7 +4,7 @@ use std::mem::discriminant;
 use std::rc::Rc;
 
 use crate::assembler::{
-    sections::{DataWrited, Instruction, TextSegment, Value},
+    sections::{DataWrited, ImmediateOrLabel, Instruction, TextSegment, Value},
     tokens::{Opcode, PseudoOps, Register},
 };
 
@@ -55,28 +55,29 @@ pub enum ParserError {
         cur_column: usize,
     },
 
-    #[error(
-        "Register cannot be used in A Bus, found: {found}\nContext: line {cur_line}, column {cur_column}"
-    )]
+    #[error("Register cannot be used in A Bus, found: {found}\nContext: line {cur_line}, column {cur_column}")]
     RegisterCannotBeUsedInABus {
         found: String,
         cur_line: usize,
         cur_column: usize,
     },
 
-    #[error(
-        "Register cannot be used in B Bus, found: {found}\nContext: line {cur_line}, column {cur_column}"
-    )]
+    #[error("Register cannot be used in B Bus, found: {found}\nContext: line {cur_line}, column {cur_column}")]
     RegisterCannotBeUsedInBBus {
         found: String,
         cur_line: usize,
         cur_column: usize,
     },
 
-    #[error(
-        "Register cannot be used in C Bus, found: {found}\nContext: line {cur_line}, column {cur_column}"
-    )]
+    #[error("Register cannot be used in C Bus, found: {found}\nContext: line {cur_line}, column {cur_column}")]
     RegisterCannotBeUsedInCBus {
+        found: String,
+        cur_line: usize,
+        cur_column: usize,
+    },
+
+    #[error("Write Operation only accepts an 'Immediate' or a 'Label'")]
+    WriterOnlyAcceptsImmediateOrLabel {
         found: String,
         cur_line: usize,
         cur_column: usize,
@@ -392,8 +393,24 @@ impl Parser {
                 let label = self.get_label()?;
                 Instruction::new_jal_instruction(label)
             }
+            Opcode::Write => {
+                self.next_token();
+                let addr = match *self.cur_tok {
+                    AsmToken::Number(ref n) => ImmediateOrLabel::Immediate(Rc::clone(n).parse()?),
+                    AsmToken::Label(ref l) => ImmediateOrLabel::Label(Rc::clone(l)),
+                    _ => bail!(ParserError::WriterOnlyAcceptsImmediateOrLabel {
+                        found: format!("{:?}", self.cur_tok),
+                        cur_line: self.cur_line,
+                        cur_column: self.cur_column
+                    }),
+                };
+                self.expect_peek(AsmToken::Assign)?;
+                self.next_token();
+                let rd = self.guard_a_bus(self.get_register()?)?;
+                Instruction::new_write_instruction(addr, rd)
+            }
             // No Operand Instructions
-            Opcode::Halt | Opcode::Nop | Opcode::Write | Opcode::Read => {
+            Opcode::Halt | Opcode::Nop | Opcode::Read => {
                 Instruction::new_no_operand_instruction(op)
             }
         };
@@ -862,7 +879,6 @@ main:
 main:
     halt
     nop
-    write
     read
         ";
 
@@ -873,7 +889,6 @@ main:
             vec![
                 Instruction::new_no_operand_instruction(Rc::new(Halt)),
                 Instruction::new_no_operand_instruction(Rc::new(Nop)),
-                Instruction::new_no_operand_instruction(Rc::new(Write)),
                 Instruction::new_no_operand_instruction(Rc::new(Read)),
             ],
         )]);
@@ -897,6 +912,36 @@ main:
         let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
             Rc::from("main"),
             vec![Instruction::new_jal_instruction(Rc::from("tubias"))],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_write() -> Result<()> {
+        let input = r"
+.text
+main:
+    write 15 <- a1
+    write label <- a2
+";
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_write_instruction(
+                    ImmediateOrLabel::Immediate(15),
+                    Rc::new(Register::A1),
+                ),
+                Instruction::new_write_instruction(
+                    ImmediateOrLabel::Label(Rc::from("label")),
+                    Rc::new(Register::A2),
+                ),
+            ],
         )]);
         assert_eq!(program.sections.len(), 1);
         assert_eq!(program.errors.len(), 0);
