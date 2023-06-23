@@ -19,7 +19,6 @@ pub struct AsmEvaluator {
     addr: HashMap<Rc<str>, u8>,
     ram: Vec<u32>,
     unreachable: Vec<(Rc<str>, u8, Microinstruction)>,
-    ilc: u8,
 }
 
 impl AsmEvaluator {
@@ -29,7 +28,6 @@ impl AsmEvaluator {
             addr: HashMap::new(),
             ram: Vec::new(),
             unreachable: Vec::new(),
-            ilc: 0,
         }
     }
 
@@ -109,7 +107,7 @@ impl AsmEvaluator {
                 label,
                 instructions,
             } => {
-                self.addr.insert(Rc::clone(label), self.ilc);
+                self.addr.insert(Rc::clone(label), state.curr_addr as u8);
                 for inst in instructions {
                     self.eval_inst(inst, state);
                 }
@@ -119,14 +117,13 @@ impl AsmEvaluator {
     }
 
     fn resolve_unreachable(&mut self, state: &mut CsState) {
-        for (label, cs_addr, micro) in self.unreachable.drain(..) {
+        for (label, cs_addr, mut micro) in self.unreachable.drain(..) {
             let addr = *self
                 .addr
                 .get(label.as_ref())
                 .expect("Should be defined before");
 
-            //TODO: Not well defined
-
+            micro.next = addr as u16;
             state.set_instr(cs_addr as u16, micro.get());
         }
     }
@@ -163,11 +160,6 @@ impl AsmEvaluator {
         state.add_instr(mi.get());
     }
 
-    fn add_instr_to_cs(&mut self, mi: Microinstruction, state: &mut CsState) {
-        state.add_instr(mi.get());
-        self.ilc = state.curr_addr as u8;
-    }
-
     fn eval_branch_inst(&mut self, ins: &BranchInstruction, state: &mut CsState) {
         let label = Rc::clone(&ins.label);
 
@@ -185,8 +177,6 @@ impl AsmEvaluator {
             }
         }
 
-        self.add_instr_to_cs(lui, state);
-
         match *(ins.opcode) {
             Opcode::Beq => {
                 let mut mi = Microinstruction::new(state.next_addr());
@@ -194,7 +184,6 @@ impl AsmEvaluator {
                 mi.b = self.reg_b_code(&ins.rs2);
                 mi.jam = 0b001;
                 mi.alu = 0b00111111;
-                self.add_instr_to_cs(mi, state);
             }
             _ => unreachable!("There is no other 'no operand' opcode"),
         }
