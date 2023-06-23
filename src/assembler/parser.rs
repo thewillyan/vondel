@@ -76,8 +76,8 @@ pub enum ParserError {
         cur_column: usize,
     },
 
-    #[error("Write Operation only accepts an 'Immediate' or a 'Label'")]
-    WriterOnlyAcceptsImmediateOrLabel {
+    #[error("Operation only accepts an 'Immediate' or a 'Label'")]
+    OnlyAcceptsImmediateOrLabel {
         found: String,
         cur_line: usize,
         cur_column: usize,
@@ -393,12 +393,28 @@ impl Parser {
                 let label = self.get_label()?;
                 Instruction::new_jal_instruction(label)
             }
+            Opcode::Read => {
+                self.next_token();
+                let rds = self.get_dest_regs()?;
+                self.expect_peek(AsmToken::Assign)?;
+                self.next_token();
+                let addr = match *self.cur_tok {
+                    AsmToken::Number(ref n) => ImmediateOrLabel::Immediate(Rc::clone(n).parse()?),
+                    AsmToken::Label(ref l) => ImmediateOrLabel::Label(Rc::clone(l)),
+                    _ => bail!(ParserError::OnlyAcceptsImmediateOrLabel {
+                        found: format!("{:?}", self.cur_tok),
+                        cur_line: self.cur_line,
+                        cur_column: self.cur_column
+                    }),
+                };
+                Instruction::new_read_instruction(addr, rds)
+            }
             Opcode::Write => {
                 self.next_token();
                 let addr = match *self.cur_tok {
                     AsmToken::Number(ref n) => ImmediateOrLabel::Immediate(Rc::clone(n).parse()?),
                     AsmToken::Label(ref l) => ImmediateOrLabel::Label(Rc::clone(l)),
-                    _ => bail!(ParserError::WriterOnlyAcceptsImmediateOrLabel {
+                    _ => bail!(ParserError::OnlyAcceptsImmediateOrLabel {
                         found: format!("{:?}", self.cur_tok),
                         cur_line: self.cur_line,
                         cur_column: self.cur_column
@@ -410,9 +426,7 @@ impl Parser {
                 Instruction::new_write_instruction(addr, rd)
             }
             // No Operand Instructions
-            Opcode::Halt | Opcode::Nop | Opcode::Read => {
-                Instruction::new_no_operand_instruction(op)
-            }
+            Opcode::Halt | Opcode::Nop => Instruction::new_no_operand_instruction(op),
         };
 
         Ok(res)
@@ -940,6 +954,44 @@ main:
                 Instruction::new_write_instruction(
                     ImmediateOrLabel::Label(Rc::from("label")),
                     Rc::new(Register::A2),
+                ),
+            ],
+        )]);
+        assert_eq!(program.sections.len(), 1);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_read() -> Result<()> {
+        let input = r"
+.text
+main:
+    read a1, a2, a3 <- 77
+    read a1, a2, a3 <- label
+";
+        let program = create_program(input);
+
+        let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_read_instruction(
+                    ImmediateOrLabel::Immediate(77),
+                    vec![
+                        Rc::new(Register::A1),
+                        Rc::new(Register::A2),
+                        Rc::new(Register::A3),
+                    ],
+                ),
+                Instruction::new_read_instruction(
+                    ImmediateOrLabel::Label(Rc::from("label")),
+                    vec![
+                        Rc::new(Register::A1),
+                        Rc::new(Register::A2),
+                        Rc::new(Register::A3),
+                    ],
                 ),
             ],
         )]);

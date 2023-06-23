@@ -146,7 +146,19 @@ impl AsmEvaluator {
             Instruction::WriteInstruction(addr, rd) => {
                 self.eval_write_inst(addr, rd, state);
             }
+            Instruction::ReadInstruction(addr, rd) => {
+                self.eval_read_inst(addr, rd, state);
+            }
         }
+    }
+
+    fn eval_read_inst(
+        &mut self,
+        addr: &ImmediateOrLabel,
+        rd: &Vec<Rc<Register>>,
+        state: &mut CsState,
+    ) {
+        todo!()
     }
 
     fn eval_write_inst(&mut self, addr: &ImmediateOrLabel, rd: &Rc<Register>, state: &mut CsState) {

@@ -44,6 +44,7 @@ pub enum Instruction {
     Branch(BranchInstruction),
     NoOperand(Rc<Opcode>),
     WriteInstruction(ImmediateOrLabel, Rc<Register>),
+    ReadInstruction(ImmediateOrLabel, Vec<Rc<Register>>),
     Jal(Rc<str>),
 }
 
@@ -83,6 +84,13 @@ impl Instruction {
         rd: Rc<Register>,
     ) -> Instruction {
         Instruction::WriteInstruction(immediate_or_label, rd)
+    }
+
+    pub fn new_read_instruction(
+        immediate_or_label: ImmediateOrLabel,
+        rd: Vec<Rc<Register>>,
+    ) -> Instruction {
+        Instruction::ReadInstruction(immediate_or_label, rd)
     }
 
     pub fn new_branch_instruction(
