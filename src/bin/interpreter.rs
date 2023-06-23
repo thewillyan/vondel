@@ -5,6 +5,7 @@ use vondel::inter::{
     evaluator::{self, evaluate_buffer},
     repl,
 };
+
 fn read_from_file(file: &str) -> Result<String> {
     let buf = match std::fs::read_to_string(file) {
         Ok(buf) => buf,
