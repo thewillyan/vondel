@@ -102,7 +102,8 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn next_token(&mut self) -> AsmToken {
+    #[allow(dead_code)]
+    pub fn next_token(&mut self) -> AsmToken {
         self.skip_whitespace();
         self.ignore_comment();
         let tok = self.tokenizer();
@@ -122,6 +123,7 @@ impl<'a> Lexer<'a> {
         tok_ctx
     }
 
+    #[allow(dead_code)]
     pub fn get_deez_toks(&mut self) -> Vec<AsmToken> {
         let mut toks = Vec::new();
         loop {

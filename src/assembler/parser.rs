@@ -42,13 +42,6 @@ pub enum ParserError {
         cur_column: usize,
     },
 
-    #[error("Expected number, found: {found}\nContext: line {cur_line}, column {cur_column}")]
-    ExpectedNumber {
-        found: String,
-        cur_line: usize,
-        cur_column: usize,
-    },
-
     #[error(
         "Expected to be in section, found: {found}\nContext: line {cur_line}, column {cur_column}"
     )]
@@ -148,6 +141,7 @@ impl Parser {
         Ok(())
     }
 
+    #[allow(dead_code)]
     fn curr_token_is(&mut self, expected: AsmToken) -> bool {
         let disc_curr = discriminant(&(*self.cur_tok));
         let disc_expected = discriminant(&expected);

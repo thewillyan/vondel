@@ -400,7 +400,6 @@ impl AsmEvaluator {
 
                 cs_state.add_complex_instr(|_, _| (loop_addr + 1) | 0b100000000);
             }
-            _ => unimplemented!(),
         }
     }
 
@@ -527,7 +526,7 @@ impl CsState {
     }
 
     pub fn add_instr(&mut self, inst: u64) {
-        let b = self.builder.set_word(self.curr_addr, inst);
+        self.builder.set_word(self.curr_addr, inst);
         self.curr_addr = self.next_addr();
     }
 
@@ -613,12 +612,6 @@ impl Microinstruction {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn create_program(input: &str) -> Program {
-        let toks = Lexer::new(input).get_deez_toks_w_ctx();
-        let program = Parser::new(toks.into()).get_deez_program();
-        program
-    }
 
     #[test]
     fn cbus_eval() {

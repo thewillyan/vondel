@@ -10,6 +10,7 @@ use super::ast::*;
 use anyhow::{bail, Result};
 
 /// Represents an evaluator for Rust code.
+#[derive(Default)]
 pub struct RustEvaluator {}
 
 impl RustEvaluator {

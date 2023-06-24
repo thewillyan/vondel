@@ -6,7 +6,7 @@ use crate::inter::{ast::Expression, evaluator::EvaluationError};
 use super::object::Object;
 
 /// Represents an environment that stores variables and their corresponding values.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Environment {
     store: HashMap<String, Object>,
     outer: Option<Rc<RefCell<Environment>>>,
