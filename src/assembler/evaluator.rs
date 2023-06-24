@@ -6,10 +6,10 @@ use crate::{
         lexer::Lexer,
         parser::{Parser, Program},
         sections::{
-            BranchOp, ImmediateOrLabel, Instruction, NoOperandOpcode, Sections,
-            SingleOperandOpcode, TextSegment, Value,
+            BranchOp, DoubleOperandOpcode, ImmediateOrLabel, Instruction, NoOperandOpcode,
+            Sections, SingleOperandOpcode, TextSegment, Value,
         },
-        tokens::{Opcode, Register},
+        tokens::Register,
     },
     uarch::mem::{CtrlStore, CtrlStoreBuilder},
 };
@@ -288,7 +288,7 @@ impl AsmEvaluator {
 
     fn eval_double_op_inst(
         &mut self,
-        opcode: &Opcode,
+        opcode: &DoubleOperandOpcode,
         rd: &Vec<Rc<Register>>,
         rs1: &Rc<Register>,
         rs2: &Value,
@@ -296,7 +296,7 @@ impl AsmEvaluator {
     ) {
         let c_code = self.get_c_code(rd);
         match opcode {
-            Opcode::Add | Opcode::Addi => {
+            DoubleOperandOpcode::Add | DoubleOperandOpcode::Addi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00111100;
@@ -304,7 +304,7 @@ impl AsmEvaluator {
                 (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
             }
-            Opcode::Sub | Opcode::Subi => {
+            DoubleOperandOpcode::Sub | DoubleOperandOpcode::Subi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00111111;
@@ -312,7 +312,7 @@ impl AsmEvaluator {
                 (mi.a, mi.immediate) = self.val_a_code(rs2);
                 cs_state.add_instr(mi.get());
             }
-            Opcode::And | Opcode::Andi => {
+            DoubleOperandOpcode::And | DoubleOperandOpcode::Andi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00011000;
@@ -320,7 +320,7 @@ impl AsmEvaluator {
                 (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
             }
-            Opcode::Or | Opcode::Ori => {
+            DoubleOperandOpcode::Or | DoubleOperandOpcode::Ori => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
                 mi.alu = 0b00011100;
@@ -328,7 +328,7 @@ impl AsmEvaluator {
                 (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
             }
-            Opcode::Mul => {
+            DoubleOperandOpcode::Mul => {
                 // Temp registers usage:
                 // - T0: gonna store the min(rs1, rs2)
                 // - T1: gonna store the max(rs1, rs2)
@@ -658,7 +658,7 @@ mod tests {
         // add a0, a1 <- t0, a3
         let instructions = vec![
             Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Add),
+                DoubleOperandOpcode::Add,
                 vec![Rc::new(Register::A0), Rc::new(Register::A1)],
                 Rc::new(Register::T0),
                 Value::Reg(Rc::new(Register::A3)),
@@ -683,7 +683,7 @@ mod tests {
         // add a0, a1 <- t0, 5
         let instructions = vec![
             Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Addi),
+                DoubleOperandOpcode::Addi,
                 vec![Rc::new(Register::A0), Rc::new(Register::A1)],
                 Rc::new(Register::T0),
                 Value::Immediate(5),
@@ -708,7 +708,7 @@ mod tests {
         // sub a0, a1 <- t0, a3
         let instructions = vec![
             Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Sub),
+                DoubleOperandOpcode::Sub,
                 vec![Rc::new(Register::A0), Rc::new(Register::A1)],
                 Rc::new(Register::T0),
                 Value::Reg(Rc::new(Register::A3)),
@@ -733,7 +733,7 @@ mod tests {
         // add a0, a1 <- t0, 7
         let instructions = vec![
             Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Subi),
+                DoubleOperandOpcode::Subi,
                 vec![Rc::new(Register::A0), Rc::new(Register::A1)],
                 Rc::new(Register::T0),
                 Value::Immediate(7),
@@ -902,7 +902,7 @@ mod tests {
         // mul a0 <- a1, a2
         let instructions = vec![
             Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Mul),
+                DoubleOperandOpcode::Mul,
                 vec![Rc::new(Register::A0)],
                 Rc::new(Register::A1),
                 Value::Reg(Rc::new(Register::A2)),
@@ -1138,7 +1138,7 @@ mod tests {
         let done = TextSegment::new_labeled_section(
             "done".into(),
             vec![Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Add),
+                DoubleOperandOpcode::Add,
                 vec![Rc::new(Register::A0)],
                 Rc::new(Register::A1),
                 Value::Reg(Rc::new(Register::A2)),
@@ -1148,7 +1148,7 @@ mod tests {
             "main".into(),
             vec![
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Opcode::Add),
+                    DoubleOperandOpcode::Add,
                     vec![Rc::new(Register::A0)],
                     Rc::new(Register::A1),
                     Value::Reg(Rc::new(Register::A2)),
@@ -1188,7 +1188,7 @@ mod tests {
         let done = TextSegment::new_labeled_section(
             "done".into(),
             vec![Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Add),
+                DoubleOperandOpcode::Add,
                 vec![Rc::new(Register::A0)],
                 Rc::new(Register::A1),
                 Value::Reg(Rc::new(Register::A2)),
@@ -1198,7 +1198,7 @@ mod tests {
             "main".into(),
             vec![
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Opcode::Add),
+                    DoubleOperandOpcode::Add,
                     vec![Rc::new(Register::A0)],
                     Rc::new(Register::A1),
                     Value::Reg(Rc::new(Register::A2)),
@@ -1238,7 +1238,7 @@ mod tests {
         let done = TextSegment::new_labeled_section(
             "done".into(),
             vec![Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Add),
+                DoubleOperandOpcode::Add,
                 vec![Rc::new(Register::A0)],
                 Rc::new(Register::A1),
                 Value::Reg(Rc::new(Register::A2)),
@@ -1248,7 +1248,7 @@ mod tests {
             "main".into(),
             vec![
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Opcode::Add),
+                    DoubleOperandOpcode::Add,
                     vec![Rc::new(Register::A0)],
                     Rc::new(Register::A1),
                     Value::Reg(Rc::new(Register::A2)),
@@ -1288,7 +1288,7 @@ mod tests {
         let done = TextSegment::new_labeled_section(
             "done".into(),
             vec![Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Add),
+                DoubleOperandOpcode::Add,
                 vec![Rc::new(Register::A0)],
                 Rc::new(Register::A1),
                 Value::Reg(Rc::new(Register::A2)),
@@ -1298,7 +1298,7 @@ mod tests {
             "main".into(),
             vec![
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Opcode::Add),
+                    DoubleOperandOpcode::Add,
                     vec![Rc::new(Register::A0)],
                     Rc::new(Register::A1),
                     Value::Reg(Rc::new(Register::A2)),
@@ -1339,7 +1339,7 @@ mod tests {
             "main".into(),
             vec![
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Opcode::Add),
+                    DoubleOperandOpcode::Add,
                     vec![Rc::new(Register::A0)],
                     Rc::new(Register::A1),
                     Value::Reg(Rc::new(Register::A2)),
@@ -1355,7 +1355,7 @@ mod tests {
         let unresolved = TextSegment::new_labeled_section(
             "unresolved".into(),
             vec![Instruction::new_double_operand_instruction(
-                Rc::new(Opcode::Add),
+                DoubleOperandOpcode::Add,
                 vec![Rc::new(Register::A0)],
                 Rc::new(Register::A1),
                 Value::Reg(Rc::new(Register::A2)),

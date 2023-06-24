@@ -5,8 +5,8 @@ use std::rc::Rc;
 
 use crate::assembler::{
     sections::{
-        BranchOp, DataWrited, ImmediateOrLabel, Instruction, NoOperandOpcode, SingleOperandOpcode,
-        TextSegment, Value,
+        BranchOp, DataWrited, DoubleOperandOpcode, ImmediateOrLabel, Instruction, NoOperandOpcode,
+        SingleOperandOpcode, TextSegment, Value,
     },
     tokens::{Opcode, PseudoOps, Register},
 };
@@ -265,7 +265,30 @@ impl Parser {
             Opcode::Mov => SingleOperandOpcode::Mov,
             _ => {
                 bail!(ParserError::ExpectedToken {
-                    expected: format!("{:?}", "NoOperandOpcode"),
+                    expected: format!("{:?}", "SingleOperandOpcode"),
+                    found: format!("{:?}", op),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+        };
+        Ok(res)
+    }
+
+    fn op_to_double_op(&mut self, op: Rc<Opcode>) -> Result<DoubleOperandOpcode> {
+        let res = match *op {
+            Opcode::Add => DoubleOperandOpcode::Add,
+            Opcode::Mul => DoubleOperandOpcode::Mul,
+            Opcode::Sub => DoubleOperandOpcode::Sub,
+            Opcode::And => DoubleOperandOpcode::And,
+            Opcode::Or => DoubleOperandOpcode::Or,
+            Opcode::Addi => DoubleOperandOpcode::Addi,
+            Opcode::Andi => DoubleOperandOpcode::Andi,
+            Opcode::Ori => DoubleOperandOpcode::Ori,
+            Opcode::Subi => DoubleOperandOpcode::Subi,
+            _ => {
+                bail!(ParserError::ExpectedToken {
+                    expected: format!("{:?}", "DoubleOperandOpcode"),
                     found: format!("{:?}", op),
                     cur_line: self.cur_line,
                     cur_column: self.cur_column
@@ -403,7 +426,12 @@ impl Parser {
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
                 let rs2 = Value::Reg(self.guard_b_bus(self.get_register()?)?);
-                Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
+                Instruction::new_double_operand_instruction(
+                    self.op_to_double_op(op)?,
+                    dest_regs,
+                    rs1,
+                    rs2,
+                )
             }
             // Imediate Register Instructions
             Opcode::Addi | Opcode::Andi | Opcode::Ori | Opcode::Subi => {
@@ -413,7 +441,12 @@ impl Parser {
                 self.next_token();
                 let immediate = self.get_number()?.parse::<u8>()?;
                 let rs2 = Value::Immediate(immediate);
-                Instruction::new_double_operand_instruction(op, dest_regs, rs1, rs2)
+                Instruction::new_double_operand_instruction(
+                    self.op_to_double_op(op)?,
+                    dest_regs,
+                    rs1,
+                    rs2,
+                )
             }
             Opcode::Lui => {
                 self.next_token();
@@ -657,7 +690,7 @@ mod tests {
 
     #[test]
     fn parse_double_operand_rr_instruction() -> Result<()> {
-        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::sections::DoubleOperandOpcode::*;
         use crate::assembler::tokens::Register::*;
         let input = r"
 .text
@@ -683,19 +716,19 @@ error2:
             Rc::from("main"),
             vec![
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Add),
+                    Add,
                     vec![Rc::from(T0)],
                     Rc::from(T1),
                     Value::Reg(Rc::from(T2)),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Sub),
+                    Sub,
                     vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
                     Rc::from(T1),
                     Value::Reg(Rc::from(T2)),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Mul),
+                    Mul,
                     vec![
                         Rc::from(T1),
                         Rc::from(T2),
@@ -713,13 +746,13 @@ error2:
                     Value::Reg(Rc::from(A1)),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(And),
+                    And,
                     vec![Rc::from(T0)],
                     Rc::from(A0),
                     Value::Reg(Rc::from(A1)),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Or),
+                    Or,
                     vec![Rc::from(T0)],
                     Rc::from(A0),
                     Value::Reg(Rc::from(A1)),
@@ -735,7 +768,7 @@ error2:
 
     #[test]
     fn parse_double_operand_reg_imm_instruction() -> Result<()> {
-        use crate::assembler::tokens::Opcode::*;
+        use crate::assembler::sections::DoubleOperandOpcode::*;
         use crate::assembler::tokens::Register::*;
         let input = r"
 .text
@@ -760,13 +793,13 @@ error2:
             Rc::from("main"),
             vec![
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Addi),
+                    Addi,
                     vec![Rc::from(T0)],
                     Rc::from(T1),
                     Value::Immediate(8),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Andi),
+                    Andi,
                     vec![
                         Rc::from(T1),
                         Rc::from(T2),
@@ -784,13 +817,13 @@ error2:
                     Value::Immediate(200),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Ori),
+                    Ori,
                     vec![Rc::from(T0)],
                     Rc::from(T1),
                     Value::Immediate(8),
                 ),
                 Instruction::new_double_operand_instruction(
-                    Rc::new(Subi),
+                    Subi,
                     vec![Rc::from(T0)],
                     Rc::from(T1),
                     Value::Immediate(8),

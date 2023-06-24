@@ -1,6 +1,19 @@
 use std::rc::Rc;
 
-use crate::assembler::tokens::{Opcode, Register};
+use crate::assembler::tokens::Register;
+
+#[derive(Debug, PartialEq)]
+pub enum DoubleOperandOpcode {
+    Add,
+    Sub,
+    Mul,
+    And,
+    Or,
+    Addi,
+    Andi,
+    Ori,
+    Subi,
+}
 
 #[derive(Debug, PartialEq)]
 pub enum SingleOperandOpcode {
@@ -39,7 +52,7 @@ pub enum ImmediateOrLabel {
 
 #[derive(Debug, PartialEq)]
 pub struct DoubleOperandInstruction {
-    pub opcode: Rc<Opcode>,
+    pub opcode: DoubleOperandOpcode,
     pub rd: Vec<Rc<Register>>,
     pub rs1: Rc<Register>,
     pub rs2: Value,
@@ -73,7 +86,7 @@ pub enum Instruction {
 
 impl Instruction {
     pub fn new_double_operand_instruction(
-        opcode: Rc<Opcode>,
+        opcode: DoubleOperandOpcode,
         rd: Vec<Rc<Register>>,
         rs1: Rc<Register>,
         rs2: Value,
