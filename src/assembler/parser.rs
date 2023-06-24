@@ -305,11 +305,9 @@ impl Parser {
 
     fn parse_data_directive(&mut self) -> Result<Sections> {
         let mut data = Vec::new();
-        self.next_token();
-
-        while discriminant(&(*self.cur_tok)) == discriminant(&AsmToken::Label(Rc::from(""))) {
-            data.push(self.parse_data_to_write()?);
+        while discriminant(&(*self.peek_tok)) == discriminant(&AsmToken::Label(Rc::from(""))) {
             self.next_token();
+            data.push(self.parse_data_to_write()?);
         }
 
         Ok(Sections::new_data_section(data))
@@ -982,6 +980,60 @@ main:
         assert_eq!(program.sections.len(), 1);
         assert_eq!(program.errors.len(), 0);
         assert_eq!(program.sections[0], expected);
+
+        Ok(())
+    }
+
+    #[test]
+    fn parse_text_and_data() -> Result<()> {
+        let input = r"
+.data
+    test: .word 123
+    test2: .byte 77
+
+.text
+main:
+    read a1, a2, a3 <- 77
+    read a1, a2, a3 <- label
+";
+        let program = create_program(input);
+
+        let data = Sections::DataSection(vec![
+            DataWrited {
+                label: Rc::from("test"),
+                kind: DataKind::Word(123),
+            },
+            DataWrited {
+                label: Rc::from("test2"),
+                kind: DataKind::Byte(77),
+            },
+        ]);
+
+        let text = Sections::TextSection(vec![TextSegment::new_labeled_section(
+            Rc::from("main"),
+            vec![
+                Instruction::new_read_instruction(
+                    ImmediateOrLabel::Immediate(77),
+                    vec![
+                        Rc::new(Register::A1),
+                        Rc::new(Register::A2),
+                        Rc::new(Register::A3),
+                    ],
+                ),
+                Instruction::new_read_instruction(
+                    ImmediateOrLabel::Label(Rc::from("label")),
+                    vec![
+                        Rc::new(Register::A1),
+                        Rc::new(Register::A2),
+                        Rc::new(Register::A3),
+                    ],
+                ),
+            ],
+        )]);
+        assert_eq!(program.sections.len(), 2);
+        assert_eq!(program.errors.len(), 0);
+        assert_eq!(program.sections[0], data);
+        assert_eq!(program.sections[1], text);
 
         Ok(())
     }
