@@ -155,39 +155,50 @@ impl AsmEvaluator {
     fn eval_read_inst(
         &mut self,
         addr: &ImmediateOrLabel,
-        rd: &Vec<Rc<Register>>,
+        rds: &Vec<Rc<Register>>,
         state: &mut CsState,
     ) {
-        todo!()
+        let mut read = Microinstruction::new(state.next_addr());
+        read.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
+        read.alu = 0b00011000;
+        read.mem = 0b010;
+        read.a = Microinstruction::IMM_A;
+        read.immediate = match addr {
+            ImmediateOrLabel::Immediate(imm) => *imm,
+            ImmediateOrLabel::Label(label) => *self
+                .values
+                .get(label.as_ref())
+                .expect("Should be defined before"),
+        };
+        state.add_instr(read.get());
+
+        let mut w_reg = Microinstruction::new(state.next_addr());
+        w_reg.c_bus = self.get_c_code(rds);
+        w_reg.alu = 0b00011000;
+        w_reg.a = self.reg_a_code(&Register::Mdr);
+        state.add_instr(w_reg.get());
     }
 
     fn eval_write_inst(&mut self, addr: &ImmediateOrLabel, rd: &Rc<Register>, state: &mut CsState) {
-        // if rd.len() != 1 {
-        //     unreachable!(
-        //         "Write instruction should not have more than \
-        //                          one register as a parameter."
-        //     )
-        // }
-        //
-        // let mut mi = Microinstruction::new(cs_state.next_addr());
-        // mi.c_bus = self.get_c_code(&vec![Rc::new(Register::Mdr)]);
-        // mi.alu = 0b00011000;
-        // mi.a = self.reg_a_code(&rd[0]);
-        // cs_state.add_instr(mi.get());
-        //
-        // let mut mi = Microinstruction::new(cs_state.next_addr());
-        // mi.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
-        // mi.alu = 0b00011000;
-        // mi.mem = 0b100;
-        // match rs1 {
-        //     Value::Immediate(imm) => {
-        //         mi.immediate = *imm;
-        //         mi.a = Microinstruction::IMM_A;
-        //     }
-        //     _ => unreachable!("Should not receive a register as a parameter."),
-        // }
-        // cs_state.add_instr(mi.get());
-        todo!()
+        let mut mdr = Microinstruction::new(state.next_addr());
+        mdr.c_bus = self.get_c_code(&vec![Rc::new(Register::Mdr)]);
+        mdr.alu = 0b00011000;
+        mdr.a = self.reg_a_code(rd);
+        state.add_instr(mdr.get());
+
+        let mut mar = Microinstruction::new(state.next_addr());
+        mar.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
+        mar.alu = 0b00011000;
+        mar.mem = 0b100;
+        mar.a = Microinstruction::IMM_A;
+        mar.immediate = match addr {
+            ImmediateOrLabel::Immediate(imm) => *imm,
+            ImmediateOrLabel::Label(label) => *self
+                .values
+                .get(label.as_ref())
+                .expect("Should be defined before"),
+        };
+        state.add_instr(mar.get());
     }
 
     fn eval_jal_inst(&mut self, label: &Rc<str>, state: &mut CsState) {
@@ -257,45 +268,21 @@ impl AsmEvaluator {
         cs_state: &mut CsState,
     ) {
         let c_code = self.get_c_code(rd);
+        let mut mi = Microinstruction::new(cs_state.next_addr());
+        (mi.a, mi.immediate) = self.val_a_code(rs1);
+        mi.c_bus = c_code;
+        mi.b = Microinstruction::NO_B;
+
         match op {
-            Opcode::Read => {
-                let mut mi = Microinstruction::new(cs_state.next_addr());
-                mi.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
-                mi.alu = 0b00011000;
-                mi.mem = 0b010;
-                match rs1 {
-                    Value::Immediate(imm) => {
-                        mi.immediate = *imm;
-                        mi.a = Microinstruction::IMM_A;
-                    }
-                    _ => unreachable!("Should not receive a register as a parameter."),
-                }
-                cs_state.add_instr(mi.get());
-
-                let mut mi = Microinstruction::new(cs_state.next_addr());
-                mi.c_bus = c_code;
-                mi.alu = 0b00011000;
-                mi.a = self.reg_a_code(&Register::Mdr);
-                cs_state.add_instr(mi.get());
-            }
-            _ => {
-                let mut mi = Microinstruction::new(cs_state.next_addr());
-                (mi.a, mi.immediate) = self.val_a_code(rs1);
-                mi.c_bus = c_code;
-                mi.b = Microinstruction::NO_B;
-
-                match op {
-                    Opcode::Lui => mi.alu = 0b00011000,
-                    Opcode::Not => mi.alu = 0b00011010,
-                    Opcode::Sll => mi.alu = 0b10011000,
-                    Opcode::Sra => mi.alu = 0b01011000,
-                    Opcode::Sla => mi.alu = 0b11011000,
-                    Opcode::Mov => mi.alu = 0b00011000,
-                    _ => unreachable!("There is no other 'single operand' opcode"),
-                }
-                cs_state.add_instr(mi.get());
-            }
+            Opcode::Lui => mi.alu = 0b00011000,
+            Opcode::Not => mi.alu = 0b00011010,
+            Opcode::Sll => mi.alu = 0b10011000,
+            Opcode::Sra => mi.alu = 0b01011000,
+            Opcode::Sla => mi.alu = 0b11011000,
+            Opcode::Mov => mi.alu = 0b00011000,
+            _ => unreachable!("There is no other 'single operand' opcode"),
         }
+        cs_state.add_instr(mi.get());
     }
 
     fn eval_double_op_inst(
@@ -625,6 +612,12 @@ impl Microinstruction {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn create_program(input: &str) -> Program {
+        let toks = Lexer::new(input).get_deez_toks_w_ctx();
+        let program = Parser::new(toks.into()).get_deez_program();
+        program
+    }
 
     #[test]
     fn cbus_eval() {
@@ -962,31 +955,72 @@ mod tests {
 
     #[test]
     fn read() {
-        let instructions = vec![
-            Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Read),
-                vec![Rc::new(Register::A3)],
-                Value::Immediate(8),
-            ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
-        ];
-        let seg = TextSegment::new_labeled_section("main".into(), instructions);
-        let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        /*
+         * .data
+         *   tubias: .word 777
+         *   gepeto: .word 42069
+         *   tubias_addr: .byte 0
+         * .text
+         *   main:
+         *    read  a1, a2, a3 <- 0
+         *    read a1 <- gepeto
+         *    read a1 <- tubias_addr
+         *    halt
+         */
+        let program = Program {
+            sections: vec![
+                Sections::new_data_section(vec![
+                    Sections::new_data_writed(DataKind::Word(777), Rc::from("tubias")),
+                    Sections::new_data_writed(DataKind::Word(42069), Rc::from("gepeto")),
+                    Sections::new_data_writed(DataKind::Byte(0), Rc::from("tubias_addr")),
+                ]),
+                Sections::new_text_section(vec![TextSegment::new_labeled_section(
+                    Rc::from("main"),
+                    vec![
+                        Instruction::new_read_instruction(
+                            ImmediateOrLabel::Immediate(0),
+                            vec![
+                                Rc::new(Register::A1),
+                                Rc::new(Register::A2),
+                                Rc::new(Register::A3),
+                            ],
+                        ),
+                        Instruction::new_read_instruction(
+                            ImmediateOrLabel::Label(Rc::from("gepeto")),
+                            vec![Rc::new(Register::A1)],
+                        ),
+                        Instruction::new_read_instruction(
+                            ImmediateOrLabel::Label(Rc::from("tubias_addr")),
+                            vec![Rc::new(Register::A1)],
+                        ),
+                        Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+                    ],
+                )]),
+            ],
+            errors: vec![],
+        };
+        let mut eval = AsmEvaluator::new();
+        let (cs, _) = eval.eval_program(program).unwrap();
+        let firmware = cs.firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = [
-            // mar <- 8 and READ
-            0b000000001_000_00011000_01000000000000000000_010_01000_11111_00001000,
-            // a3 <- mdr
-            0b000000010_000_00011000_00000000000000000001_000_00000_11111_00000000,
+            // mar <- 0 and READ
+            0b000000001_000_00011000_01000000000000000000_010_01000_11111_00000000,
+            // a1, a2, a3 <- mdr
+            0b000000010_000_00011000_00000000000000000111_000_00000_11111_00000000,
+            // mar <- 1 and READ
+            0b000000011_000_00011000_01000000000000000000_010_01000_11111_00000001,
+            // a1 <- mdr
+            0b000000100_000_00011000_00000000000000000100_000_00000_11111_00000000,
+            // mar <- 0 and READ
+            0b000000101_000_00011000_01000000000000000000_010_01000_11111_00000000,
+            // a1 <- mdr
+            0b000000110_000_00011000_00000000000000000100_000_00000_11111_00000000,
             Microinstruction::HALT,
         ];
 
         for (addr, mi) in expected.iter().enumerate() {
-            eprintln!("addr:     {:09b}", addr);
-            eprintln!("expected: {:061b}", mi);
-            eprintln!("got:      {:061b}", firmware[addr]);
             assert_eq!(firmware[addr], *mi);
         }
 
@@ -997,31 +1031,68 @@ mod tests {
 
     #[test]
     fn write() {
-        let instructions = vec![
-            Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Write),
-                vec![Rc::new(Register::A3)],
-                Value::Immediate(8),
-            ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
-        ];
-        let seg = TextSegment::new_labeled_section("main".into(), instructions);
-        let secs = Sections::new_text_section(vec![seg]);
-        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        /*
+         * .data
+         *   tubias: .word 777
+         *   gepeto: .word 42069
+         *   tubias_addr: .byte 0
+         * .text
+         *   main:
+         *    write  0 <- a3
+         *    write gepeto <- a2
+         *    write tubias_addr <- a1
+         *    halt
+         */
+        let program = Program {
+            sections: vec![
+                Sections::new_data_section(vec![
+                    Sections::new_data_writed(DataKind::Word(777), Rc::from("tubias")),
+                    Sections::new_data_writed(DataKind::Word(42069), Rc::from("gepeto")),
+                    Sections::new_data_writed(DataKind::Byte(0), Rc::from("tubias_addr")),
+                ]),
+                Sections::new_text_section(vec![TextSegment::new_labeled_section(
+                    Rc::from("main"),
+                    vec![
+                        Instruction::new_write_instruction(
+                            ImmediateOrLabel::Immediate(0),
+                            Rc::new(Register::A3),
+                        ),
+                        Instruction::new_write_instruction(
+                            ImmediateOrLabel::Label(Rc::from("gepeto")),
+                            Rc::new(Register::A2),
+                        ),
+                        Instruction::new_write_instruction(
+                            ImmediateOrLabel::Label(Rc::from("tubias_addr")),
+                            Rc::new(Register::A1),
+                        ),
+                        Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+                    ],
+                )]),
+            ],
+            errors: vec![],
+        };
+        let mut eval = AsmEvaluator::new();
+        let (cs, _) = eval.eval_program(program).unwrap();
+        let firmware = cs.firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
         let expected = [
             // mdr <- a3
             0b000000001_000_00011000_10000000000000000000_000_11000_11111_00000000,
-            // mar <- 8 and WRITE
-            0b000000010_000_00011000_01000000000000000000_100_01000_11111_00001000,
+            // mar <- 0 and WRITE
+            0b000000010_000_00011000_01000000000000000000_100_01000_11111_00000000,
+            // mdr <- a2
+            0b000000011_000_00011000_10000000000000000000_000_10111_11111_00000000,
+            // mar <- address of gepeto that is 1 and WRITE
+            0b000000100_000_00011000_01000000000000000000_100_01000_11111_00000001,
+            // mdr <- a1
+            0b000000101_000_00011000_10000000000000000000_000_10110_11111_00000000,
+            // mar <- tubias_addr that is 0 and WRITE
+            0b000000110_000_00011000_01000000000000000000_100_01000_11111_00000000,
             Microinstruction::HALT,
         ];
 
         for (addr, mi) in expected.iter().enumerate() {
-            eprintln!("addr:     {:09b}", addr);
-            eprintln!("expected: {:061b}", mi);
-            eprintln!("got:      {:061b}", firmware[addr]);
             assert_eq!(firmware[addr], *mi);
         }
 
