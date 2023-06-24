@@ -222,25 +222,14 @@ impl AsmEvaluator {
         let label = Rc::clone(&ins.label);
 
         let mut first = Microinstruction::new(state.next_addr());
+        let mut second = None;
         let branched_addr = state.next_addr() | 0b100000000;
         first.a = self.reg_a_code(&ins.rs1);
         first.b = self.reg_b_code(&ins.rs2);
         first.alu = 0b00111111;
 
-        match ins.opcode {
-            BranchOp::Beq => first.jam = 0b001,
-            BranchOp::Bne => first.jam = 0b011,
-            BranchOp::Blt => {
-                first.jam = 0b010;
-                first.a = self.reg_a_code(&ins.rs2);
-                first.b = self.reg_b_code(&ins.rs1);
-            }
-            BranchOp::Bgt => first.jam = 0b010,
-        }
-
-        state.add_instr(first.get());
-
         let mut branched = Microinstruction::new(branched_addr);
+        let mut second_branched = None;
 
         match self.addr.get(&label) {
             Some(v) => {
@@ -252,7 +241,40 @@ impl AsmEvaluator {
             }
         }
 
+        match ins.opcode {
+            BranchOp::Beq => first.jam = 0b001,
+            BranchOp::Bne => {
+                first.jam = 0b010;
+                let mut mi = first.clone();
+                mi.next += 1;
+                mi.a = self.reg_a_code(&ins.rs2);
+                mi.b = self.reg_b_code(&ins.rs1);
+                second = Some(mi);
+                second_branched = Some(branched.clone());
+
+                let label = Rc::clone(&ins.label);
+                if self.addr.get(&label).is_none() {
+                    self.unreachable
+                        .push((label, branched_addr + 1, branched.clone()));
+                }
+            }
+            BranchOp::Blt => {
+                first.jam = 0b010;
+                first.a = self.reg_a_code(&ins.rs2);
+                first.b = self.reg_b_code(&ins.rs1);
+            }
+            BranchOp::Bgt => first.jam = 0b010,
+        }
+
+        state.add_instr(first.get());
+        if let Some(mi) = second {
+            state.add_instr(mi.get());
+        }
+
         state.set_instr(branched_addr, branched.get());
+        if let Some(mi) = second_branched {
+            state.set_instr(branched_addr + 1, mi.get());
+        }
     }
 
     fn eval_no_op_inst(&mut self, opcode: &NoOperandOpcode, state: &mut CsState) {
@@ -1212,18 +1234,23 @@ mod tests {
             0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
             // add a0 <- a1, a2
             0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
-            // bgt a2, a3, done
-            0b000000011_011_00111111_00000000000000000000_000_10111_10011_00000000,
+            // bne a2, a3, done
+            0b000000011_010_00111111_00000000000000000000_000_10111_10011_00000000,
+            0b000000100_010_00111111_00000000000000000000_000_11000_10010_00000000,
         ];
 
-        let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
+        let branched_mcode = vec![
+            0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000,
+            0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000,
+        ];
 
         for (addr, &mi) in no_branch_mcode.iter().enumerate() {
             assert_eq!(mi, firmware[addr]);
         }
 
         let branched_addr = 3 | 0b100000000;
-        assert_eq!(branched_mcode, firmware[branched_addr]);
+        assert_eq!(branched_mcode[0], firmware[branched_addr]);
+        assert_eq!(branched_mcode[1], firmware[branched_addr + 1]);
     }
 
     #[test]
