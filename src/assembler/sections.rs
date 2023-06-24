@@ -3,6 +3,12 @@ use std::rc::Rc;
 use crate::assembler::tokens::{Opcode, Register};
 
 #[derive(Debug, PartialEq)]
+pub enum NoOperandOpcode {
+    Halt,
+    Nop,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum BranchOp {
     Beq,
     Bne,
@@ -49,7 +55,7 @@ pub enum Instruction {
     DoubleOperand(DoubleOperandInstruction),
     SingleOperand(SingleOperandInstruction),
     Branch(BranchInstruction),
-    NoOperand(Rc<Opcode>),
+    NoOperand(NoOperandOpcode),
     WriteInstruction(ImmediateOrLabel, Rc<Register>),
     ReadInstruction(ImmediateOrLabel, Vec<Rc<Register>>),
     Jal(Rc<str>),
@@ -78,7 +84,7 @@ impl Instruction {
         Instruction::SingleOperand(SingleOperandInstruction { opcode, rd, rs1 })
     }
 
-    pub fn new_no_operand_instruction(opcode: Rc<Opcode>) -> Instruction {
+    pub fn new_no_operand_instruction(opcode: NoOperandOpcode) -> Instruction {
         Instruction::NoOperand(opcode)
     }
 

@@ -4,7 +4,9 @@ use std::mem::discriminant;
 use std::rc::Rc;
 
 use crate::assembler::{
-    sections::{BranchOp, DataWrited, ImmediateOrLabel, Instruction, TextSegment, Value},
+    sections::{
+        BranchOp, DataWrited, ImmediateOrLabel, Instruction, NoOperandOpcode, TextSegment, Value,
+    },
     tokens::{Opcode, PseudoOps, Register},
 };
 
@@ -236,6 +238,22 @@ impl Parser {
         Ok(res)
     }
 
+    fn op_to_no_op(&mut self, op: Rc<Opcode>) -> Result<NoOperandOpcode> {
+        let res = match *op {
+            Opcode::Halt => NoOperandOpcode::Halt,
+            Opcode::Nop => NoOperandOpcode::Nop,
+            _ => {
+                bail!(ParserError::ExpectedToken {
+                    expected: format!("{:?}", "NoOperandOpcode"),
+                    found: format!("{:?}", op),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+        };
+        Ok(res)
+    }
+
     fn get_pseudo_op(&mut self) -> Result<Rc<PseudoOps>> {
         let pseudo_op = match *self.cur_tok {
             AsmToken::PseudoOp(ref p) => Rc::clone(p),
@@ -443,7 +461,9 @@ impl Parser {
                 Instruction::new_write_instruction(addr, rd)
             }
             // No Operand Instructions
-            Opcode::Halt | Opcode::Nop => Instruction::new_no_operand_instruction(op),
+            Opcode::Halt | Opcode::Nop => {
+                Instruction::new_no_operand_instruction(self.op_to_no_op(op)?)
+            }
         };
 
         Ok(res)
@@ -889,7 +909,6 @@ main:
 
     #[test]
     fn parse_no_operand_instruction() -> Result<()> {
-        use crate::assembler::tokens::Opcode::*;
         let input = r"
 .text
 main:
@@ -902,8 +921,8 @@ main:
         let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
             Rc::from("main"),
             vec![
-                Instruction::new_no_operand_instruction(Rc::new(Halt)),
-                Instruction::new_no_operand_instruction(Rc::new(Nop)),
+                Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+                Instruction::new_no_operand_instruction(NoOperandOpcode::Nop),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);

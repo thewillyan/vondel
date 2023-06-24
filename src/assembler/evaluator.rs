@@ -5,7 +5,9 @@ use crate::{
     assembler::{
         lexer::Lexer,
         parser::{Parser, Program},
-        sections::{BranchOp, ImmediateOrLabel, Instruction, Sections, TextSegment, Value},
+        sections::{
+            BranchOp, ImmediateOrLabel, Instruction, NoOperandOpcode, Sections, TextSegment, Value,
+        },
         tokens::{Opcode, Register},
     },
     uarch::mem::{CtrlStore, CtrlStoreBuilder},
@@ -136,7 +138,7 @@ impl AsmEvaluator {
             Instruction::SingleOperand(ins) => {
                 self.eval_single_op_inst(&ins.opcode, &ins.rd, &ins.rs1, state);
             }
-            Instruction::NoOperand(opcode) => self.eval_no_op_inst(opcode.as_ref(), state),
+            Instruction::NoOperand(opcode) => self.eval_no_op_inst(opcode, state),
             Instruction::Branch(ins) => {
                 self.eval_branch_inst(ins, state);
             }
@@ -252,10 +254,10 @@ impl AsmEvaluator {
         state.set_instr(branched_addr, branched.get());
     }
 
-    fn eval_no_op_inst(&mut self, opcode: &Opcode, state: &mut CsState) {
+    fn eval_no_op_inst(&mut self, opcode: &NoOperandOpcode, state: &mut CsState) {
         match opcode {
-            Opcode::Halt => state.add_instr(Microinstruction::HALT),
-            _ => unreachable!("There is no other 'no operand' opcode"),
+            NoOperandOpcode::Halt => state.add_instr(Microinstruction::HALT),
+            NoOperandOpcode::Nop => state.add_instr(Microinstruction::new(state.next_addr()).get()),
         }
     }
 
@@ -661,7 +663,7 @@ mod tests {
                 Rc::new(Register::T0),
                 Value::Reg(Rc::new(Register::A3)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -686,7 +688,7 @@ mod tests {
                 Rc::new(Register::T0),
                 Value::Immediate(5),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -711,7 +713,7 @@ mod tests {
                 Rc::new(Register::T0),
                 Value::Reg(Rc::new(Register::A3)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -736,7 +738,7 @@ mod tests {
                 Rc::new(Register::T0),
                 Value::Immediate(7),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -759,7 +761,7 @@ mod tests {
                 vec![Rc::new(Register::A3)],
                 Value::Immediate(1),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -783,7 +785,7 @@ mod tests {
                 vec![Rc::new(Register::A3)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -807,7 +809,7 @@ mod tests {
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -831,7 +833,7 @@ mod tests {
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -855,7 +857,7 @@ mod tests {
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -879,7 +881,7 @@ mod tests {
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -905,7 +907,7 @@ mod tests {
                 Rc::new(Register::A1),
                 Value::Reg(Rc::new(Register::A2)),
             ),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let seg = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![seg]);
@@ -992,7 +994,7 @@ mod tests {
                             ImmediateOrLabel::Label(Rc::from("tubias_addr")),
                             vec![Rc::new(Register::A1)],
                         ),
-                        Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+                        Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
                     ],
                 )]),
             ],
@@ -1064,7 +1066,7 @@ mod tests {
                             ImmediateOrLabel::Label(Rc::from("tubias_addr")),
                             Rc::new(Register::A1),
                         ),
-                        Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+                        Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
                     ],
                 )]),
             ],
@@ -1104,13 +1106,13 @@ mod tests {
     fn jal() {
         let instructions = vec![
             Instruction::new_jal_instruction(Rc::from("tubias")),
-            Instruction::new_no_operand_instruction(Rc::new(Opcode::Halt)),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
         ];
         let tubias = TextSegment::new_labeled_section(
             "tubias".into(),
-            vec![Instruction::new_no_operand_instruction(Rc::new(
-                Opcode::Halt,
-            ))],
+            vec![Instruction::new_no_operand_instruction(
+                NoOperandOpcode::Halt,
+            )],
         );
         let main = TextSegment::new_labeled_section("main".into(), instructions);
         let secs = Sections::new_text_section(vec![tubias, main]);
