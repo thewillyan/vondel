@@ -68,12 +68,24 @@ impl CtrlStoreBuilder {
         self
     }
 
+    /// set the nth word of the memory to `v`
+    pub fn set_word(&mut self, n: u16, v: u64) {
+        self.firmware[n as usize] = v;
+    }
+
     /// load the microintructions of `v` starting at the nth memory word
     pub fn load<T: IntoIterator<Item = u64>>(mut self, n: u16, v: T) -> Self {
         for (i, mi) in v.into_iter().enumerate() {
             self.firmware[i + n as usize] = mi;
         }
         self
+    }
+
+    /// load the microintructions of `v` starting at the nth memory word
+    pub fn load_words<T: IntoIterator<Item = u64>>(&mut self, n: u16, v: T) {
+        for (i, mi) in v.into_iter().enumerate() {
+            self.firmware[i + n as usize] = mi;
+        }
     }
 
     pub fn set_mpc(mut self, byte: u16) -> Self {
@@ -111,6 +123,11 @@ impl CtrlStore {
 
     pub fn builder() -> CtrlStoreBuilder {
         CtrlStoreBuilder::default()
+    }
+
+    /// Get a Arc reference to the Control Store firmware
+    pub fn firmware(&self) -> Arc<[u64; CS_ADDRS]> {
+        Arc::clone(&self.firmware)
     }
 
     /// Get the next Microinstruction from the CtrlStore, in other words,

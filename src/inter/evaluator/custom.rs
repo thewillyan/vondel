@@ -1,6 +1,7 @@
 use crate::inter::{ast::Program, environment::Environment, evaluator::Evaluator};
 use anyhow::Result;
 
+#[derive(Default)]
 pub struct CustomEvaluator {}
 
 impl CustomEvaluator {

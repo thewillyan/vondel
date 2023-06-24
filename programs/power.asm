@@ -1,21 +1,20 @@
 .data
-  X: .word 2       # Value of X
-  n: .word 5       # Value of n
+  x: .byte 2       # Value of X
+  n: .byte 5       # Value of n
 
 .text
 _start:
-    lui mar, t3 <- 0   # Set the memory address register and a counter to 0
-    read a0, t0      # Read X
+    lui t0 <- x        # t0 = X must be a byte
+    lui t1 <- n        # t1 = n must be a byte
+    lui t2 <- 0        # T2 is a counter for the loop
 
-    lui mar <- 1       # Set the memory address register to 1
-    read a1, t1       # Read n
-
-    lui ra <- 1        # ra = 1
+    lui ra <- 1        # ra = 1 will be the result of the multiplication
 
 loop:
-    beq t3, t1, done    # If the loop counter equals n, exit the loop
+    beq t2, t1, done      # If the loop counter equals n, exit the loop
     mul ra <- ra, t0      # Multiply ra by X
-    addi t3 <- t3, 1      # Increment the loop counter
+    addi t2 <- t2, 1      # Increment the loop counter
     jal loop
 
 done:
+  halt
