@@ -5,7 +5,8 @@ use std::rc::Rc;
 
 use crate::assembler::{
     sections::{
-        BranchOp, DataWrited, ImmediateOrLabel, Instruction, NoOperandOpcode, TextSegment, Value,
+        BranchOp, DataWrited, ImmediateOrLabel, Instruction, NoOperandOpcode, SingleOperandOpcode,
+        TextSegment, Value,
     },
     tokens::{Opcode, PseudoOps, Register},
 };
@@ -254,6 +255,26 @@ impl Parser {
         Ok(res)
     }
 
+    fn op_to_single_op(&mut self, op: Rc<Opcode>) -> Result<SingleOperandOpcode> {
+        let res = match *op {
+            Opcode::Lui => SingleOperandOpcode::Lui,
+            Opcode::Not => SingleOperandOpcode::Not,
+            Opcode::Sll => SingleOperandOpcode::Sll,
+            Opcode::Sra => SingleOperandOpcode::Sra,
+            Opcode::Sla => SingleOperandOpcode::Sla,
+            Opcode::Mov => SingleOperandOpcode::Mov,
+            _ => {
+                bail!(ParserError::ExpectedToken {
+                    expected: format!("{:?}", "NoOperandOpcode"),
+                    found: format!("{:?}", op),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+        };
+        Ok(res)
+    }
+
     fn get_pseudo_op(&mut self) -> Result<Rc<PseudoOps>> {
         let pseudo_op = match *self.cur_tok {
             AsmToken::PseudoOp(ref p) => Rc::clone(p),
@@ -401,14 +422,22 @@ impl Parser {
                 self.next_token();
                 let immediate = self.get_number()?.parse::<u8>()?;
                 let rs1 = Value::Immediate(immediate);
-                Instruction::new_single_operand_instruction(op, dest_regs, rs1)
+                Instruction::new_single_operand_instruction(
+                    self.op_to_single_op(op)?,
+                    dest_regs,
+                    rs1,
+                )
             }
             // Single Operand Instructions
             Opcode::Not | Opcode::Sll | Opcode::Sra | Opcode::Sla | Opcode::Mov => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 let rs1 = Value::Reg(rs1);
-                Instruction::new_single_operand_instruction(op, dest_regs, rs1)
+                Instruction::new_single_operand_instruction(
+                    self.op_to_single_op(op)?,
+                    dest_regs,
+                    rs1,
+                )
             }
             // Branch motherfucker
             Opcode::Beq | Opcode::Bne | Opcode::Blt | Opcode::Bgt => {
@@ -777,8 +806,8 @@ error2:
 
     #[test]
     fn parse_single_operand_rr_instruction() -> Result<()> {
+        use crate::assembler::sections::SingleOperandOpcode::*;
         use crate::assembler::sections::Value;
-        use crate::assembler::tokens::Opcode::*;
         use crate::assembler::tokens::Register::*;
         let input = r"
 .text
@@ -796,27 +825,27 @@ main:
             Rc::from("main"),
             vec![
                 Instruction::new_single_operand_instruction(
-                    Rc::new(Not),
+                    Not,
                     vec![Rc::from(T0), Rc::from(T2)],
                     Value::Reg(Rc::from(T1)),
                 ),
                 Instruction::new_single_operand_instruction(
-                    Rc::new(Sll),
+                    Sll,
                     vec![Rc::from(T1), Rc::from(T2), Rc::from(T3), Rc::from(S0)],
                     Value::Reg(Rc::from(T1)),
                 ),
                 Instruction::new_single_operand_instruction(
-                    Rc::new(Sra),
+                    Sra,
                     vec![Rc::from(T1)],
                     Value::Reg(Rc::from(T1)),
                 ),
                 Instruction::new_single_operand_instruction(
-                    Rc::new(Sla),
+                    Sla,
                     vec![Rc::from(T1)],
                     Value::Reg(Rc::from(T1)),
                 ),
                 Instruction::new_single_operand_instruction(
-                    Rc::new(Mov),
+                    Mov,
                     vec![Rc::from(T3), Rc::from(T2)],
                     Value::Reg(Rc::from(T1)),
                 ),
@@ -832,7 +861,6 @@ main:
     #[test]
     fn parse_single_operand_imm_instruction() -> Result<()> {
         use crate::assembler::sections::Value;
-        use crate::assembler::tokens::Opcode::*;
         use crate::assembler::tokens::Register::*;
         let input = r"
 .text
@@ -845,7 +873,7 @@ main:
         let expected = Sections::TextSection(vec![TextSegment::new_labeled_section(
             Rc::from("main"),
             vec![Instruction::new_single_operand_instruction(
-                Rc::new(Lui),
+                SingleOperandOpcode::Lui,
                 vec![Rc::from(T0), Rc::from(T2), Rc::from(T1), Rc::from(Ra)],
                 Value::Immediate(200),
             )],

@@ -6,7 +6,8 @@ use crate::{
         lexer::Lexer,
         parser::{Parser, Program},
         sections::{
-            BranchOp, ImmediateOrLabel, Instruction, NoOperandOpcode, Sections, TextSegment, Value,
+            BranchOp, ImmediateOrLabel, Instruction, NoOperandOpcode, Sections,
+            SingleOperandOpcode, TextSegment, Value,
         },
         tokens::{Opcode, Register},
     },
@@ -263,7 +264,7 @@ impl AsmEvaluator {
 
     fn eval_single_op_inst(
         &mut self,
-        op: &Opcode,
+        op: &SingleOperandOpcode,
         rd: &Vec<Rc<Register>>,
         rs1: &Value,
         cs_state: &mut CsState,
@@ -275,13 +276,12 @@ impl AsmEvaluator {
         mi.b = Microinstruction::NO_B;
 
         match op {
-            Opcode::Lui => mi.alu = 0b00011000,
-            Opcode::Not => mi.alu = 0b00011010,
-            Opcode::Sll => mi.alu = 0b10011000,
-            Opcode::Sra => mi.alu = 0b01011000,
-            Opcode::Sla => mi.alu = 0b11011000,
-            Opcode::Mov => mi.alu = 0b00011000,
-            _ => unreachable!("There is no other 'single operand' opcode"),
+            SingleOperandOpcode::Lui => mi.alu = 0b00011000,
+            SingleOperandOpcode::Not => mi.alu = 0b00011010,
+            SingleOperandOpcode::Sll => mi.alu = 0b10011000,
+            SingleOperandOpcode::Sra => mi.alu = 0b01011000,
+            SingleOperandOpcode::Sla => mi.alu = 0b11011000,
+            SingleOperandOpcode::Mov => mi.alu = 0b00011000,
         }
         cs_state.add_instr(mi.get());
     }
@@ -757,7 +757,7 @@ mod tests {
     fn test_lui() {
         let instructions = vec![
             Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Lui),
+                SingleOperandOpcode::Lui,
                 vec![Rc::new(Register::A3)],
                 Value::Immediate(1),
             ),
@@ -781,7 +781,7 @@ mod tests {
     fn test_mov() {
         let instructions = vec![
             Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Mov),
+                SingleOperandOpcode::Mov,
                 vec![Rc::new(Register::A3)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
@@ -805,7 +805,7 @@ mod tests {
     fn test_not() {
         let instructions = vec![
             Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Not),
+                SingleOperandOpcode::Not,
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
@@ -829,7 +829,7 @@ mod tests {
     fn test_sll() {
         let instructions = vec![
             Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Sll),
+                SingleOperandOpcode::Sll,
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
@@ -853,7 +853,7 @@ mod tests {
     fn test_sla() {
         let instructions = vec![
             Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Sla),
+                SingleOperandOpcode::Sla,
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),
@@ -877,7 +877,7 @@ mod tests {
     fn test_sra() {
         let instructions = vec![
             Instruction::new_single_operand_instruction(
-                Rc::new(Opcode::Sra),
+                SingleOperandOpcode::Sra,
                 vec![Rc::new(Register::A3), Rc::new(Register::A2)],
                 Value::Reg(Rc::new(Register::Mdr)),
             ),

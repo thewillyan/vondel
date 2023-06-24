@@ -3,6 +3,16 @@ use std::rc::Rc;
 use crate::assembler::tokens::{Opcode, Register};
 
 #[derive(Debug, PartialEq)]
+pub enum SingleOperandOpcode {
+    Lui,
+    Not,
+    Sll,
+    Sra,
+    Sla,
+    Mov,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum NoOperandOpcode {
     Halt,
     Nop,
@@ -37,7 +47,7 @@ pub struct DoubleOperandInstruction {
 
 #[derive(Debug, PartialEq)]
 pub struct SingleOperandInstruction {
-    pub opcode: Rc<Opcode>,
+    pub opcode: SingleOperandOpcode,
     pub rd: Vec<Rc<Register>>,
     pub rs1: Value,
 }
@@ -77,7 +87,7 @@ impl Instruction {
     }
 
     pub fn new_single_operand_instruction(
-        opcode: Rc<Opcode>,
+        opcode: SingleOperandOpcode,
         rd: Vec<Rc<Register>>,
         rs1: Value,
     ) -> Instruction {
