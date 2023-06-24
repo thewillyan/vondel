@@ -5,7 +5,7 @@ use crate::{
     assembler::{
         lexer::Lexer,
         parser::{Parser, Program},
-        sections::{ImmediateOrLabel, Instruction, Sections, TextSegment, Value},
+        sections::{BranchOp, ImmediateOrLabel, Instruction, Sections, TextSegment, Value},
         tokens::{Opcode, Register},
     },
     uarch::mem::{CtrlStore, CtrlStoreBuilder},
@@ -224,16 +224,15 @@ impl AsmEvaluator {
         first.b = self.reg_b_code(&ins.rs2);
         first.alu = 0b00111111;
 
-        match *(ins.opcode) {
-            Opcode::Beq => first.jam = 0b001,
-            Opcode::Bne => first.jam = 0b011,
-            Opcode::Blt => {
+        match ins.opcode {
+            BranchOp::Beq => first.jam = 0b001,
+            BranchOp::Bne => first.jam = 0b011,
+            BranchOp::Blt => {
                 first.jam = 0b010;
                 first.a = self.reg_a_code(&ins.rs2);
                 first.b = self.reg_b_code(&ins.rs1);
             }
-            Opcode::Bgt => first.jam = 0b010,
-            _ => unreachable!("There is no other 'no operand' opcode"),
+            BranchOp::Bgt => first.jam = 0b010,
         }
 
         state.add_instr(first.get());
@@ -1153,7 +1152,7 @@ mod tests {
                     Value::Reg(Rc::new(Register::A2)),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Opcode::Beq),
+                    BranchOp::Beq,
                     Rc::new(Register::A1),
                     Rc::new(Register::A2),
                     Rc::from("done"),
@@ -1203,7 +1202,7 @@ mod tests {
                     Value::Reg(Rc::new(Register::A2)),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Opcode::Bne),
+                    BranchOp::Bne,
                     Rc::new(Register::A2),
                     Rc::new(Register::A3),
                     Rc::from("done"),
@@ -1253,7 +1252,7 @@ mod tests {
                     Value::Reg(Rc::new(Register::A2)),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Opcode::Blt),
+                    BranchOp::Blt,
                     Rc::new(Register::A2),
                     Rc::new(Register::A3),
                     Rc::from("done"),
@@ -1303,7 +1302,7 @@ mod tests {
                     Value::Reg(Rc::new(Register::A2)),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Opcode::Bgt),
+                    BranchOp::Bgt,
                     Rc::new(Register::A2),
                     Rc::new(Register::A3),
                     Rc::from("done"),
@@ -1344,7 +1343,7 @@ mod tests {
                     Value::Reg(Rc::new(Register::A2)),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Opcode::Beq),
+                    BranchOp::Beq,
                     Rc::new(Register::A2),
                     Rc::new(Register::A3),
                     Rc::from("unresolved"),

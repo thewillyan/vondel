@@ -4,7 +4,7 @@ use std::mem::discriminant;
 use std::rc::Rc;
 
 use crate::assembler::{
-    sections::{DataWrited, ImmediateOrLabel, Instruction, TextSegment, Value},
+    sections::{BranchOp, DataWrited, ImmediateOrLabel, Instruction, TextSegment, Value},
     tokens::{Opcode, PseudoOps, Register},
 };
 
@@ -217,6 +217,25 @@ impl Parser {
         Ok(instr)
     }
 
+    fn op_to_branch_op(&mut self, op: Rc<Opcode>) -> Result<BranchOp> {
+        let res = match *op {
+            Opcode::Beq => BranchOp::Beq,
+            Opcode::Bne => BranchOp::Bne,
+            Opcode::Blt => BranchOp::Blt,
+            Opcode::Bgt => BranchOp::Bgt,
+            _ => {
+                bail!(ParserError::ExpectedToken {
+                    expected: format!("{:?}", "BranchOp"),
+                    found: format!("{:?}", op),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+        };
+
+        Ok(res)
+    }
+
     fn get_pseudo_op(&mut self) -> Result<Rc<PseudoOps>> {
         let pseudo_op = match *self.cur_tok {
             AsmToken::PseudoOp(ref p) => Rc::clone(p),
@@ -383,7 +402,7 @@ impl Parser {
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
                 let label = self.get_label()?;
-                Instruction::new_branch_instruction(op, rs1, rs2, label)
+                Instruction::new_branch_instruction(self.op_to_branch_op(op)?, rs1, rs2, label)
             }
             // Jal
             Opcode::Jal => {
@@ -820,7 +839,6 @@ main:
 
     #[test]
     fn parse_branch_instruction() -> Result<()> {
-        use crate::assembler::tokens::Opcode::*;
         use crate::assembler::tokens::Register::*;
         let input = r"
 .text
@@ -837,25 +855,25 @@ main:
             Rc::from("main"),
             vec![
                 Instruction::new_branch_instruction(
-                    Rc::new(Beq),
+                    BranchOp::Beq,
                     Rc::from(T0),
                     Rc::from(T1),
                     Rc::from("main"),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Bne),
+                    BranchOp::Bne,
                     Rc::from(T0),
                     Rc::from(T1),
                     Rc::from("kkk"),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Blt),
+                    BranchOp::Blt,
                     Rc::from(T0),
                     Rc::from(T1),
                     Rc::from("tubias"),
                 ),
                 Instruction::new_branch_instruction(
-                    Rc::new(Bgt),
+                    BranchOp::Bgt,
                     Rc::from(T0),
                     Rc::from(T1),
                     Rc::from("gepeto"),

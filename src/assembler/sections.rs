@@ -3,6 +3,13 @@ use std::rc::Rc;
 use crate::assembler::tokens::{Opcode, Register};
 
 #[derive(Debug, PartialEq)]
+pub enum BranchOp {
+    Beq,
+    Bne,
+    Blt,
+    Bgt,
+}
+#[derive(Debug, PartialEq)]
 pub enum Value {
     Immediate(u8),
     Reg(Rc<Register>),
@@ -31,7 +38,7 @@ pub struct SingleOperandInstruction {
 
 #[derive(Debug, PartialEq)]
 pub struct BranchInstruction {
-    pub opcode: Rc<Opcode>,
+    pub opcode: BranchOp,
     pub rs1: Rc<Register>,
     pub rs2: Rc<Register>,
     pub label: Rc<str>,
@@ -94,7 +101,7 @@ impl Instruction {
     }
 
     pub fn new_branch_instruction(
-        opcode: Rc<Opcode>,
+        opcode: BranchOp,
         rs1: Rc<Register>,
         rs2: Rc<Register>,
         label: Rc<str>,
