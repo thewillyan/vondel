@@ -1,0 +1,2029 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Vondel Language and Microarchitecture</title>
+        <meta name="robots" content="noindex" />
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="assembler/specs.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="uarch/index.html"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="uarch/uinstruction.html"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="uarch/implementations.html"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Vondel Language and Microarchitecture</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/thewillyan/vondel" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="interpreter"><a class="header" href="#interpreter">Interpreter</a></h1>
+<p>The Vondel Interpreter was built on top of the <a href="https://monkeylang.org/">Monkey Language</a> using the
+book <a href="https://interpreterbook.com/">Writing an Interpreter with GO</a> but on <code>Rust</code> 😂</p>
+<p>Monkey is a simple programming language designed for educational purposes, focusing on simplicity and ease of understanding.
+This interpreter allows you to run Monkey code and see the results in real-time.</p>
+<h2 id="language-specs"><a class="header" href="#language-specs">Language Specs</a></h2>
+<p>The Vondel Language is simpler than a common Monkey Lang implementation because we need to implement a custom evaluator
+using our own microarchitecture. And doing Strings, Structs and Vectors on this UArch will not be a good experience for us.</p>
+<p>Basically, what we implemented in the Vondel Language, which includes integers, booleans, functions, and lambda functions,
+you have a foundation for building a variety of programs.</p>
+<p>More info on the sup-chapter <a href="interpreter/./language.html">Language Specifications</a>.</p>
+<h2 id="lexer"><a class="header" href="#lexer">Lexer</a></h2>
+<p>Our lexer don't allow UTF-8 enconding for processing text and just rely on common ASCII.</p>
+<p>It's a simple lexer that use a lot of String allocations instead of string slices for performance optimizations.
+It also uses one of <code>Rust</code> most powerfull features <code>enums</code> for processing <strong>non Identifier</strong> tokens so that we can
+rely on <code>Rust</code> strong type system.</p>
+<p>More info on the sup-chapter <a href="interpreter/./lexer.html">Lexer</a></p>
+<h2 id="parser"><a class="header" href="#parser">Parser</a></h2>
+<p>The parser for the Vondel language utilizes a powerful parsing technique called Pratt Parsing.
+It allows for efficient and flexible parsing of expressions with varying levels of precedence so that we can parse complex expressions without too much hassle.</p>
+<p>More info on the sup-chapter <a href="interpreter/./parser.html">Parser</a></p>
+<h2 id="object"><a class="header" href="#object">Object</a></h2>
+<p>Because Vondel is a dynamic language we use <code>Objects</code> for an intermediate representation and evaluations</p>
+<p>More info on the sup-chapter <a href="interpreter/./object.html">Object</a></p>
+<h2 id="environment"><a class="header" href="#environment">Environment</a></h2>
+<p>It allows for the storage and retrieval of variables and their corresponding values in a flexible and efficient manner.
+The module supports nested environments, enabling scoping and variable lookup in outer environments.</p>
+<p>More info on the sup-chapter <a href="interpreter/./environment.html">Environment</a></p>
+<h2 id="evaluator"><a class="header" href="#evaluator">Evaluator</a></h2>
+<p>For the evaluation module we just define a <code>EvaluationError</code> enum for handling most evaluation and runtime errors.
+A <code>Evaluator</code> trait for creating custom evaluators and <code>evaluate_buffer</code> <strong>fn</strong> that handles receives anything that implements <code>Evaluator</code>, a <code>Program</code> and return a prints the result of this evaluation</p>
+<p>We also define two differente evaluators for our users:</p>
+<ol>
+<li><a href="interpreter/./evaluator/rust.html">Rust Evaluator</a> - that uses Rust for doing all evaluations</li>
+<li><a href="interpreter/./evaluator/custom.html">Custom Evaluator</a> - that uses our custom microarchitecture for evaluting these ASTs</li>
+</ol>
+<p>More info on the sup-chapter <a href="interpreter/./evaluator/README.html">Evaluator</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="vondel-language-specification"><a class="header" href="#vondel-language-specification">Vondel Language Specification</a></h1>
+<p>This specification outlines the syntax and behavior of the Vondel language,
+a simple programming language that supports arithmetic operations, functions, and lambda functions.</p>
+<h2 id="basics"><a class="header" href="#basics">Basics</a></h2>
+<ul>
+<li>Vondel is a dynamically-typed language, meaning that variable types are inferred at runtime.</li>
+<li>All statements in Vondel end with a semicolon (<code>;</code>).</li>
+<li>Vondel is whitespace insensitive, meaning that spaces and line breaks are ignored except where necessary for separating tokens.</li>
+</ul>
+<h2 id="data-types"><a class="header" href="#data-types">Data Types</a></h2>
+<p>Vondel Suported Data Types:</p>
+<ul>
+<li><strong>Integers</strong>: Represented by whole numbers without fractional or decimal parts.</li>
+<li><strong>Booleans</strong>: Represented by the keywords <code>true</code> and <code>false</code>.</li>
+<li><strong>Null</strong>: Represented by the keyword <code>null</code>.</li>
+</ul>
+<h2 id="variables"><a class="header" href="#variables">Variables</a></h2>
+<p>Variables in Vondel are dynamically typed and declared using the let keyword.</p>
+<pre><code class="language-vondel">let x = 10;
+let name = &quot;Alice&quot;;
+let flag = true;
+</code></pre>
+<h2 id="arithmetic-operations"><a class="header" href="#arithmetic-operations">Arithmetic Operations</a></h2>
+<p>Vondel supports the following arithmetic operations:</p>
+<ul>
+<li>Addition: <code>+</code></li>
+<li>Subtraction: <code>-</code></li>
+<li>Multiplication: <code>*</code></li>
+<li>Division: <code>/</code></li>
+<li>Modulo: <code>%</code></li>
+</ul>
+<pre><code class="language-vondel">  let x = 10 + 5;
+  let y = x * 2 - 3;
+  let z = (x + y) / 2;
+</code></pre>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<p>Vondel allows the definition and invocation of functions.</p>
+<h3 id="function-definition"><a class="header" href="#function-definition">Function Definition</a></h3>
+<p>Functions are defined using the fn keyword followed by the parameter list in parentheses and the function body in curly braces.</p>
+<pre><code class="language-vondel">let add = fn(x, y) {
+  return x + y;
+};
+</code></pre>
+<h3 id="function-invocation"><a class="header" href="#function-invocation">Function Invocation</a></h3>
+<p>To invoke a function, use the function name followed by arguments in parentheses.</p>
+<pre><code class="language-vondel">let result = add(3, 4); // result = 7
+</code></pre>
+<h3 id="return-statement"><a class="header" href="#return-statement">Return Statement</a></h3>
+<p>The return statement is used to exit a function and optionally return a value.</p>
+<pre><code class="language-vondel">let multiply = fn(x, y) {
+  return x * y;
+};
+</code></pre>
+<h2 id="lambda-functions"><a class="header" href="#lambda-functions">Lambda Functions</a></h2>
+<p>Vondel supports lambda functions, also known as anonymous functions or function literals.</p>
+<h3 id="lambda-function-definition"><a class="header" href="#lambda-function-definition">Lambda Function Definition</a></h3>
+<p>Lambda functions are defined using the fn keyword followed by the parameter list in parentheses and the function body in curly braces. They can be assigned to variables.</p>
+<pre><code class="language-vondel">let multiply = fn(x, y) {
+  return x * y;
+};
+
+let square = fn(x) {
+  return multiply(x, x);
+};
+</code></pre>
+<h3 id="lambda-function-invocation"><a class="header" href="#lambda-function-invocation">Lambda Function Invocation</a></h3>
+<p>To invoke a lambda function, use the function name followed by arguments in parentheses.</p>
+<pre><code class="language-vondel">let result = square(5); // result = 25
+</code></pre>
+<h3 id="higher-order-functions"><a class="header" href="#higher-order-functions">Higher-Order Functions</a></h3>
+<p>Vondel supports higher-order functions, which are functions that can accept other functions as arguments or return functions as results.</p>
+<pre><code class="language-vondel">let applyFunc = fn(func, x, y) {
+  return func(x, y);
+};
+
+let result = applyFunc(multiply, 3, 4); // result = 12
+</code></pre>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<pre><code class="language-vondel">let add = fn(x, y) {
+  return x + y;
+};
+
+let result = add(3, 4); // result = 7
+
+let multiply = fn(x, y) {
+  return x * y;
+};
+
+let square = fn(x) {
+  return multiply(x, x);
+};
+
+let area = square(5); // area = 25
+let fibonacci = fn(x) {
+  if (x == 0) {
+    0
+  } else {
+    if (x == 1) {
+      1
+    } else {
+      fibonacci(x - 1) + fibonacci(x - 2);
+    }
+  }
+};
+
+fibonacci(9) // 34
+</code></pre>
+<h2 id="limitations"><a class="header" href="#limitations">Limitations</a></h2>
+<p>The Vondel language described in this specification is a simplified version of a programming language and has several limitations, including but not limited to:</p>
+<ul>
+<li>Limited data types and operations.</li>
+<li>Lack of control flow statements such as loops and conditionals.</li>
+<li>Limited built-in functions and standard library.</li>
+<li>The language is intentionally designed to be minimalistic and educational, focusing on core concepts and syntax.</li>
+</ul>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<p>The Monkey programming language: <a href="https://monkeylang.org/">monkey lang site</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="lexer-design-decision"><a class="header" href="#lexer-design-decision">Lexer Design Decision</a></h1>
+<p>The lexer provided is responsible for tokenizing input strings into a sequence of tokens. This README explains the design decisions made in implementing the lexer.</p>
+<h2 id="overall-design"><a class="header" href="#overall-design">Overall Design</a></h2>
+<p>The lexer is implemented as a struct called <code>Lexer</code> with the following fields:</p>
+<ul>
+<li><code>ch</code>: Represents the current character being processed.</li>
+<li><code>input</code>: Represents the input string as a vector of bytes.</li>
+<li><code>read_position</code>: Tracks the current position while reading the input.</li>
+<li><code>position</code>: Tracks the position of the current character being processed.</li>
+</ul>
+<p>The <code>Lexer</code> struct also includes several methods to perform different tasks:</p>
+<ul>
+<li><code>new</code>: Initializes a new <code>Lexer</code> instance with the given input string.</li>
+<li><code>skip_whitespace</code>: Skips whitespace characters until a non-whitespace character is encountered.</li>
+<li><code>peek_char</code>: Returns the next character in the input without consuming it.</li>
+<li><code>read_char</code>: Reads the next character from the input and updates the lexer's internal state.</li>
+<li><code>next_token</code>: Returns the next token from the input.</li>
+<li><code>parse_operator</code>: Parses an operator token based on the current and next characters in the input.</li>
+<li><code>tokenizer</code>: Tokenizes the current character based on its type.</li>
+<li><code>read_name</code>: Reads an identifier token from the input.</li>
+<li><code>read_number</code>: Reads an integer number token from the input.</li>
+<li><code>get_deez_toks</code>: Returns a vector of all tokens found in the input.</li>
+</ul>
+<p>The design follows a simple and straightforward approach to tokenizing the input string.</p>
+<h2 id="tokenization"><a class="header" href="#tokenization">Tokenization</a></h2>
+<p>The <code>tokenizer</code> method is responsible for tokenizing the current character based on its type. It uses pattern matching to identify different types of characters and returns the corresponding token type.</p>
+<ul>
+<li>Whitespace characters are skipped using the <code>skip_whitespace</code> method.</li>
+<li>Single-character tokens like commas, semicolons, parentheses, and squirlies are identified directly.</li>
+<li>Operator tokens are parsed by the <code>parse_operator</code> method, which takes into account both single and double-character operators.</li>
+<li>Identifiers are recognized by checking if the current character is alphabetical or an underscore. The <code>read_name</code> method is called to read the complete identifier.</li>
+<li>Integer numbers are recognized by checking if the current character is a digit. The <code>read_number</code> method is called to read the complete number.</li>
+<li>Any other character is considered illegal and is represented by an <code>Illegal</code> token type.</li>
+</ul>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<p>To use the lexer, follow these steps:</p>
+<ol>
+<li>
+<p>Import the <code>Lexer</code> struct and the <code>TokenType</code> enum from the appropriate module or file.</p>
+</li>
+<li>
+<p>Create a new instance of the <code>Lexer</code> by calling the <code>new</code> method and passing the input string as a parameter.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let input = String::from(&quot;let x = 5 + 3;&quot;);
+let mut lexer = Lexer::new(input);
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Retrieve tokens from the lexer by calling the next_token method. It returns the next token in the input string.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let token = lexer.next_token();
+
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Continue calling next_token to retrieve subsequent tokens until you reach the end of the input. The end of input is indicated by the TokenType::Eof token.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>loop {
+    let token = lexer.next_token();
+    if token == TokenType::Eof {
+        break;
+        }
+    // Process the token as needed
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Or you can use <code>get_deez_toks</code> method to return all tokens at once as a <code>Vec&lt;TokenType&gt;</code></p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let all_toks = lexer.get_deez_toks();
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Use the retrieved tokens for further processing or analysis based on your specific requirements.</p>
+</li>
+</ol>
+<p>Please note that this example assumes you have the appropriate code structure and dependencies in place for the lexer to work correctly. Adjust the code snippets based on your specific implementation.</p>
+<h2 id="testing"><a class="header" href="#testing">Testing</a></h2>
+<p>The lexer includes a set of unit tests implemented using the <code>#[cfg(test)]</code> attribute and the <code>mod tests</code> block.
+These tests ensure the correctness of the lexer implementation by verifying the tokenization of different input strings.</p>
+<p>The tests cover various scenarios, including skipping whitespace, reading identifiers and numbers,
+handling operators, and tokenizing complex input strings with multiple tokens.</p>
+<h2 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h2>
+<p>The lexer design follows a modular and intuitive approach to tokenize input strings.
+It provides flexibility to extend the lexer's functionality if required.
+The unit tests provide confidence in the correctness of the lexer implementation.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="parser-design-decisions"><a class="header" href="#parser-design-decisions">Parser Design Decisions</a></h1>
+<p>The Vondel parser is designed to parse the Vondel programming language, which is built on top of the Monkey language.
+The parser follows the Pratt parsing approach to handle expressions and statements in the program.</p>
+<h2 id="pratt-parser-explanation"><a class="header" href="#pratt-parser-explanation">Pratt Parser Explanation</a></h2>
+<p>Pratt parsing, also known as TDOP, is a parsing technique that uses a Recursive Descent Approach to parse expressions based on their precedence and associativity.</p>
+<p>The main idea behind Pratt parsing is to associate each token or operator with two parsing functions: a prefix parsing function and an infix parsing function.
+The prefix parsing function is responsible for parsing expressions that start with the token, while the infix parsing function handles expressions that involve the token as an operator.</p>
+<p>Let's illustrate how that bitch works with this simple expression <code>(-5 + 3) * 2</code></p>
+<ol>
+<li>
+<p><strong>Tokenization</strong>:
+The expression is tokenized as follows:
+<code>(</code>, <code>-</code>, <code>5</code>, <code>+</code>, <code>3</code>, <code>)</code>, <code>*</code>, <code>2</code></p>
+</li>
+<li>
+<p><strong>Precedence and Associativity</strong>:
+Let's assign the following precedence levels:
+<code>*</code> (highest), <code>+</code> (lower), <code>-</code> (lower)</p>
+</li>
+<li>
+<p><strong>Prefix Parsing</strong>:
+The prefix parsing function for the <code>(</code> token creates a grouping expression.</p>
+</li>
+<li>
+<p><strong>Prefix Parsing for <code>-</code></strong>:
+The parser encounters the <code>-</code> token and checks if it's a prefix operator. Since it is, the parser creates a unary expression for it.</p>
+</li>
+<li>
+<p><strong>Infix Parsing</strong>:
+The parser encounters the <code>)</code> token and skips it since it doesn't have an associated infix parsing function.</p>
+</li>
+<li>
+<p><strong>Right Binding Power</strong>:
+The right binding power for <code>*</code> is the same as its precedence level.</p>
+</li>
+<li>
+<p><strong>Right-hand Side Expression</strong>:
+The parser invokes the infix parsing function for <code>*</code> and creates a binary expression with the <code>*</code> operator and the right-hand side expression.</p>
+</li>
+<li>
+<p><strong>Recursive Descent</strong>:
+The parser examines the next token (<code>2</code>) and creates an integer expression for it.</p>
+</li>
+<li>
+<p><strong>Parsing Complete</strong>:
+The parsing process is complete, resulting in a fully parsed expression.</p>
+</li>
+</ol>
+<p>Here's the visualization of the Pratt parsing process for the expression <code>(-5 + 3) * 2</code>:</p>
+<pre><code>       *
+      / \
+     +   2
+    / \
+   -   3
+    |
+   5
+</code></pre>
+<h2 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h2>
+<p>The parser uses the <code>anyhow</code> crate for error handling. It defines a custom <code>ParserError</code> enum to represent different parsing errors that can occur.
+The <code>ErrorWithCtx</code> struct is used to associate the error message with the corresponding context in the source code.</p>
+<h2 id="precedence"><a class="header" href="#precedence">Precedence</a></h2>
+<p>The parser defines the Precedence enum to represent the precedence levels of different operators in the language.
+The <code>precedence_of</code> function assigns a precedence level to each token type used in Pratt parsing.</p>
+<h2 id="statement-types"><a class="header" href="#statement-types">Statement Types</a></h2>
+<p>The parser defines the <code>StatementType</code> enum to represent different types of statements in the program.
+This includes <code>Let statements</code> for variable declarations, <code>Return statements</code>, <code>Expression statements</code>, and <code>Block statements</code> for code blocks.</p>
+<h2 id="expression"><a class="header" href="#expression">Expression</a></h2>
+<p>The <code>Expression</code> module provides the definition and functionality for handling different types of expressions in the code.</p>
+<h3 id="prefixop"><a class="header" href="#prefixop">PrefixOp</a></h3>
+<p>The <code>PrefixOp</code> enum represents the prefix operators available in the language, including <code>Bang</code> and <code>Minus</code>.</p>
+<h3 id="infixop"><a class="header" href="#infixop">InfixOp</a></h3>
+<p>The <code>InfixOp</code> enum represents the infix operators available in the language, such as <code>Plus</code>, <code>Minus</code>, <code>Asterisk</code>, <code>Slash</code>, <code>Equal</code>, <code>NotEqual</code>, <code>LessThan</code>, and <code>GreaterThan</code>. It provides methods to retrieve the operator as a string representation.</p>
+<h3 id="expression-1"><a class="header" href="#expression-1">Expression</a></h3>
+<p>The <code>Expression</code> enum represents various types of expressions, including <code>Identifier</code>, <code>Integer</code>, <code>Prefix</code>, <code>Infix</code>, <code>Boolean</code>, <code>If</code>, <code>FunctionLiteral</code>, and <code>Call</code>. It also provides methods to get the type of the expression as a string and constructors for creating specific types of expressions.</p>
+<h4 id="constructors"><a class="header" href="#constructors">Constructors</a></h4>
+<ul>
+<li><code>new_ident(ident: &amp;String)</code>: Creates a new <code>Identifier</code> expression with the given identifier.</li>
+<li><code>new_integer(int: &amp;String) -&gt; Result&lt;Self&gt;</code>: Creates a new <code>Integer</code> expression with the parsed integer value from the input string. Returns an error if the parsing fails.</li>
+<li><code>new_prefix(op: &amp;TokenType, exp: Expression) -&gt; Result&lt;Self&gt;</code>: Creates a new <code>Prefix</code> expression with the specified operator and right-hand side expression. Returns an error if the operator is not allowed.</li>
+<li><code>new_infix(left: Expression, op: &amp;TokenType, right: Expression) -&gt; Result&lt;Self&gt;</code>: Creates a new <code>Infix</code> expression with the specified left-hand side, operator, and right-hand side expressions. Returns an error if the operator is not allowed.</li>
+<li><code>new_boolean(t: &amp;TokenType) -&gt; Result&lt;Self&gt;</code>: Creates a new <code>Boolean</code> expression with the specified boolean value. Returns an error if the boolean token is not allowed.</li>
+<li><code>new_if(cond: Expression, cons: StatementType, alt: Option&lt;StatementType&gt;)</code>: Creates a new <code>If</code> expression with the condition, consequence, and optional alternative statements.</li>
+<li><code>new_function(params: Vec&lt;Expression&gt;, block: StatementType)</code>: Creates a new <code>FunctionLiteral</code> expression with the specified parameters and block statement.</li>
+<li><code>new_call(func: Expression, args: Vec&lt;Expression&gt;)</code>: Creates a new <code>Call</code> expression with the specified function expression and argument expressions.</li>
+</ul>
+<h2 id="program-structure"><a class="header" href="#program-structure">Program Structure</a></h2>
+<p>The parser uses the <code>Program</code> struct to store the parsed statements and errors. The <code>get_deez_program</code> method is responsible for parsing the entire program and populating the <code>Program</code> struct.</p>
+<h2 id="lexer-integration"><a class="header" href="#lexer-integration">Lexer Integration</a></h2>
+<p>The parser expects a slice of <code>TokenType</code> tokens as input, which are generated by a lexer. This allow us to do some kind of decoupling between lexing and parsing.</p>
+<h2 id="usage-1"><a class="header" href="#usage-1">Usage</a></h2>
+<p>To use the parser follow these steps:</p>
+<ol>
+<li>
+<p>Create a vector of tokens by hand or using a <a href="interpreter//docs/src/interpreter/lexer.html">lexer</a>.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let input =  &quot;let tubias = 123;&quot;
+let toks = Lexer::new(input).get_deez_tokens();
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Create a new <code>Parser</code> and pass this tokens as parameters.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut parser = Parser::new(&amp;toks);
+let program = parser.get_deez_program();
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Do whatever you want with these statements or errors.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Access the parsed statements and handle errors if needed
+for statement in program.statements {
+    // Process each statement...
+}
+
+// Handle parsing errors, if any
+for error in program.errors {
+    // Handle each error...
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h2 id="testing-1"><a class="header" href="#testing-1">Testing</a></h2>
+<p>The approach for testing this parser was decoupling it from the lexer. So that future internal changes of the current lexer can't interfere with our parse,
+unless we change the contract between then that is <code>TokenType</code></p>
+<h2 id="conclusion-1"><a class="header" href="#conclusion-1">Conclusion</a></h2>
+<p>In conclusion, the Vondel parser, based on the Pratt parsing approach, provides efficient and accurate parsing of expressions and statements in the Vondel programming language.
+With its error handling capabilities, well-defined precedence levels, and support for various statement types,
+the parser offers a solid foundation for the development and expansion of the Vondel language, ensuring reliable and effective parsing of code structures.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="object-1"><a class="header" href="#object-1">Object</a></h1>
+<p>The <code>Object</code> module in the Vondel language is designed to handle various types of objects used in the language, including integers, booleans, return values, null values, and functions. It provides a <code>Object</code> enum with associated data for each object type. The module defines methods to inspect objects and retrieve their string representation. The <code>Object</code> enum implements the <code>Debug</code>, <code>PartialEq</code>, and <code>Clone</code> traits for debugging, equality comparison, and cloning, respectively. Additionally, it provides a <code>type_as_string()</code> method to retrieve the type of the object as a string for error handling.</p>
+<h2 id="object-enum"><a class="header" href="#object-enum">Object Enum</a></h2>
+<p>The <code>Object</code> enum represents the different types of objects in the Vondel language. It has the following variants:</p>
+<ul>
+<li><code>Integer(i64)</code>: Represents an integer value.</li>
+<li><code>Boolean(bool)</code>: Represents a boolean value.</li>
+<li><code>ReturnValue(Box&lt;Object&gt;)</code>: Represents a return value from a function.</li>
+<li><code>Null</code>: Represents a null value.</li>
+<li><code>Function { params: Vec&lt;Expression&gt;, body: StatementType, env: Rc&lt;RefCell&lt;Environment&gt;&gt; }</code>: Represents a function object, storing the function's parameters, body, and environment.</li>
+</ul>
+<h2 id="object-methods"><a class="header" href="#object-methods">Object Methods</a></h2>
+<p>The <code>Object</code> module provides the following methods:</p>
+<ul>
+<li><code>inspect() -&gt; String</code>: Returns a string representation of the object.</li>
+<li><code>type_as_string() -&gt; &amp;'static str</code>: Returns the type of the object as a string for error handling.</li>
+</ul>
+<h2 id="display-formatting"><a class="header" href="#display-formatting">Display Formatting</a></h2>
+<p>The <code>Object</code> enum implements the <code>fmt::Display</code> trait to provide a formatted string representation for display purposes. The <code>Display</code> implementation formats the object based on its variant, converting it to a string representation.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl fmt::Display for Object {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        // Format the object based on its variant
+        // ...
+    }
+}
+
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="environment-1"><a class="header" href="#environment-1">Environment</a></h1>
+<p>The <code>Environment</code> module provides functionality for storing variables and their corresponding values.</p>
+<h2 id="features"><a class="header" href="#features">Features</a></h2>
+<ul>
+<li><strong>Variable Storage</strong>: The <code>Environment</code> struct uses a <code>HashMap</code> to store variables and their values.</li>
+<li><strong>Nested Environments</strong>: The module supports nested environments, allowing for scoping and variable lookup in outer environments.</li>
+<li><strong>Argument Matching</strong>: The <code>set_arguments_to_env</code> function sets arguments to the environment, matching them with corresponding parameters.</li>
+<li><strong>Error Handling</strong>: The module uses the <code>anyhow</code> crate for error handling, providing detailed error messages for various scenarios.</li>
+</ul>
+<h2 id="usage-2"><a class="header" href="#usage-2">Usage</a></h2>
+<p>To create a new environment, use the <code>Environment::new()</code> function. To create an environment with an outer environment, use <code>Environment::new_with_outer(outer)</code>.</p>
+<p>To set arguments to the environment, use the <code>set_arguments_to_env(args, params)</code> function, providing a vector of arguments and parameters.</p>
+<p>To retrieve the value of a variable, use the <code>get(name)</code> function, providing the variable name. It automatically looks up the variable in outer environments if it's not found in the current environment.</p>
+<p>To set the value of a variable, use the <code>set(name, value)</code> function, providing the variable name and value.</p>
+<h2 id="examples-1"><a class="header" href="#examples-1">Examples</a></h2>
+<pre><pre class="playground"><code class="language-rust">use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use anyhow::{bail, Result};
+
+use crate::inter::{ast::Expression, evaluator::EvaluationError};
+
+use super::object::Object;
+
+/// Represents an environment that stores variables and their corresponding values.
+#[derive(Debug, PartialEq, Clone)]
+pub struct Environment {
+    store: HashMap&lt;String, Object&gt;,
+    outer: Option&lt;Rc&lt;RefCell&lt;Environment&gt;&gt;&gt;,
+}
+
+impl Environment {
+    // ... Implementation details ...
+}
+
+// Example usage
+fn main() {
+    let mut environment = Environment::new();
+
+    environment.set(
+        &amp;Expression::Identifier(&quot;x&quot;.to_string()),
+        Object::Integer(42),
+    ).unwrap();
+
+    let result = environment.get(&quot;x&quot;).unwrap();
+    println!(&quot;Value of 'x': {}&quot;, result);
+}</code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="evaluator-1"><a class="header" href="#evaluator-1">Evaluator</a></h1>
+<p>The <code>evaluator</code> module provides the definition and functionality for evaluating code using different evaluators.
+This document outlines the design decisions and considerations made in the implementation of the evaluator module.</p>
+<h2 id="evaluationerror-enum"><a class="header" href="#evaluationerror-enum">EvaluationError Enum</a></h2>
+<p>The <code>EvaluationError</code> enum represents possible errors that can occur during evaluation.
+It includes various error variants such as <code>MissingIntegerToInvert</code>, <code>MismatchedTypesInfix</code>, <code>UnallowedBooleanComparisonOperator</code>, <code>IdentifierNotFound</code>, <code>ExpectedIdentifier</code>, and <code>WrongNumberOfArguments</code>.
+These errors cover different scenarios where evaluation can fail and provide descriptive error messages.</p>
+<h2 id="evaluator-trait"><a class="header" href="#evaluator-trait">Evaluator Trait</a></h2>
+<p>The <code>Evaluator</code> trait defines the behavior of an evaluator. It includes a single method, <code>eval</code>, which takes an AST node and an environment and returns the resulting <code>Object</code> or an error if evaluation fails.
+Implementations of this trait provide the specific evaluation logic for different languages or custom evaluators.</p>
+<h2 id="evaluator-implementations"><a class="header" href="#evaluator-implementations">Evaluator Implementations</a></h2>
+<p>The evaluator module includes two sub-modules, <a href="interpreter/evaluator/./custom.html">custom</a> and <a href="interpreter/evaluator/./rust.html">rust</a> , which contain different implementations of the <code>Evaluator</code> trait.
+These implementations can be used to evaluate code written in different languages or using custom evaluation logic.</p>
+<h2 id="evaluate_buffer-function"><a class="header" href="#evaluate_buffer-function">evaluate_buffer Function</a></h2>
+<p>The <code>evaluate_buffer</code> function is a utility function that simplifies the evaluation process. It takes a boxed trait object implementing the <code>Evaluator</code> trait and an input string to evaluate.
+The function performs the lexing, parsing, and evaluation steps, and prints the resulting object or error message. It can be used as a convenient way to evaluate code using different evaluators.</p>
+<h2 id="usage-3"><a class="header" href="#usage-3">Usage</a></h2>
+<p>To use our evalutor follow theses steps:</p>
+<ol>
+<li>Create a <code>Custom Custom</code> evaluator or just use our <a href="interpreter/evaluator/./custom.html">custom</a> and <a href="interpreter/evaluator/./rust.html">rust</a> builtin evaluators
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use my_evaluator::{Evaluator, evaluate_buffer};
+// Define a custom evaluator
+struct MyEvaluator;
+impl Evaluator for MyEvaluator {
+    // Implement the `eval` method
+    // ...
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>Create a new Evaluator instance
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let my_eval = Box::new(MyEvaluator::new());
+let rust_eval = Box::new(RustEvaluator::new());
+let custom_eval = Box::new(CustomEvaluator::new();
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>Use <code>evaluater_buffer</code> fn or create your own logic for parsing <code>Program</code>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let input  = String::from(&quot;777 * 777&quot;);
+println!(&quot;my_eval res: {}&quot;,  evaluate_buffer(my_eval, input)?;
+println!(&quot;rust_eval res: {}&quot;,  evaluate_buffer(rust_eval, input)?;
+println!(&quot;custom_eval res: {}&quot;,  evaluate_buffer(custom_eval, input)?;
+<span class="boring">}</span></code></pre></pre>
+</li>
+</ol>
+<h2 id="testing-2"><a class="header" href="#testing-2">Testing</a></h2>
+<p>The <code>Evaluator</code> module provides a set of tests to ensure the correctness of the evaluators and their functionalities.
+The tests cover various scenarios, including error handling, function calls, and decoupling from the parser and lexer.</p>
+<h2 id="conclusion-2"><a class="header" href="#conclusion-2">Conclusion</a></h2>
+<p>In conclusion, the Evaluator module plays a crucial role in interpreting and evaluating Rust code.
+It provides an essential component for executing programs, performing expressions, handling errors, and enabling function calls.
+By decoupling from the parser and lexer, the evaluators ensure flexibility and compatibility with various parsing and lexing implementations.
+The comprehensive test suite included in the module verifies the correctness of the evaluators, covering error handling, function calls, and specific behaviors of the RustEvaluator and CustomEvaluator implementations.
+With the Evaluator module, developers can confidently evaluate Rust code and rely on its robustness and accuracy in producing the expected results.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="rust-evaluator"><a class="header" href="#rust-evaluator">Rust Evaluator</a></h1>
+<p>The <code>RustEvaluator</code> is an implementation of the <code>Evaluator</code> trait specifically designed to evaluate Rust code. This document outlines the design decisions and considerations made in the implementation of the <code>RustEvaluator</code> struct.</p>
+<h2 id="rustevaluator-struct"><a class="header" href="#rustevaluator-struct">RustEvaluator Struct</a></h2>
+<p>The <code>RustEvaluator</code> struct represents an evaluator for Rust code. It provides methods for evaluating different types of expressions and statements in Rust.</p>
+<h2 id="usage-4"><a class="header" href="#usage-4">Usage</a></h2>
+<p>To use the <code>RustEvaluator</code> follow these steps:</p>
+<ol>
+<li>
+<p>Import the necessary modules and structs in your Rust file:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::{cell::RefCell, rc::Rc};
+use anyhow::{Result};
+use crate::inter::{
+    ast::expression::{InfixOp, PrefixOp},
+    environment::Environment,
+    object::Object,
+    // Import other necessary modules as needed
+};
+use super::ast::*;
+// Import the RustEvaluator module
+use super::RustEvaluator;
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Create an instance of the RustEvaluator:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let evaluator = RustEvaluator::new();
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Set up the environment and input for evaluation:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut environment = Environment::new();
+let input = &quot;1 + 2&quot;;
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Pass the program to the eval() method of the RustEvaluator instance to evaluate it:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let result = evaluator.eval(&amp;program, &amp;mut environment);
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Handle the evaluation result using <code>Result</code>:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>match result {
+    Ok(object) =&gt; {
+        // Handle the evaluated object
+        // ...
+    }
+    Err(error) =&gt; {
+        // Handle the evaluation error
+        // ...
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+</li>
+<li>
+<p>Repeat steps 4 and 5 as needed to evaluate multiple programs or statements.</p>
+</li>
+</ol>
+<p>By following these steps, you can integrate the RustEvaluator into your Rust project and evaluate Rust code.</p>
+<p>Feel free to modify the code snippets or the instructions to fit your specific use case.</p>
+<h3 id="methods"><a class="header" href="#methods">Methods</a></h3>
+<h4 id="new"><a class="header" href="#new"><code>new()</code></a></h4>
+<p>The <code>new()</code> method creates a new instance of the <code>RustEvaluator</code>.</p>
+<h4 id="map_boolean"><a class="header" href="#map_boolean"><code>map_boolean()</code></a></h4>
+<p>The <code>map_boolean()</code> method maps a boolean value to the corresponding <code>Object</code> value used in the evaluator.</p>
+<h4 id="eval_bang_operator"><a class="header" href="#eval_bang_operator"><code>eval_bang_operator()</code></a></h4>
+<p>The <code>eval_bang_operator()</code> method evaluates the logical NOT (<code>!</code>) operator on the right operand.</p>
+<h4 id="eval_minus_operator"><a class="header" href="#eval_minus_operator"><code>eval_minus_operator()</code></a></h4>
+<p>The <code>eval_minus_operator()</code> method evaluates the arithmetic minus (<code>-</code>) operator on the right operand.</p>
+<h4 id="eval_prefix_expression"><a class="header" href="#eval_prefix_expression"><code>eval_prefix_expression()</code></a></h4>
+<p>The <code>eval_prefix_expression()</code> method evaluates a prefix expression (e.g., <code>-</code>, <code>!</code>) by applying the corresponding operator on the right operand.</p>
+<h4 id="eval_infix_expression"><a class="header" href="#eval_infix_expression"><code>eval_infix_expression()</code></a></h4>
+<p>The <code>eval_infix_expression()</code> method evaluates an infix expression (e.g., <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>&lt;</code>, <code>&gt;</code>, <code>==</code>, <code>!=</code>) by performing the operation on the left and right operands.</p>
+<h4 id="is_truthy"><a class="header" href="#is_truthy"><code>is_truthy()</code></a></h4>
+<p>The <code>is_truthy()</code> method checks if an object is truthy, meaning it evaluates to true.</p>
+<h4 id="eval_if_expression"><a class="header" href="#eval_if_expression"><code>eval_if_expression()</code></a></h4>
+<p>The <code>eval_if_expression()</code> method evaluates an <code>if</code> expression by evaluating the condition and executing the appropriate branch based on the result.</p>
+<h4 id="eval_let_statement"><a class="header" href="#eval_let_statement"><code>eval_let_statement()</code></a></h4>
+<p>The <code>eval_let_statement()</code> method evaluates a <code>let</code> statement by evaluating the value expression and storing it in the environment with the specified name.</p>
+<h4 id="eval_expressions"><a class="header" href="#eval_expressions"><code>eval_expressions()</code></a></h4>
+<p>The <code>eval_expressions()</code> method evaluates a list of expressions within the given environment.</p>
+<h4 id="eval_fn_call"><a class="header" href="#eval_fn_call"><code>eval_fn_call()</code></a></h4>
+<p>The <code>eval_fn_call()</code> method evaluates a function call expression by evaluating the function expression and the argument expressions, and executing the function with the provided arguments.</p>
+<h4 id="eval_expression"><a class="header" href="#eval_expression"><code>eval_expression()</code></a></h4>
+<p>The <code>eval_expression()</code> method evaluates an expression by dispatching to the appropriate evaluation method based on the expression type.</p>
+<h4 id="eval_block_statements"><a class="header" href="#eval_block_statements"><code>eval_block_statements()</code></a></h4>
+<p>The <code>eval_block_statements()</code> method evaluates a block of statements by iterating over each statement and evaluating them in order.</p>
+<h4 id="eval_statements"><a class="header" href="#eval_statements"><code>eval_statements()</code></a></h4>
+<p>The <code>eval_statements()</code> method evaluates a statement by dispatching to the appropriate evaluation method based on the statement type.</p>
+<h3 id="implementation-of-evaluator-trait"><a class="header" href="#implementation-of-evaluator-trait">Implementation of Evaluator Trait</a></h3>
+<p>The <code>RustEvaluator</code> struct implements the <code>Evaluator</code> trait, which defines the behavior of an evaluator. The <code>eval()</code> method is implemented to evaluate a program by iterating over each statement and evaluating them in order.</p>
+<h2 id="conclusion-3"><a class="header" href="#conclusion-3">Conclusion</a></h2>
+<p>The <code>RustEvaluator</code> provides a comprehensive implementation of an evaluator for Rust code. It handles different types of expressions and statements and provides accurate evaluation results.The design decisions made in the implementation ensure flexibility and extensibility for future enhancements or modifications.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="assembler"><a class="header" href="#assembler">Assembler</a></h1>
+<p>The <code>Vondel Assembler</code> was based on RISC V assemblers with our custom taste for Mnemonics and operations that our Uarch can accept</p>
+<p>This assembler produce 2 files a <code>.ram</code> and a <code>.rom</code> that can be used for our microarchitecture needs where:</p>
+<ul>
+<li><strong>.ram</strong>: It's the ram dump produced by <code>.data</code> sections</li>
+<li><strong>.rom</strong>: It's the firmware made by <code>.text</code> sections</li>
+</ul>
+<h2 id="usage-5"><a class="header" href="#usage-5">Usage</a></h2>
+<p>To use the <code>Vondel Assembler</code> you can open your terminal and type</p>
+<pre><code class="language-sh">cargo run -r assembler --  -i input.asm -o output
+</code></pre>
+<p>This commmand will generate lex, parse and evaluate the <code>input.asm</code> and therefore produce <code>output.ram</code> and <code>output.rom</code> for further usage</p>
+<blockquote>
+<p>If the output argument isn't provided the default output file will begin with <code>a</code></p>
+</blockquote>
+<h2 id="language-specifications"><a class="header" href="#language-specifications">Language Specifications</a></h2>
+<p>Our language specs are similar to RISC V, but with some tweaks</p>
+<p>If you came from there you'll be in home</p>
+<pre><code class="language-asm">.data
+    tubias: .word 420
+    test: .byte 69
+    res: .word 42069
+
+.text
+main:
+    addi s0 &lt;- test
+    lui s1 &lt;- 254
+    add a0,a1,a2,a3 &lt;- t1, t2
+    beq t1, a0, done
+
+
+done:
+    read s2 &lt;- tubias
+    write res &lt;- t1
+    halt
+</code></pre>
+<p>More info on the sup-chapter <a href="assembler/./specs.html">Language Specs</a></p>
+<h2 id="lexer-1"><a class="header" href="#lexer-1">Lexer</a></h2>
+<p>Just a common lexer that we'll ignore comments and parse all necessary tokens for further steps</p>
+<p>More info on the sup-chapter <a href="assembler/./lexer.html">Lexer</a></p>
+<h2 id="parser-1"><a class="header" href="#parser-1">Parser</a></h2>
+<p>Here we define our syntax that is described on <a href="assembler/./specs.html">Language Specs</a>, if any step here fail we should the user
+the error and context</p>
+<p>More info on the sup-chapter <a href="assembler/./parser.html">Parser</a></p>
+<h2 id="evaluator-2"><a class="header" href="#evaluator-2">Evaluator</a></h2>
+<p>We generate our <code>ROM</code> and <code>RAM</code> for our microarchitecture, it handles the logic of our firmware and all variables
+that are beeing used</p>
+<p>More info on the sup-chapter <a href="assembler/./evaluator.html">Evaluator</a></p>
+<h2 id="comparision"><a class="header" href="#comparision">Comparision</a></h2>
+<p>The comparision between our language and assembler with the ones that our teacher proposed at class</p>
+<p>The <code>key</code> difference between then are:</p>
+<ol>
+<li>Our assembler is easier to extend and define a fine grained syntax than the proposed one.</li>
+<li>We have a error handling with more context for the user</li>
+<li>We build the microinstruction itself while our teacher use opcode to navegate on the firmware own microinstructions</li>
+<li>We support immediates that can speed the process a lot</li>
+</ol>
+<p>More info on the sup-chapter <a href="assembler/./comparision.html">Comparision</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="registers"><a class="header" href="#registers">Registers</a></h1>
+<p>The assembler supports 25 registers. These registers can be used for general-purpose operations or not.</p>
+<div class="table-wrapper"><table><thead><tr><th>Register</th><th>Suggested Usage</th><th>A Bus</th><th>B Bus</th><th>C Bus</th></tr></thead><tbody>
+<tr><td>Mar</td><td>Memory Address</td><td></td><td></td><td>Output</td></tr>
+<tr><td>Mdr</td><td>Memory Data</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>Mbr</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Mbru</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Mbr2</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Mbr2u</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Pc</td><td>Program Counter</td><td>Input</td><td></td><td>Output</td></tr>
+<tr><td>Cpp</td><td>Call Pointer</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>Lv</td><td>Local Variable</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>Ra</td><td>Return Address</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T0</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T1</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T2</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T3</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S0</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S1</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S2</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S3</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S4</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S5</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S6</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A0</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A1</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A2</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A3</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+</tbody></table>
+</div>
+<h1 id="sections"><a class="header" href="#sections">Sections</a></h1>
+<p>The assembler supports two sections: <code>.text</code> and <code>.data</code>. The sections are defined as follows:</p>
+<h2 id="text-section"><a class="header" href="#text-section">.text Section</a></h2>
+<p>The <code>.text</code> section contains the executable instructions.</p>
+<h2 id="data-section"><a class="header" href="#data-section">.data Section</a></h2>
+<p>The <code>.data</code> section is used for declaring and initializing data.</p>
+<h1 id="instruction-format"><a class="header" href="#instruction-format">Instruction Format</a></h1>
+<p>Most vondel instructions in follow the format: <code>opcode dest_regs &lt;- source1, source2</code>. Here's a breakdown of the components:</p>
+<ul>
+<li><code>opcode</code>: Specifies the operation to be performed.</li>
+<li><code>dest_regs</code>: The registers where the result will be stored.</li>
+<li><code>source1</code> and <code>source2</code>: Registers or immediate values used as operands.</li>
+</ul>
+<h1 id="supported-instructions"><a class="header" href="#supported-instructions">Supported Instructions</a></h1>
+<p>The assembler supports the following instructions:</p>
+<ul>
+<li>Arithmetic and Logic
+<ul>
+<li><a href="assembler/specs.html#add">ADD</a></li>
+<li><a href="assembler/specs.html#sub">SUB</a></li>
+<li><a href="assembler/specs.html#mul">MUL</a></li>
+<li><a href="assembler/specs.html#and">AND</a></li>
+<li><a href="assembler/specs.html#or">OR</a></li>
+<li><a href="assembler/specs.html#not">NOT</a></li>
+</ul>
+</li>
+<li>Shift
+<ul>
+<li><a href="assembler/specs.html#sll">SLL (Shift Left Logical)</a></li>
+<li><a href="assembler/specs.html#sla">SLA (Shift Left Arithmetic)</a></li>
+<li><a href="assembler/specs.html#sra">SRA (Shift Right Arithmetic)</a></li>
+</ul>
+</li>
+<li>Memory
+<ul>
+<li><a href="assembler/specs.html#read">READ</a></li>
+<li><a href="assembler/specs.html#write">WRITE</a></li>
+</ul>
+</li>
+<li>Branch
+<ul>
+<li><a href="assembler/specs.html#jal">JAL</a></li>
+<li><a href="assembler/specs.html#beq">BEQ</a></li>
+<li><a href="assembler/specs.html#bne">BNE</a></li>
+<li><a href="assembler/specs.html#blt">BLT</a></li>
+<li><a href="assembler/specs.html#bgt">BGT</a></li>
+</ul>
+</li>
+<li>Immediate
+<ul>
+<li><a href="assembler/specs.html#lui">LUI</a></li>
+<li><a href="assembler/specs.html#addi">ADDI</a></li>
+<li><a href="assembler/specs.html#subi">SUBI</a></li>
+<li><a href="assembler/specs.html#andi">ANDI</a></li>
+<li><a href="assembler/specs.html#ori">ORI</a></li>
+</ul>
+</li>
+<li>Other
+<ul>
+<li><a href="assembler/specs.html#mov">MOV</a></li>
+<li><a href="assembler/specs.html#halt">HALT</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="add"><a class="header" href="#add">Add</a></h2>
+<p>Adds two registers and save the result into 1 up to 20 registers that are allowed in the C_bus</p>
+<pre><code>add t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="sub"><a class="header" href="#sub">Sub</a></h2>
+<p>Subtract <code>x - y</code> and store on registers</p>
+<pre><code>sub t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="mul"><a class="header" href="#mul">Mul</a></h2>
+<p>Multiplies the value of <code>x</code> and <code>y</code> and store on registers</p>
+<pre><code>mul t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="and"><a class="header" href="#and">And</a></h2>
+<p>Makes a bitwise <code>and</code> with <code>x</code> and <code>y</code></p>
+<pre><code>and t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="or"><a class="header" href="#or">Or</a></h2>
+<p>Makes a bitwise <code>or</code> with <code>x</code> and <code>y</code></p>
+<pre><code>or t0, t1, t2, s0, s1, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="not"><a class="header" href="#not">Not</a></h2>
+<p>Stores the result of <code>!x</code> on the registers</p>
+<pre><code>not t0, t1, t2, s0, s1, a2, ra &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="sll"><a class="header" href="#sll">Sll</a></h2>
+<p>Stores the result of <code>x &lt;&lt; 8</code> on the registers</p>
+<pre><code>sll t0, t1 &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="sla"><a class="header" href="#sla">Sla</a></h2>
+<p>Stores the result of <code>x &lt;&lt; 1</code> on the registers</p>
+<pre><code>sla t0, t1 &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="sra"><a class="header" href="#sra">Sra</a></h2>
+<p>Stores the result of <code>x &gt;&gt; 1</code> on the registers</p>
+<pre><code>sra t0, t1 &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="read"><a class="header" href="#read">Read</a></h2>
+<p>Load a value from memory on the address <code>addr</code> into a register</p>
+<pre><code>read t0, t1, t2 &lt;- addr
+read t0, t1, t2 &lt;- 77
+</code></pre>
+<blockquote>
+<p>Addr can be both a label referencing a variable in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="write"><a class="header" href="#write">Write</a></h2>
+<p>Store a value from a register <code>x</code> into memory on address <code>addr</code></p>
+<pre><code>write addr &lt;- t1
+write 77 &lt;- ra
+</code></pre>
+<blockquote>
+<p>It allows only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<blockquote>
+<p>Addr can be both a label referencing a variable in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="jal"><a class="header" href="#jal">Jal</a></h2>
+<p>Jump inconditionally to a <code>label</code></p>
+<pre><code>jal loop
+</code></pre>
+<h2 id="beq"><a class="header" href="#beq">Beq</a></h2>
+<p>Branch if equal (jump to a <code>label</code> if <code>x</code> and <code>y</code> are equal)</p>
+<pre><code>beq t0, t1, done
+</code></pre>
+<h2 id="bne"><a class="header" href="#bne">Bne</a></h2>
+<p>Branch if <strong>not</strong> equal (jump to a <code>label</code> if <code>x</code> and <code>y</code> are not equal)</p>
+<pre><code>bne t0, t1, done
+</code></pre>
+<h2 id="blt"><a class="header" href="#blt">Blt</a></h2>
+<p>Branch if less then (jump to a <code>label</code> if <code>x</code> is less then <code>y</code>)</p>
+<pre><code>blt t0, t1, done
+</code></pre>
+<h2 id="bgt"><a class="header" href="#bgt">Bgt</a></h2>
+<p>Branch if greater then (jump to a <code>label</code> if <code>x</code> is greater then <code>y</code>)</p>
+<pre><code>bgt t0, t1, done
+</code></pre>
+<h2 id="lui"><a class="header" href="#lui">Lui</a></h2>
+<p>Load upper immediate <code>imm</code> on registers</p>
+<pre><code>lui t0, t1,t2 &lt;- imm
+lui t0, t1,t2 &lt;- 77
+</code></pre>
+<blockquote>
+<p>It takes only a single immediate as parameter</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="addi"><a class="header" href="#addi">Addi</a></h2>
+<p>Adds a register <code>x</code> and a immediate <code>imm</code> and save this value on registers</p>
+<pre><code>addi t0, t1,t2 &lt;- t0, imm
+addi t0, t1,t2 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="subi"><a class="header" href="#subi">Subi</a></h2>
+<p>Subtracts from register <code>x</code> the value of a immediate <code>imm</code> and save this value on registers</p>
+<pre><code>subi t0, t1 &lt;- t0, imm
+subi t0, t1 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="andi"><a class="header" href="#andi">Andi</a></h2>
+<p>Makes a bitwise <code>and</code> of register <code>x</code> and a immediate <code>imm</code>, then saves this value on registers</p>
+<pre><code>andi t0, t1 &lt;- t0, imm
+andi t0, t1 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="ori"><a class="header" href="#ori">Ori</a></h2>
+<p>Makes a bitwise <code>or</code> of register <code>x</code> and a immediate <code>imm</code>, then saves this value on registers</p>
+<pre><code>ori t0, t1 &lt;- t0, imm
+ori t0, t1 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="mov"><a class="header" href="#mov">Mov</a></h2>
+<p>Store the value of the register x on the registers</p>
+<pre><code>mov t0, t1, t2 &lt;- a1
+mov ra, s1, s2, s3 &lt;- t0
+</code></pre>
+<blockquote>
+<p>It supports only a single register as parameter</p>
+</blockquote>
+<h2 id="halt"><a class="header" href="#halt">Halt</a></h2>
+<p>Stop the program execution</p>
+<pre><code>halt
+</code></pre>
+<blockquote>
+<p>Just halt</p>
+</blockquote>
+<h2 id="data-declaration-instructions-data-section"><a class="header" href="#data-declaration-instructions-data-section">Data Declaration Instructions (<code>.data</code> section)</a></h2>
+<ul>
+<li><code>.byte</code>: Declare a byte-sized data item</li>
+<li><code>.word</code>: Declare a word-sized (4 bytes) data item</li>
+</ul>
+<h1 id="labels-and-branching"><a class="header" href="#labels-and-branching">Labels and Branching</a></h1>
+<p>Labels can be defined and used as targets for branching instructions. Here are the guidelines for labels and branching:</p>
+<ul>
+<li>Labels are defined by placing a colon (<code>:</code>) after the label name (e.g., <code>label:</code>).</li>
+<li>Branching instructions can use labels as targets (e.g., <code>beq t1, t2, label</code>).</li>
+</ul>
+<h1 id="comments"><a class="header" href="#comments">Comments</a></h1>
+<p>Comments start with a semicolon (<code>;</code>) or (<code>#</code>) and continue until the end of the line. Comments are ignored during assembly.</p>
+<h1 id="addressing-modes"><a class="header" href="#addressing-modes">Addressing Modes</a></h1>
+<p>The assembler supports two addressing modes: immediate and register addressing. Here's how they are used:</p>
+<ul>
+<li>Immediate values can be specified directly in the instruction.</li>
+<li>Registers have the ABI form of RISC V</li>
+</ul>
+<p>This specification provides a general outline for the assembler language. Additional details, such as specific opcode mappings and assembly directives, can be added as needed.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="lexer-2"><a class="header" href="#lexer-2">Lexer</a></h1>
+<p>This lexer is specifically designed for a custom microarchitecture and includes RISC-V opcodes. It provides tokenization functionality for assembly code.</p>
+<h2 id="usage-6"><a class="header" href="#usage-6">Usage</a></h2>
+<p>To utilize the Lexer in your project, follow these steps:</p>
+<ol>
+<li>Include the lexer code in your project's source files.</li>
+<li>Import the necessary modules and dependencies, such as <code>std::{iter::Peekable, rc::Rc, str::Chars}</code>.</li>
+<li>Instantiate a <code>Lexer</code> object, passing the input source code as a string to the new function.</li>
+<li>Use the provided methods to tokenize the source code
+<ul>
+<li><code>next_token</code>: Retrieves the next token in the source code.</li>
+<li><code>next_with_ctx</code>: Retrieves the next token with context information, including line and column numbers.</li>
+<li><code>get_deez_toks</code>: Retrieves all tokens in the source code as a vector.</li>
+<li><code>get_deez_toks_w_ctx</code>: Retrieves all tokens with context information as a vector.</li>
+</ul>
+</li>
+</ol>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use crate::assembler::tokens::{AsmToken, TokWithCtx};
+
+let input_code = &quot;...&quot;;  // Provide your assembly code here
+let mut lexer = Lexer::new(&amp;input_code);
+
+loop {
+    let token = lexer.next_token();
+    if token == AsmToken::Eof {
+        break;
+    }
+    println!(&quot;Token: {:?}&quot;, token);
+}
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="parser-2"><a class="header" href="#parser-2">Parser</a></h1>
+<p>This is a parser designed for the Vondel Microarchitecture. It provides functionality to parse assembly code written for the Vondel Microarchitecture.</p>
+<h2 id="usage-7"><a class="header" href="#usage-7">Usage</a></h2>
+<p>To use the parser, follow these steps:</p>
+<ol>
+<li>Create an instance of the <code>Parser</code> struct by providing the input tokens as a <code>Rc&lt;[TokWithCtx]&gt;</code> parameter.</li>
+<li>Use the <code>new</code> function of the <code>Parser</code> struct to initialize it with the provided tokens.</li>
+<li>Use the various parsing functions provided by the <code>Parser</code> struct to parse the assembly code.</li>
+</ol>
+<h2 id="example-1"><a class="header" href="#example-1">Example</a></h2>
+<p>Using our lexer</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let input = r&quot;
+.data
+    dividend:   .word 10    # Dividend
+    divisor:    .word 3     # Divisor
+    quotient:   .word 0     # Quotient
+    remainder:  .word 0     # Remainder
+    address:    .byte 77    # Address
+&quot;;
+
+let mut l = Lexer::new(input);
+let toks = l.get_deez_toks_w_ctx();
+let rc_slice = Rc::from(toks.into_boxed_slice());
+let mut p = Parser::new(rc_slice);
+p.get_deez_program()
+<span class="boring">}</span></code></pre></pre>
+<p>Using a Vector of TokWithCtx</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let toks = toks_from_api()?;
+let mut p = Parser::new(rc_slice);
+p.get_deez_program()
+<span class="boring">}</span></code></pre></pre>
+<h2 id="parser-structure"><a class="header" href="#parser-structure">Parser Structure</a></h2>
+<p>The parser is implemented using the following structs:</p>
+<h3 id="program"><a class="header" href="#program">Program</a></h3>
+<p>The <code>Program</code> struct represents the parsed assembly program. It contains the following fields:</p>
+<ul>
+<li><code>sections</code>: A vector of <code>Sections</code> representing the different sections of the program.</li>
+<li><code>errors</code>: A vector of <code>Error</code> representing any parsing errors encountered during the parsing process.</li>
+</ul>
+<h3 id="parser-3"><a class="header" href="#parser-3">Parser</a></h3>
+<p>The <code>Parser</code> struct is the main parser implementation. It contains the following fields:</p>
+<ul>
+<li><code>toks</code>: A shared reference to the input tokens.</li>
+<li><code>cur_tok</code>: The current token being processed.</li>
+<li><code>peek_tok</code>: The next token to be processed.</li>
+<li><code>idx</code>: The index of the current token in the <code>toks</code> vector.</li>
+<li><code>cur_line</code>: The current line number.</li>
+<li><code>cur_column</code>: The current column number.</li>
+</ul>
+<p>The <code>Parser</code> struct provides the following methods:</p>
+<ul>
+<li><code>new(toks: Rc&lt;[TokWithCtx]&gt;)</code>: Creates a new instance of the <code>Parser</code> struct with the provided input tokens.</li>
+<li><code>next_token()</code>: Moves to the next token in the input.</li>
+<li><code>expect_peek(expected: AsmToken) -&gt; Result&lt;()&gt;</code>: Checks if the next token matches the expected token.</li>
+<li><code>curr_token_is(expected: AsmToken) -&gt; bool</code>: Checks if the current token matches the expected token.</li>
+<li><code>peek_token_is(expected: AsmToken) -&gt; bool</code>: Checks if the next token matches the expected token.</li>
+<li><code>get_label() -&gt; Result&lt;Rc&lt;str&gt;&gt;</code>: Retrieves the label from the current token.</li>
+<li><code>get_number() -&gt; Result&lt;Rc&lt;str&gt;&gt;</code>: Retrieves the number from the current token.</li>
+<li><code>get_register() -&gt; Result&lt;Rc&lt;Register&gt;&gt;</code>: Retrieves the register from the current token.</li>
+<li><code>get_opcode() -&gt; Result&lt;Rc&lt;Opcode&gt;&gt;</code>: Retrieves the opcode from the current token.</li>
+<li><code>get_pseudo_op() -&gt; Result&lt;Rc&lt;PseudoOps&gt;&gt;</code>: Retrieves the pseudo operation from the current token.</li>
+<li><code>guard_a_bus(reg: Rc&lt;Register&gt;) -&gt; Result&lt;Rc&lt;Register&gt;&gt;</code>: Checks if the provided register can be used in the A bus.</li>
+<li><code>guard_b_bus(reg: Rc&lt;Register&gt;) -&gt; Result&lt;Rc&lt;Register&gt;&gt;</code>: Checks if the provided register can be used in the B bus.</li>
+<li><code>guard_c_bus(reg: Rc&lt;Register&gt;) -&gt; Result&lt;Rc&lt;Register&gt;&gt;</code>: Checks if the provided register can be used in the C bus.</li>
+<li><code>parse_data_to_write() -&gt; Result&lt;DataWrited&gt;</code>: Parses the data to be written.</li>
+<li><code>parse_data_directive() -&gt; Result&lt;Sections&gt;</code>: Parses the data directive section.</li>
+<li><code>get_dest_regs() -&gt; Result&lt;Vec&lt;Rc&lt;Register&gt;&gt;&gt;</code>: Retrieves the destination registers.</li>
+<li><code>parse_instruction_til_rs1() -&gt; Result&lt;(Vec&lt;Rc&lt;Register&gt;&gt;, Rc&lt;Register&gt;)&gt;</code>: Parses the instruction until the RS1 register.</li>
+<li><code>get_instruction() -&gt; Result&lt;Instruction&gt;</code>: Retrieves the instruction.</li>
+<li><code>parse_labeled_section() -&gt; Result&lt;TextSegment&gt;</code>: Parses the labeled section.</li>
+<li>`parse_text_directive() -&gt;.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><p><code>AsmEvaluator</code> is a custom microarchitecture evaluator implemented in Rust.
+It provides functionality for evaluating assembly code written in a custom instruction set architecture.</p>
+<h1 id="usage-8"><a class="header" href="#usage-8">Usage</a></h1>
+<p>To use the <code>AsmEvaluator</code>, follow these steps:</p>
+<ol>
+<li>Create a new instance of <code>AsmEvaluator</code> using the new method:</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let mut evaluator = AsmEvaluator::new();
+<span class="boring">}</span></code></pre></pre>
+<ol start="2">
+<li>Call the <code>evaluate_buffer</code> method to evaluate a buffer containing assembly code:</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let buffer = r&quot;
+.text
+main:
+    lui t1 &lt;- 77
+&quot;;
+let result = evaluator.evaluate_buffer(buffer);
+<span class="boring">}</span></code></pre></pre>
+<p>The evaluate_buffer method returns a <code>Result</code> containing the control store (<code>CtrlStore</code>) and a reference to the evaluated memory <code>(&amp;[u32])</code>. You can handle the result accordingly.</p>
+<ol start="3">
+<li>Alternatively, you can evaluate a Program directly by calling the eval_program method:</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let program = get_program(); // Obtain the program somehow
+let result = evaluator.eval_program(program);
+<span class="boring">}</span></code></pre></pre>
+<p>The eval_program method follows a similar pattern as <code>evaluate_buffer</code> but takes a <code>Program</code> as input.</p>
+<ol start="4">
+<li>You can also evaluate individual sections of the program using the <code>eval</code> method:</li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let sections = get_sections(); // Obtain the sections somehow
+let control_store = evaluator.eval(&amp;sections);
+<span class="boring">}</span></code></pre></pre>
+<p>The eval method takes a reference to the <code>Sections</code> enum, which can contain either a <code>TextSection</code> or a <code>DataSection</code>. It returns the <code>CtrlStore</code> generated from the evaluation.</p>
+<h1 id="structure"><a class="header" href="#structure">Structure</a></h1>
+<p>The <code>AsmEvaluator</code> struct has the following fields:</p>
+<ul>
+<li><code>values</code>: A HashMap mapping labels to values (u8).</li>
+<li><code>addr</code>: A HashMap mapping labels to addresses (u8).</li>
+<li><code>ram</code>: A vector representing the random access memory.</li>
+<li><code>unreachable</code>: A vector containing tuples of unreachable labels, their corresponding control store addresses, and microinstructions.
+The struct implements the Default trait using the derive attribute.</li>
+</ul>
+<p>The <code>AsmEvaluator</code> struct provides the following methods:</p>
+<ul>
+<li><code>new</code>: Creates a new instance of AsmEvaluator.</li>
+<li><code>evaluate_buffer</code>: Evaluates a buffer of assembly code and returns the control store and evaluated memory.</li>
+<li><code>eval_program</code>: Evaluates a Program and returns the control store and evaluated memory.</li>
+<li><code>eval</code>: Evaluates individual sections of the program and returns the control store.
+Additionally, there are internal helper methods for evaluating data and text segments, resolving unreachable instructions, and evaluating different types of instructions.</li>
+</ul>
+<h1 id="error-handling-1"><a class="header" href="#error-handling-1">Error Handling</a></h1>
+<p>If there are errors while parsing the program, the <code>evaluate_buffer</code> method will print the errors and return a <code>Result</code> with an error message. It's important to handle this case to ensure proper error reporting and handling.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparision-with-proposed-assembler-and-language"><a class="header" href="#comparision-with-proposed-assembler-and-language">Comparision with proposed Assembler and Language</a></h1>
+<h2 id="output"><a class="header" href="#output">Output</a></h2>
+<p>The first and more obvious difference between our project and the proposed, is that we generate the <code>Microinstruction</code> itself
+and not a tuple <code>(Opcode, Byte_addr)</code> that can be used by the microarchitecture.</p>
+<p>We choose this method because of the poor performance that is accomplished using <code>fetch</code> operation for getting the next instruction</p>
+<p>A common operation of <code>goto</code> or <code>jal</code> can be perfomed on a single instruction in Vondel because we know the next address without having to use <code>fetch</code></p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">Index</th><th style="text-align: center">Vondel</th><th style="text-align: left">Proposed</th></tr></thead><tbody>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0b000000010_100_00000000_00000000000000000000_000_11111_11111_00000000</td><td style="text-align: left">0b00001110_000_00110101_001000_001_001</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center"></td><td style="text-align: left">0b00000000_100_00010100_001000_001_010</td></tr>
+</tbody></table>
+</div>
+<p>Another difference is the way that we interact with <code>RAM</code>, on Vondel we produce a <code>.ram</code> file that it's separated from the firmware file,
+this, by itself, can reduce early gotos that are common in the proposed one. Because all words can be placed early and stop the program without executing anything</p>
+<h2 id="combinations"><a class="header" href="#combinations">Combinations</a></h2>
+<p>Vondel has more than <code>700000000</code> possibilities for creating instructions.
+This is because of our 23 register that can be combined in any way on <code>C_Bus</code>, 24 options for <code>A_bus</code> and 19 for <code>B_bus</code>. Where every register of
+<strong>A</strong> or <strong>B</strong> bus can be replaced with a immediate or an address to a label.</p>
+<p>On the proposed assembler, we only have operations with register <code>X</code> and everything in centered around him, limiting the way a programmer can
+interact with a microarchitecture.</p>
+<h2 id="extensibility"><a class="header" href="#extensibility">Extensibility</a></h2>
+<p>Adding new <strong>Mnemonics</strong>, <strong>Registers</strong>, <strong>PseudoOps</strong>, <strong>Sections</strong> or updating previous one is extremelly easy on Vondel.</p>
+<p>Because of <code>Rust</code> powerful type-system, any new changes that you make to this project will be captured by both our unit tests and
+Rust itself, leading to a more robust project.</p>
+<p>The proposed one was written in python without any tests</p>
+<h2 id="fine-grained-syntax"><a class="header" href="#fine-grained-syntax">Fine Grained Syntax</a></h2>
+<p>On Vondel, we can define the syntax of our Language in any way that you want.
+Because we created a parsing stage, our syntax will be defined there.</p>
+<p>A syntax pattern that would be hard to do in the proposed one is our <code>write</code> function.</p>
+<pre><code class="language-asm">write 123 &lt;- t0
+write addr &lt;- a1
+</code></pre>
+<p>Most Vondel instructions can receive up to <strong>23</strong> registers as destination, but this one only receives <code>label</code> or <code>immediate</code> for storing the result
+and it must have an <code>register</code> as input</p>
+<p>Implementing this on the proposed one would require to remake the entire bussiness logic that consists of <code>opcode, dest, source</code></p>
+<p>On Vondel we just create a arm on the <code>match statement</code> and it's done</p>
+<h2 id="error-handling-and-diagnostics"><a class="header" href="#error-handling-and-diagnostics">Error Handling and Diagnostics</a></h2>
+<p>One of the most important features of a interpreter/compiler/assembler is how well it handle errors and show this information for a user.</p>
+<p>On the proposed one, if something goes wrong the parser still tries to generate a file and just prints that have happened an error like this:</p>
+<pre><code class="language-sh">Error of syntax on line 15
+</code></pre>
+<p>We improved this error system using Rust powerful type-system that cries until we handle it on a good manner using this approachs:</p>
+<ol>
+<li>Show not only a line but also which token is required and at which column</li>
+<li>If some operation is forbidden like writing to MBR we send an error message to the user</li>
+</ol>
+<pre><code class="language-sh">Expected &quot;Assign&quot; found &quot;Comma&quot;
+Line 13, column 9
+
+Cannot write to MAR on C Bus
+Line 18, column 9
+</code></pre>
+<h2 id="immediate-support"><a class="header" href="#immediate-support">Immediate Support</a></h2>
+<p>On Vondel we support Immediates, that are a type of data used in microarchitecture to provide immediate values or constants as operands in instructions.
+They allow for the inclusion of constant values directly within the instruction itself, without the need to load them from memory or registers.</p>
+<p>It's not implemented on the proposed one</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="microarchitecture"><a class="header" href="#microarchitecture">Microarchitecture</a></h1>
+<p>The basic idea behind Vondel's design is to follow some tips from the book <em>Structured
+Computer Organization - Andrew S. Tanenbaum</em> while implementing the ability to
+perform operations even if the main clock is in a non-edge level in order to
+reduce clock cycles.</p>
+<p>The implementation of this design is provided by the <code>uarch</code> module.</p>
+<h2 id="datapath-structure"><a class="header" href="#datapath-structure">Datapath structure</a></h2>
+<p>The way that a datapath is structured is not far from the usual three-bus design
+plus a <a href="https://en.wikipedia.org/wiki/Instruction_unit"><em>IFU</em></a>, the techniques
+involved a rather simple for now as you can see the diagram below:</p>
+<div align="center">
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/WkBo8bD.png" alt="Data path diagram" /></th></tr></thead><tbody>
+<tr><td style="text-align: center"><em>The diagram of a single datapath (click to zoom).</em></td></tr>
+</tbody></table>
+</div></div>
+<p>This implementation provides 24 registers in total: 5 memory registers, 3 system
+registers (to manage function calls and variables) and 16 general 16 general
+purpose registers (from R0 to R15). The register list is as following:</p>
+<ul>
+<li>Memory
+<ul>
+<li>MAR (Memory Address Register): 20 bits</li>
+<li>MDR (Memory Data Register): 32 bits</li>
+<li>PC (Program Counter): 20 bits</li>
+<li>MBR (Memory Buffer Reader): 8 bits</li>
+<li>MBR2 (Memory Buffer Reader 2): 16 bits</li>
+</ul>
+</li>
+<li>System
+<ul>
+<li>SP (Stack Pointer): 20 bits</li>
+<li>LV (Local Variables): 20 bits</li>
+<li>CPP (Constant Pool Pointer): 20 bits</li>
+</ul>
+</li>
+<li>General Purpose
+<ul>
+<li>R0: 32 bits</li>
+<li>...</li>
+<li>R15: 32 bits</li>
+</ul>
+</li>
+</ul>
+<p>Each cycle the datapath is driven by a Microinstruction provided by the Control
+Store. For more info see the <a href="uarch/./uinstruction.html">next chapter</a>.</p>
+<h2 id="data-parallelism"><a class="header" href="#data-parallelism">Data parallelism</a></h2>
+<p>For that we will use two <a href="https://en.wikipedia.org/wiki/Datapath"><em>datapaths</em></a>
+with one <a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit"><em>ALU</em></a> each, but
+the clock trigger of one is the opposite of the other, that is, ALU1 is
+falling-edge triggered and ALU2 is rising-edge triggered. Furthermore,
+the clock signal received in ALU2 is a function of the clock signal
+of ALU1.</p>
+<p>Let's say that ALU1 has a clock <em>α<sub>1</sub></em> and the delayed version of this
+signal is <em>α<sub>1</sub><sup>'</sup></em>. So the ALU2 must have a clock
+<em>α<sub>2</sub> = (α<sub>1</sub> ∧ α<sub>1</sub><sup>'</sup>)</em> plus a
+delay of <em>δ<sub>1</sub></em> as shown below:</p>
+<div align="center">
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/O3SP6L2.png" alt="Clock relation diagram" /></th></tr></thead><tbody>
+<tr><td style="text-align: center"><em>The relation between the clock α<sub>1</sub> and α<sub>2</sub>.</em></td></tr>
+</tbody></table>
+</div></div>
+<p>In other words, ALU1 will start its operation cycle on the falling-edge of
+<em>α<sub>1</sub></em> and end the operation on the rising-edge, while ALU2 will
+start its operation cycle on the rising-edge of <em>α<sub>2</sub></em> and end the
+operation on the falling-edge, taking advantage of the main clock (<em>α<sub>1</sub></em>)
+even when it is at high level.</p>
+<p>The advantage of this method is that we can share the
+<a href="https://en.wikipedia.org/wiki/Control_storebbjk"><em>control store</em></a> and all the
+registers without big cost in the Misconstruction size, external hardware
+components and additional logic steps that may cost some clock cycles. The
+way that the components are shared is shown below:</p>
+<div align="center">
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/tlHAPgL.png" alt="Shared components diagram" /></th></tr></thead><tbody>
+<tr><td style="text-align: center"><em>The datapaths share some components such as the Microprogram, RAM and shared registers.</em></td></tr>
+</tbody></table>
+</div></div>
+<p>Those two datapaths will become a <a href="https://en.wikipedia.org/wiki/Thread_(computing)"><em>thread</em></a>
+in a future design of this Microarchitecture that is planned to have two task parallel threads.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="microinstruction"><a class="header" href="#microinstruction">Microinstruction</a></h1>
+<p>Microinstructions are stored in the control store and are fetched with the address
+stode at MPC (Microprogram Counter).</p>
+<p>A Vondel microinstruction has 64 bits the following format:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: center">9 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">8 bits</td><td style="text-align: center">20 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">8 bits</td></tr>
+</tbody></table>
+</div>
+<p>You can find a more detailed version of this diagram <a href="https://i.imgur.com/tlHAPgL.png">here</a>.</p>
+<h2 id="next"><a class="header" href="#next">NEXT</a></h2>
+<p>The <code>NEXT</code> field stores the next microinstruction address. In other words, the
+<code>NEXT</code> field stores the next value to be stored at MPC.</p>
+<h2 id="jam"><a class="header" href="#jam">JAM</a></h2>
+<p>The <code>JAM</code> field stores in which conditions the program should jump. A Jump is
+a change in the natural flow of the microprogram that represents that the next
+instruction should be changed is some way.</p>
+<p>We have 3 possible condition to jump: if the value returned by ALU is 0 (JAMZ),
+if is negative (JAMN) and if we want to change the next instruction using
+something stored at MBR (JMPC). The first bit (MSB) from <code>JAM</code> is JMPC, the
+second is JAMN and the last is JAMZ.</p>
+<p>On JAMN and JAMZ a jump is, in fact, a OR operation on the most sigficant bit
+of MPC and the condition. In other words, if the condition is true, which happens
+when its bit is 1, that 1 is bitwise ORed with the MSB of MPC, so if the value
+of MPC is <code>000001010</code> the jump position is <code>100001010</code>. But on JMPC,
+a jump is a bitwise or with MBR and the 8 LSB's from MPC.</p>
+<h2 id="alu"><a class="header" href="#alu">ALU</a></h2>
+<p>The <code>ALU</code> field actually controls 2 devices: the ALU itself and the shifter
+connected to its autput.</p>
+<p>The ALU has two input, A and B (that come from the A and B bus, respectively) and 
+it's controled by the 6 LSB's from the ALU field, they are:</p>
+<ul>
+<li>F0 and F1 (Controls the ALU function)</li>
+<li>ENA and ENB (Enables the input from A and B bus respectively)</li>
+<li>INVA (Inverts the bits of A)</li>
+<li>INC (Increments 1 to the ALU result)</li>
+</ul>
+<p>from MSB to LSB. The logic and arithmetic functions that ALU can
+operate are managed by F0 and F1 like this:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: left">Function</th></tr></thead><tbody>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A OR B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">NOT B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">A + B</td></tr>
+</tbody></table>
+</div>
+<p>Some useful combinations of ALU signal can be found below:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: center">ENA</th><th style="text-align: center">ENB</th><th style="text-align: center">INVA</th><th style="text-align: center">INC</th><th style="text-align: left">Function</th></tr></thead><tbody>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">not A</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">not B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A + B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + B + 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">B + 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">B − A</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">B − 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">−A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A OR B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">0</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">−1</td></tr>
+</tbody></table>
+</div>
+<p>The shifter has 2 inputs: The value of the ALU operation (let's call it <code>X</code>) and
+the operation opcode that are which are the 2 MSB's from the ALU field. The
+operations and its opcode are as following:</p>
+<div class="table-wrapper"><table><thead><tr><th>Opcode</th><th>Operation</th><th>Output</th></tr></thead><tbody>
+<tr><td><code>0b00</code></td><td>None</td><td><code>X</code></td></tr>
+<tr><td><code>0b01</code></td><td>Shift Right 1 bit</td><td><code>X &gt;&gt; 1</code></td></tr>
+<tr><td><code>0b10</code></td><td>Shift Left 8 bits</td><td><code>X &lt;&lt; 8</code></td></tr>
+<tr><td><code>0b11</code></td><td>Shift Left 1 bit</td><td><code>X &lt;&lt; 1</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="c-bus"><a class="header" href="#c-bus">C BUS</a></h2>
+<p>The <code>C BUS</code> field represents which registers gonna be writen with the value
+of the C BUS (which is the shifter output). This field has 20 bits because
+there are 20 registers connected to the C bus, each bit 1 represents that the
+register represented by that bit should be writen by the C BUS.</p>
+<p>The relation between a bit n and which register it's represents is shown below
+(from MSB to LSB):</p>
+<div class="table-wrapper"><table><thead><tr><th>Bit</th><th>Register</th></tr></thead><tbody>
+<tr><td>1</td><td>MDR</td></tr>
+<tr><td>2</td><td>MAR</td></tr>
+<tr><td>3</td><td>PC</td></tr>
+<tr><td>4</td><td>LV</td></tr>
+<tr><td>5</td><td>R0</td></tr>
+<tr><td>6</td><td>R1</td></tr>
+<tr><td>7</td><td>R2</td></tr>
+<tr><td>8</td><td>R3</td></tr>
+<tr><td>9</td><td>R4</td></tr>
+<tr><td>10</td><td>R5</td></tr>
+<tr><td>11</td><td>R6</td></tr>
+<tr><td>12</td><td>R7</td></tr>
+<tr><td>13</td><td>R8</td></tr>
+<tr><td>14</td><td>R9</td></tr>
+<tr><td>15</td><td>R10</td></tr>
+<tr><td>16</td><td>R11</td></tr>
+<tr><td>17</td><td>R12</td></tr>
+<tr><td>18</td><td>R13</td></tr>
+<tr><td>19</td><td>R14</td></tr>
+<tr><td>20</td><td>R15</td></tr>
+</tbody></table>
+</div>
+<h2 id="mem"><a class="header" href="#mem">MEM</a></h2>
+<p>The memory field represents which memory operations gonna happen in the cycle.
+The bit 1 (MSB), 2 and 3 represents the operations of WRITE, READ and FETCH
+respectively.</p>
+<p>Each bit 1 in the field informs that the memory operation related to that
+field will be executed.</p>
+<h2 id="a-and-b"><a class="header" href="#a-and-b">A and B</a></h2>
+<p><code>A</code> and <code>B</code> are fields that control which register writes to the A and B bus
+respectively, but, since the A and B bus are connected directly to the A and B
+inputs of the ALU, they can also be viewed as which register goes as a entry
+to the ALU operation.</p>
+<p>The values of <code>A</code> and <code>B</code> and which register they enable (NONE,
+represents that none of them writes to the respective BUS, so the value of the
+bus is 0) is shown below:</p>
+<p>Output to BUS A:</p>
+<div class="table-wrapper"><table><thead><tr><th>ID</th><th>BIN</th><th>Register</th></tr></thead><tbody>
+<tr><td>0</td><td>00000</td><td>MDR</td></tr>
+<tr><td>1</td><td>00001</td><td>PC</td></tr>
+<tr><td>2</td><td>00010</td><td>MBR</td></tr>
+<tr><td>3</td><td>00011</td><td>MBRU</td></tr>
+<tr><td>4</td><td>00100</td><td>MBR2</td></tr>
+<tr><td>5</td><td>00101</td><td>MBR2U</td></tr>
+<tr><td>6</td><td>00110</td><td>LV</td></tr>
+<tr><td>7</td><td>00111</td><td>CPP</td></tr>
+<tr><td>8</td><td>01000</td><td>IMMEDIATE</td></tr>
+<tr><td>9</td><td>01001</td><td>R0</td></tr>
+<tr><td>10</td><td>01010</td><td>R1</td></tr>
+<tr><td>11</td><td>01011</td><td>R2</td></tr>
+<tr><td>12</td><td>01100</td><td>R3</td></tr>
+<tr><td>13</td><td>01101</td><td>R4</td></tr>
+<tr><td>14</td><td>01110</td><td>R5</td></tr>
+<tr><td>15</td><td>01111</td><td>R6</td></tr>
+<tr><td>16</td><td>10000</td><td>R7</td></tr>
+<tr><td>17</td><td>10001</td><td>R8</td></tr>
+<tr><td>18</td><td>10010</td><td>R9</td></tr>
+<tr><td>19</td><td>10011</td><td>R10</td></tr>
+<tr><td>20</td><td>10100</td><td>R11</td></tr>
+<tr><td>21</td><td>10101</td><td>R12</td></tr>
+<tr><td>22</td><td>10110</td><td>R13</td></tr>
+<tr><td>23</td><td>10111</td><td>R14</td></tr>
+<tr><td>24</td><td>11000</td><td>R15</td></tr>
+<tr><td>..</td><td>...</td><td>NONE</td></tr>
+</tbody></table>
+</div>
+<hr />
+<p>Output to BUS B:</p>
+<div class="table-wrapper"><table><thead><tr><th>ID</th><th>BIN</th><th>Register</th></tr></thead><tbody>
+<tr><td>0</td><td>00000</td><td>MDR</td></tr>
+<tr><td>1</td><td>00001</td><td>LV</td></tr>
+<tr><td>2</td><td>00010</td><td>CPP</td></tr>
+<tr><td>3</td><td>00011</td><td>IMMEDIATE</td></tr>
+<tr><td>4</td><td>00100</td><td>R0</td></tr>
+<tr><td>5</td><td>00101</td><td>R1</td></tr>
+<tr><td>6</td><td>00110</td><td>R2</td></tr>
+<tr><td>7</td><td>00111</td><td>R3</td></tr>
+<tr><td>8</td><td>01000</td><td>R4</td></tr>
+<tr><td>9</td><td>01001</td><td>R5</td></tr>
+<tr><td>10</td><td>01010</td><td>R6</td></tr>
+<tr><td>11</td><td>01011</td><td>R7</td></tr>
+<tr><td>12</td><td>01100</td><td>R8</td></tr>
+<tr><td>13</td><td>01101</td><td>R9</td></tr>
+<tr><td>14</td><td>01110</td><td>R10</td></tr>
+<tr><td>15</td><td>01111</td><td>R11</td></tr>
+<tr><td>16</td><td>10000</td><td>R12</td></tr>
+<tr><td>17</td><td>10001</td><td>R13</td></tr>
+<tr><td>18</td><td>10010</td><td>R14</td></tr>
+<tr><td>19</td><td>10011</td><td>R15</td></tr>
+<tr><td>..</td><td>...</td><td>NONE</td></tr>
+</tbody></table>
+</div>
+<h2 id="immediate"><a class="header" href="#immediate">IMMEDIATE</a></h2>
+<p>The immediate field allows us to send a arbitrary 8 bit number to the A or B
+bus, i.e if we set <code>0x08</code> in the IMMEDIATE field and enable the immediate input
+on the A and/or B bus, that <code>0x08</code> gonna be loaded in the corresponding bus.</p>
+<h2 id="assembly"><a class="header" href="#assembly">Assembly</a></h2>
+<p>Some details about the relation between the assembly code and the microarchitecture.</p>
+<h3 id="register-nomeclature"><a class="header" href="#register-nomeclature">Register nomeclature</a></h3>
+<p>In the assembly code the general purpose registers were renamed for convenience
+in when writing code, the rename table is as following:</p>
+<div class="table-wrapper"><table><thead><tr><th>Register</th><th>Assembly Name</th></tr></thead><tbody>
+<tr><td>R0</td><td>Ra</td></tr>
+<tr><td>R1</td><td>T0</td></tr>
+<tr><td>R2</td><td>T1</td></tr>
+<tr><td>R3</td><td>T2</td></tr>
+<tr><td>R4</td><td>T3</td></tr>
+<tr><td>R5</td><td>S0</td></tr>
+<tr><td>R6</td><td>S1</td></tr>
+<tr><td>R7</td><td>S2</td></tr>
+<tr><td>R8</td><td>S3</td></tr>
+<tr><td>R9</td><td>S4</td></tr>
+<tr><td>R10</td><td>S5</td></tr>
+<tr><td>R11</td><td>S6</td></tr>
+<tr><td>R12</td><td>A0</td></tr>
+<tr><td>R13</td><td>A1</td></tr>
+<tr><td>R14</td><td>A2</td></tr>
+<tr><td>R15</td><td>A3</td></tr>
+</tbody></table>
+</div>
+<p><strong>WARNING:</strong> The registers <code>T0</code> - <code>T3</code> can be used in instructions like <code>mul</code> to
+store temporary values, so the value of those can be changed in the instruction
+implementations, therefore they are not guaranteed to have the value that you expect
+using instruction like <code>lui</code> or <code>read</code>.</p>
+<h2 id="assembly-implementations"><a class="header" href="#assembly-implementations">Assembly Implementations</a></h2>
+<p>You can find some implementatinos examples of assembly code into the microarchitecture in the
+<a href="uarch/./implementations.html">next chapter</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="instruction-implementations"><a class="header" href="#instruction-implementations">Instruction Implementations</a></h1>
+<p>In this section we will show how some of the microinstruction of the Vondel
+Language are implemented in the microprogram.</p>
+<h2 id="operations-summary"><a class="header" href="#operations-summary">Operations Summary</a></h2>
+<ul>
+<li>Arithmetic
+<ul>
+<li><a href="uarch/implementations.html#add">ADD</a></li>
+<li><a href="uarch/implementations.html#sub">SUB</a></li>
+<li><a href="uarch/implementations.html#mul">MUL</a></li>
+</ul>
+</li>
+<li>Logic
+<ul>
+<li><a href="uarch/implementations.html#and">AND</a></li>
+<li><a href="uarch/implementations.html#or">OR</a></li>
+<li><a href="uarch/implementations.html#not">NOT</a></li>
+</ul>
+</li>
+<li>Shift
+<ul>
+<li><a href="uarch/implementations.html#sll">SLL (Shift Left Logical)</a></li>
+<li><a href="uarch/implementations.html#sla">SLA (Shift Left Arithmetic)</a></li>
+<li><a href="uarch/implementations.html#sra">SRA (Shift Right Arithmetic)</a></li>
+</ul>
+</li>
+<li>Memory
+<ul>
+<li><a href="uarch/implementations.html#read">READ</a></li>
+<li><a href="uarch/implementations.html#write">WRITE</a></li>
+</ul>
+</li>
+<li>Branch
+<ul>
+<li><a href="uarch/implementations.html#jal">JAL</a></li>
+<li><a href="uarch/implementations.html#beq">BEQ</a></li>
+<li><a href="uarch/implementations.html#bne">BNE</a></li>
+<li><a href="uarch/implementations.html#blt">BLT</a></li>
+<li><a href="uarch/implementations.html#bgt">BGT</a></li>
+</ul>
+</li>
+<li>Immediate
+<ul>
+<li><a href="uarch/implementations.html#lui">LUI</a></li>
+<li><a href="uarch/implementations.html#addi">ADDI</a></li>
+<li><a href="uarch/implementations.html#subi">SUBI</a></li>
+<li><a href="uarch/implementations.html#andi">ANDI</a></li>
+<li><a href="uarch/implementations.html#ori">ORI</a></li>
+</ul>
+</li>
+<li>Other
+<ul>
+<li><a href="uarch/implementations.html#mov">MOV</a></li>
+<li><a href="uarch/implementations.html#halt">HALT</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="halt-1"><a class="header" href="#halt-1">HALT</a></h2>
+<p><em>HALT</em> is a special microinstruction to indicate that
+the program has ended. In this design this opcode is achieved by seting all 64
+bits of the microinstruction to 1.</p>
+<p>This constant is avalible as a shortcut in the <code>CtrlStore</code> struct.</p>
+<h2 id="mov-1"><a class="header" href="#mov-1">MOV</a></h2>
+<p>Syntax: <code>mov x -&gt; r0, ..., rn</code>.</p>
+<p>Action: Store the value of the register <code>x</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level"><a class="header" href="#high-level">High Level</a></h3>
+<pre><code>mov r14 -&gt; r15, r13
+</code></pre>
+<h3 id="microprogram"><a class="header" href="#microprogram">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00000000000000000101</td><td style="text-align: center">000</td><td style="text-align: center">01110</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="add-1"><a class="header" href="#add-1">ADD</a></h2>
+<p>Syntax: <code>add x, y -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>x + y</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-1"><a class="header" href="#high-level-1">High Level</a></h3>
+<pre><code>add r2, r3 -&gt; r0, r1
+</code></pre>
+<h3 id="microprogram-1"><a class="header" href="#microprogram-1">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111100</td><td style="text-align: center">00001100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="sub-1"><a class="header" href="#sub-1">SUB</a></h2>
+<p>Syntax: <code>sub x, y -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>x - y</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-2"><a class="header" href="#high-level-2">High Level</a></h3>
+<pre><code>sub r2, r3 -&gt; r0
+</code></pre>
+<h3 id="microprogram-2"><a class="header" href="#microprogram-2">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">00110</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="and-1"><a class="header" href="#and-1">AND</a></h2>
+<p>Syntax: <code>and x, y -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>x &amp; y </code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-3"><a class="header" href="#high-level-3">High Level</a></h3>
+<pre><code>and r2, r3 -&gt; r1
+</code></pre>
+<h3 id="microprogram-3"><a class="header" href="#microprogram-3">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00001100</td><td style="text-align: center">00000100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="or-1"><a class="header" href="#or-1">OR</a></h2>
+<p>Syntax: <code>or x, y -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>x | y </code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-4"><a class="header" href="#high-level-4">High Level</a></h3>
+<pre><code>or r2, r3 -&gt; r0, r1, r14, r15
+</code></pre>
+<h3 id="microprogram-4"><a class="header" href="#microprogram-4">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="not-1"><a class="header" href="#not-1">NOT</a></h2>
+<p>Syntax: <code>not x -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>!x</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-5"><a class="header" href="#high-level-5">High Level</a></h3>
+<pre><code>not r3 -&gt; r0, r15
+</code></pre>
+<h3 id="microprogram-5"><a class="header" href="#microprogram-5">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011010</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="sll-1"><a class="header" href="#sll-1">SLL</a></h2>
+<p>Syntax: <code>sll x -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>x &lt;&lt; 8</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-6"><a class="header" href="#high-level-6">High Level</a></h3>
+<pre><code>sll r3 -&gt; r0, r15
+</code></pre>
+<h3 id="microprogram-6"><a class="header" href="#microprogram-6">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">10011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="sla-1"><a class="header" href="#sla-1">SLA</a></h2>
+<p>Syntax: <code>sla x -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>x &lt;&lt; 1</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-7"><a class="header" href="#high-level-7">High Level</a></h3>
+<pre><code>sla r3 -&gt; r0, r15
+</code></pre>
+<h3 id="microprogram-7"><a class="header" href="#microprogram-7">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">11011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="sra-1"><a class="header" href="#sra-1">SRA</a></h2>
+<p>Syntax: <code>sra x -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the result of <code>x &gt;&gt; 1</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-8"><a class="header" href="#high-level-8">High Level</a></h3>
+<pre><code>sra r3 -&gt; r0, r15
+</code></pre>
+<h3 id="microprogram-8"><a class="header" href="#microprogram-8">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">01011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="read-1"><a class="header" href="#read-1">READ</a></h2>
+<p>Syntax: <code>read [addr] -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the memory word at <code>addr</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-9"><a class="header" href="#high-level-9">High Level</a></h3>
+<pre><code>read 0x00008 -&gt; r0, r15
+</code></pre>
+<h3 id="microprogram-9"><a class="header" href="#microprogram-9">Microprogram</a></h3>
+<p>Precondition: <code>0x00008</code> should be stored at MAR.</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">010</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">00000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">2</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="write-1"><a class="header" href="#write-1">WRITE</a></h2>
+<p>Syntax: <code>write x -&gt; [addr]</code>.</p>
+<p>Action: Stores the memory value of <code>x</code> at <code>addr</code> on the memory.</p>
+<h3 id="high-level-10"><a class="header" href="#high-level-10">High Level</a></h3>
+<pre><code>write r14 -&gt; 0x00001
+</code></pre>
+<h3 id="microprogram-10"><a class="header" href="#microprogram-10">Microprogram</a></h3>
+<p>Precondition: <code>0x00001</code> should be store at MAR.</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">10000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01110</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000001</td><td style="text-align: center">100</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">2</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="jal-1"><a class="header" href="#jal-1">JAL</a></h2>
+<p>Syntax: <code>jal [addr]</code>.</p>
+<p>Action: Jumps to the instruction of id (address) <code>addr</code>.</p>
+<h3 id="high-level-11"><a class="header" href="#high-level-11">High Level</a></h3>
+<pre><code>jal 0x0A
+</code></pre>
+<h3 id="microprogram-11"><a class="header" href="#microprogram-11">Microprogram</a></h3>
+<p><code>JMPC</code> bit is used to nconditional branch, so we have to find some way of
+storing <code>0x0A</code> into MBR and then use <code>JMPC</code> to jump to that address.
+For that the number 10 (<code>0x0A</code>) must be stored at memory and its address
+should be stored in PC. So, let's store 10 in the current address of the PC,
+by default the PC is 0, so let's store it there.</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">010</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">100</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">10</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<p>In a nutshell the operations are the following:</p>
+<ol>
+<li>Fetch the memory.</li>
+<li>Set <code>JMPC</code> to 1.</li>
+</ol>
+<h2 id="beq-1"><a class="header" href="#beq-1">BEQ</a></h2>
+<p>Syntax: <code>beq x, y</code>.</p>
+<p>Action: Jump if the value of the register <code>x</code> is equal to the value of the
+register <code>y</code>.</p>
+<h3 id="high-level-12"><a class="header" href="#high-level-12">High Level</a></h3>
+<pre><code>beq r14, r15
+</code></pre>
+<h3 id="microprogram-12"><a class="header" href="#microprogram-12">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">001</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="bne-1"><a class="header" href="#bne-1">BNE</a></h2>
+<p>Syntax: <code>bne x, y</code>.</p>
+<p>Action: Jump if the value of the register <code>x</code> is <strong>not</strong> equal to the value of the
+register <code>y</code>.</p>
+<h3 id="high-level-13"><a class="header" href="#high-level-13">High Level</a></h3>
+<pre><code>bne r14, r15
+</code></pre>
+<h3 id="microprogram-13"><a class="header" href="#microprogram-13">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">258</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="blt-1"><a class="header" href="#blt-1">BLT</a></h2>
+<p>Syntax: <code>blt x, y</code>.</p>
+<p>Action: Jump if the value of the register <code>x</code> is less than the value of the
+register <code>y</code>.</p>
+<h3 id="high-level-14"><a class="header" href="#high-level-14">High Level</a></h3>
+<pre><code>blt r14, r15
+</code></pre>
+<h3 id="microprogram-14"><a class="header" href="#microprogram-14">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="bgt-1"><a class="header" href="#bgt-1">BGT</a></h2>
+<p>Syntax: <code>bgt x, y</code>.</p>
+<p>Action: Jump if the value of the register <code>x</code> is greater than the value of the
+register <code>y</code>.</p>
+<h3 id="high-level-15"><a class="header" href="#high-level-15">High Level</a></h3>
+<pre><code>bgt r14, r15
+</code></pre>
+<h3 id="microprogram-15"><a class="header" href="#microprogram-15">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="mul-1"><a class="header" href="#mul-1">MUL</a></h2>
+<p>Syntax: <code>mul x, y -&gt; r0, ..., rn</code>.</p>
+<p>Action: Multiply the value of x by y .</p>
+<h3 id="high-level-16"><a class="header" href="#high-level-16">High Level</a></h3>
+<pre><code>mul r6, r7 -&gt; r13
+</code></pre>
+<h3 id="microprogram-16"><a class="header" href="#microprogram-16">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">01010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">2</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00000100000000000100</td><td style="text-align: center">000</td><td style="text-align: center">01111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">3</td><td style="text-align: center">000000100</td><td style="text-align: center">001</td><td style="text-align: center">00110110</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01001</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">4</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">00111100</td><td style="text-align: center">00000000000000000100</td><td style="text-align: center">000</td><td style="text-align: center">10110</td><td style="text-align: center">00101</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">100000010</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">258</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00000100000000000100</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">260</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<p>In a nutshell the operations are the following:</p>
+<ol>
+<li>Jump to <code>0b100000001</code> (257) if <code>r6 - r7</code> is negative.</li>
+<li>Case 1 (has not jumped), therefore <code>r6 &gt;= r7</code>
+<ol>
+<li>Store the value of <code>r7</code> on <code>r0</code></li>
+<li>Store the value of <code>r6</code> on <code>r1</code> and <code>r13</code></li>
+<li>Store the value of <code>r0 - 1</code> into <code>r0</code> or jump to the <code>TERMINATE</code> code (260) if equals to 0.</li>
+<li>Stores the value of <code>r13 + r1</code> into <code>r13</code>.</li>
+</ol>
+</li>
+<li>Case 2 (has jumped), therefore <code>r6 &lt; r7</code>
+<ol>
+<li>Store the value of <code>r6</code> on <code>r0</code></li>
+<li>Store the value of <code>r7</code> on <code>r1</code> and <code>r13</code> and goto the step 3 of the case 1.</li>
+</ol>
+</li>
+</ol>
+<p>In another words, the smallest number is stored at <code>r0</code> and the greater is stored
+in <code>r1</code> and we aways make <code>r0 * r1</code>. This optimization is necessary because a
+multiplication is computed as sequential additions, and making less additions
+save some clock cycles.</p>
+<h2 id="lui-1"><a class="header" href="#lui-1">LUI</a></h2>
+<p>Syntax: <code>lui [byte] -&gt; r0, ..., rn</code>.</p>
+<p>Action: Store the the immediate value of <code>byte</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-17"><a class="header" href="#high-level-17">High Level</a></h3>
+<pre><code>lui 0xFF -&gt; r15
+</code></pre>
+<p>This program stores <code>0xFF</code> (255) to r15, but 255 is not stored in any register (it is
+a <em>immediate value</em>).</p>
+<h3 id="microprogram-17"><a class="header" href="#microprogram-17">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00000000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="addi-1"><a class="header" href="#addi-1">ADDI</a></h2>
+<p>Syntax: <code>addi x, [byte] -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the value of <code>x + [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-18"><a class="header" href="#high-level-18">High Level</a></h3>
+<pre><code>addi r14, 0x05 -&gt; r14
+</code></pre>
+<h3 id="microprogram-18"><a class="header" href="#microprogram-18">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000101</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="subi-1"><a class="header" href="#subi-1">SUBI</a></h2>
+<p>Syntax: <code>subi x, [byte] -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the value of <code>x - [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-19"><a class="header" href="#high-level-19">High Level</a></h3>
+<pre><code>subi r14, 0x05 -&gt; r14
+</code></pre>
+<h3 id="microprogram-19"><a class="header" href="#microprogram-19">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000101</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="andi-1"><a class="header" href="#andi-1">ANDI</a></h2>
+<p>Syntax: <code>andi x, [byte] -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the value of <code>x &amp; [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-20"><a class="header" href="#high-level-20">High Level</a></h3>
+<pre><code>andi r14, 0xFF -&gt; r14
+</code></pre>
+<h3 id="microprogram-20"><a class="header" href="#microprogram-20">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00001100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="ori-1"><a class="header" href="#ori-1">ORI</a></h2>
+<p>Syntax: <code>ori x, [byte] -&gt; r0, ..., rn</code>.</p>
+<p>Action: Stores the value of <code>x | [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-21"><a class="header" href="#high-level-21">High Level</a></h3>
+<pre><code>ori r14, 0x00 -&gt; r14
+</code></pre>
+<h3 id="microprogram-21"><a class="header" href="#microprogram-21">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="chapter-1"><a class="header" href="#chapter-1">Chapter 1</a></h1>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

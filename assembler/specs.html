@@ -1,0 +1,472 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Language Specification - Vondel Language and Microarchitecture</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html" class="active"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Vondel Language and Microarchitecture</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/thewillyan/vondel" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="registers"><a class="header" href="#registers">Registers</a></h1>
+<p>The assembler supports 25 registers. These registers can be used for general-purpose operations or not.</p>
+<div class="table-wrapper"><table><thead><tr><th>Register</th><th>Suggested Usage</th><th>A Bus</th><th>B Bus</th><th>C Bus</th></tr></thead><tbody>
+<tr><td>Mar</td><td>Memory Address</td><td></td><td></td><td>Output</td></tr>
+<tr><td>Mdr</td><td>Memory Data</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>Mbr</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Mbru</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Mbr2</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Mbr2u</td><td>Memory Buffer</td><td>Input</td><td></td><td></td></tr>
+<tr><td>Pc</td><td>Program Counter</td><td>Input</td><td></td><td>Output</td></tr>
+<tr><td>Cpp</td><td>Call Pointer</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>Lv</td><td>Local Variable</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>Ra</td><td>Return Address</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T0</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T1</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T2</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>T3</td><td>Temporary</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S0</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S1</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S2</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S3</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S4</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S5</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>S6</td><td>Saved</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A0</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A1</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A2</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+<tr><td>A3</td><td>Function Arg</td><td>Input</td><td>Input</td><td>Output</td></tr>
+</tbody></table>
+</div>
+<h1 id="sections"><a class="header" href="#sections">Sections</a></h1>
+<p>The assembler supports two sections: <code>.text</code> and <code>.data</code>. The sections are defined as follows:</p>
+<h2 id="text-section"><a class="header" href="#text-section">.text Section</a></h2>
+<p>The <code>.text</code> section contains the executable instructions.</p>
+<h2 id="data-section"><a class="header" href="#data-section">.data Section</a></h2>
+<p>The <code>.data</code> section is used for declaring and initializing data.</p>
+<h1 id="instruction-format"><a class="header" href="#instruction-format">Instruction Format</a></h1>
+<p>Most vondel instructions in follow the format: <code>opcode dest_regs &lt;- source1, source2</code>. Here's a breakdown of the components:</p>
+<ul>
+<li><code>opcode</code>: Specifies the operation to be performed.</li>
+<li><code>dest_regs</code>: The registers where the result will be stored.</li>
+<li><code>source1</code> and <code>source2</code>: Registers or immediate values used as operands.</li>
+</ul>
+<h1 id="supported-instructions"><a class="header" href="#supported-instructions">Supported Instructions</a></h1>
+<p>The assembler supports the following instructions:</p>
+<ul>
+<li>Arithmetic and Logic
+<ul>
+<li><a href="#add">ADD</a></li>
+<li><a href="#sub">SUB</a></li>
+<li><a href="#mul">MUL</a></li>
+<li><a href="#and">AND</a></li>
+<li><a href="#or">OR</a></li>
+<li><a href="#not">NOT</a></li>
+</ul>
+</li>
+<li>Shift
+<ul>
+<li><a href="#sll">SLL (Shift Left Logical)</a></li>
+<li><a href="#sla">SLA (Shift Left Arithmetic)</a></li>
+<li><a href="#sra">SRA (Shift Right Arithmetic)</a></li>
+</ul>
+</li>
+<li>Memory
+<ul>
+<li><a href="#read">READ</a></li>
+<li><a href="#write">WRITE</a></li>
+</ul>
+</li>
+<li>Branch
+<ul>
+<li><a href="#jal">JAL</a></li>
+<li><a href="#beq">BEQ</a></li>
+<li><a href="#bne">BNE</a></li>
+<li><a href="#blt">BLT</a></li>
+<li><a href="#bgt">BGT</a></li>
+</ul>
+</li>
+<li>Immediate
+<ul>
+<li><a href="#lui">LUI</a></li>
+<li><a href="#addi">ADDI</a></li>
+<li><a href="#subi">SUBI</a></li>
+<li><a href="#andi">ANDI</a></li>
+<li><a href="#ori">ORI</a></li>
+</ul>
+</li>
+<li>Other
+<ul>
+<li><a href="#mov">MOV</a></li>
+<li><a href="#halt">HALT</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="add"><a class="header" href="#add">Add</a></h2>
+<p>Adds two registers and save the result into 1 up to 20 registers that are allowed in the C_bus</p>
+<pre><code>add t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="sub"><a class="header" href="#sub">Sub</a></h2>
+<p>Subtract <code>x - y</code> and store on registers</p>
+<pre><code>sub t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="mul"><a class="header" href="#mul">Mul</a></h2>
+<p>Multiplies the value of <code>x</code> and <code>y</code> and store on registers</p>
+<pre><code>mul t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="and"><a class="header" href="#and">And</a></h2>
+<p>Makes a bitwise <code>and</code> with <code>x</code> and <code>y</code></p>
+<pre><code>and t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="or"><a class="header" href="#or">Or</a></h2>
+<p>Makes a bitwise <code>or</code> with <code>x</code> and <code>y</code></p>
+<pre><code>or t0, t1, t2, s0, s1, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="not"><a class="header" href="#not">Not</a></h2>
+<p>Stores the result of <code>!x</code> on the registers</p>
+<pre><code>not t0, t1, t2, s0, s1, a2, ra &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="sll"><a class="header" href="#sll">Sll</a></h2>
+<p>Stores the result of <code>x &lt;&lt; 8</code> on the registers</p>
+<pre><code>sll t0, t1 &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="sla"><a class="header" href="#sla">Sla</a></h2>
+<p>Stores the result of <code>x &lt;&lt; 1</code> on the registers</p>
+<pre><code>sla t0, t1 &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="sra"><a class="header" href="#sra">Sra</a></h2>
+<p>Stores the result of <code>x &gt;&gt; 1</code> on the registers</p>
+<pre><code>sra t0, t1 &lt;- a0
+</code></pre>
+<blockquote>
+<p>It uses only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<h2 id="read"><a class="header" href="#read">Read</a></h2>
+<p>Load a value from memory on the address <code>addr</code> into a register</p>
+<pre><code>read t0, t1, t2 &lt;- addr
+read t0, t1, t2 &lt;- 77
+</code></pre>
+<blockquote>
+<p>Addr can be both a label referencing a variable in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="write"><a class="header" href="#write">Write</a></h2>
+<p>Store a value from a register <code>x</code> into memory on address <code>addr</code></p>
+<pre><code>write addr &lt;- t1
+write 77 &lt;- ra
+</code></pre>
+<blockquote>
+<p>It allows only a <em><strong>single</strong></em> register as source</p>
+</blockquote>
+<blockquote>
+<p>Addr can be both a label referencing a variable in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="jal"><a class="header" href="#jal">Jal</a></h2>
+<p>Jump inconditionally to a <code>label</code></p>
+<pre><code>jal loop
+</code></pre>
+<h2 id="beq"><a class="header" href="#beq">Beq</a></h2>
+<p>Branch if equal (jump to a <code>label</code> if <code>x</code> and <code>y</code> are equal)</p>
+<pre><code>beq t0, t1, done
+</code></pre>
+<h2 id="bne"><a class="header" href="#bne">Bne</a></h2>
+<p>Branch if <strong>not</strong> equal (jump to a <code>label</code> if <code>x</code> and <code>y</code> are not equal)</p>
+<pre><code>bne t0, t1, done
+</code></pre>
+<h2 id="blt"><a class="header" href="#blt">Blt</a></h2>
+<p>Branch if less then (jump to a <code>label</code> if <code>x</code> is less then <code>y</code>)</p>
+<pre><code>blt t0, t1, done
+</code></pre>
+<h2 id="bgt"><a class="header" href="#bgt">Bgt</a></h2>
+<p>Branch if greater then (jump to a <code>label</code> if <code>x</code> is greater then <code>y</code>)</p>
+<pre><code>bgt t0, t1, done
+</code></pre>
+<h2 id="lui"><a class="header" href="#lui">Lui</a></h2>
+<p>Load upper immediate <code>imm</code> on registers</p>
+<pre><code>lui t0, t1,t2 &lt;- imm
+lui t0, t1,t2 &lt;- 77
+</code></pre>
+<blockquote>
+<p>It takes only a single immediate as parameter</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="addi"><a class="header" href="#addi">Addi</a></h2>
+<p>Adds a register <code>x</code> and a immediate <code>imm</code> and save this value on registers</p>
+<pre><code>addi t0, t1,t2 &lt;- t0, imm
+addi t0, t1,t2 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="subi"><a class="header" href="#subi">Subi</a></h2>
+<p>Subtracts from register <code>x</code> the value of a immediate <code>imm</code> and save this value on registers</p>
+<pre><code>subi t0, t1 &lt;- t0, imm
+subi t0, t1 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="andi"><a class="header" href="#andi">Andi</a></h2>
+<p>Makes a bitwise <code>and</code> of register <code>x</code> and a immediate <code>imm</code>, then saves this value on registers</p>
+<pre><code>andi t0, t1 &lt;- t0, imm
+andi t0, t1 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="ori"><a class="header" href="#ori">Ori</a></h2>
+<p>Makes a bitwise <code>or</code> of register <code>x</code> and a immediate <code>imm</code>, then saves this value on registers</p>
+<pre><code>ori t0, t1 &lt;- t0, imm
+ori t0, t1 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second a immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="mov"><a class="header" href="#mov">Mov</a></h2>
+<p>Store the value of the register x on the registers</p>
+<pre><code>mov t0, t1, t2 &lt;- a1
+mov ra, s1, s2, s3 &lt;- t0
+</code></pre>
+<blockquote>
+<p>It supports only a single register as parameter</p>
+</blockquote>
+<h2 id="halt"><a class="header" href="#halt">Halt</a></h2>
+<p>Stop the program execution</p>
+<pre><code>halt
+</code></pre>
+<blockquote>
+<p>Just halt</p>
+</blockquote>
+<h2 id="data-declaration-instructions-data-section"><a class="header" href="#data-declaration-instructions-data-section">Data Declaration Instructions (<code>.data</code> section)</a></h2>
+<ul>
+<li><code>.byte</code>: Declare a byte-sized data item</li>
+<li><code>.word</code>: Declare a word-sized (4 bytes) data item</li>
+</ul>
+<h1 id="labels-and-branching"><a class="header" href="#labels-and-branching">Labels and Branching</a></h1>
+<p>Labels can be defined and used as targets for branching instructions. Here are the guidelines for labels and branching:</p>
+<ul>
+<li>Labels are defined by placing a colon (<code>:</code>) after the label name (e.g., <code>label:</code>).</li>
+<li>Branching instructions can use labels as targets (e.g., <code>beq t1, t2, label</code>).</li>
+</ul>
+<h1 id="comments"><a class="header" href="#comments">Comments</a></h1>
+<p>Comments start with a semicolon (<code>;</code>) or (<code>#</code>) and continue until the end of the line. Comments are ignored during assembly.</p>
+<h1 id="addressing-modes"><a class="header" href="#addressing-modes">Addressing Modes</a></h1>
+<p>The assembler supports two addressing modes: immediate and register addressing. Here's how they are used:</p>
+<ul>
+<li>Immediate values can be specified directly in the instruction.</li>
+<li>Registers have the ABI form of RISC V</li>
+</ul>
+<p>This specification provides a general outline for the assembler language. Additional details, such as specific opcode mappings and assembly directives, can be added as needed.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../assembler/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../assembler/lexer.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../assembler/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../assembler/lexer.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,411 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Microinstruction - Vondel Language and Microarchitecture</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html" class="active"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Vondel Language and Microarchitecture</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/thewillyan/vondel" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="microinstruction"><a class="header" href="#microinstruction">Microinstruction</a></h1>
+<p>Microinstructions are stored in the control store and are fetched with the address
+stode at MPC (Microprogram Counter).</p>
+<p>A Vondel microinstruction has 64 bits the following format:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: center">9 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">8 bits</td><td style="text-align: center">20 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">8 bits</td></tr>
+</tbody></table>
+</div>
+<p>You can find a more detailed version of this diagram <a href="https://i.imgur.com/tlHAPgL.png">here</a>.</p>
+<h2 id="next"><a class="header" href="#next">NEXT</a></h2>
+<p>The <code>NEXT</code> field stores the next microinstruction address. In other words, the
+<code>NEXT</code> field stores the next value to be stored at MPC.</p>
+<h2 id="jam"><a class="header" href="#jam">JAM</a></h2>
+<p>The <code>JAM</code> field stores in which conditions the program should jump. A Jump is
+a change in the natural flow of the microprogram that represents that the next
+instruction should be changed is some way.</p>
+<p>We have 3 possible condition to jump: if the value returned by ALU is 0 (JAMZ),
+if is negative (JAMN) and if we want to change the next instruction using
+something stored at MBR (JMPC). The first bit (MSB) from <code>JAM</code> is JMPC, the
+second is JAMN and the last is JAMZ.</p>
+<p>On JAMN and JAMZ a jump is, in fact, a OR operation on the most sigficant bit
+of MPC and the condition. In other words, if the condition is true, which happens
+when its bit is 1, that 1 is bitwise ORed with the MSB of MPC, so if the value
+of MPC is <code>000001010</code> the jump position is <code>100001010</code>. But on JMPC,
+a jump is a bitwise or with MBR and the 8 LSB's from MPC.</p>
+<h2 id="alu"><a class="header" href="#alu">ALU</a></h2>
+<p>The <code>ALU</code> field actually controls 2 devices: the ALU itself and the shifter
+connected to its autput.</p>
+<p>The ALU has two input, A and B (that come from the A and B bus, respectively) and 
+it's controled by the 6 LSB's from the ALU field, they are:</p>
+<ul>
+<li>F0 and F1 (Controls the ALU function)</li>
+<li>ENA and ENB (Enables the input from A and B bus respectively)</li>
+<li>INVA (Inverts the bits of A)</li>
+<li>INC (Increments 1 to the ALU result)</li>
+</ul>
+<p>from MSB to LSB. The logic and arithmetic functions that ALU can
+operate are managed by F0 and F1 like this:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: left">Function</th></tr></thead><tbody>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A OR B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">NOT B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">A + B</td></tr>
+</tbody></table>
+</div>
+<p>Some useful combinations of ALU signal can be found below:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: center">ENA</th><th style="text-align: center">ENB</th><th style="text-align: center">INVA</th><th style="text-align: center">INC</th><th style="text-align: left">Function</th></tr></thead><tbody>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">not A</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">not B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A + B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + B + 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">B + 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">B − A</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">B − 1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">−A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A OR B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">0</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">−1</td></tr>
+</tbody></table>
+</div>
+<p>The shifter has 2 inputs: The value of the ALU operation (let's call it <code>X</code>) and
+the operation opcode that are which are the 2 MSB's from the ALU field. The
+operations and its opcode are as following:</p>
+<div class="table-wrapper"><table><thead><tr><th>Opcode</th><th>Operation</th><th>Output</th></tr></thead><tbody>
+<tr><td><code>0b00</code></td><td>None</td><td><code>X</code></td></tr>
+<tr><td><code>0b01</code></td><td>Shift Right 1 bit</td><td><code>X &gt;&gt; 1</code></td></tr>
+<tr><td><code>0b10</code></td><td>Shift Left 8 bits</td><td><code>X &lt;&lt; 8</code></td></tr>
+<tr><td><code>0b11</code></td><td>Shift Left 1 bit</td><td><code>X &lt;&lt; 1</code></td></tr>
+</tbody></table>
+</div>
+<h2 id="c-bus"><a class="header" href="#c-bus">C BUS</a></h2>
+<p>The <code>C BUS</code> field represents which registers gonna be writen with the value
+of the C BUS (which is the shifter output). This field has 20 bits because
+there are 20 registers connected to the C bus, each bit 1 represents that the
+register represented by that bit should be writen by the C BUS.</p>
+<p>The relation between a bit n and which register it's represents is shown below
+(from MSB to LSB):</p>
+<div class="table-wrapper"><table><thead><tr><th>Bit</th><th>Register</th></tr></thead><tbody>
+<tr><td>1</td><td>MDR</td></tr>
+<tr><td>2</td><td>MAR</td></tr>
+<tr><td>3</td><td>PC</td></tr>
+<tr><td>4</td><td>LV</td></tr>
+<tr><td>5</td><td>R0</td></tr>
+<tr><td>6</td><td>R1</td></tr>
+<tr><td>7</td><td>R2</td></tr>
+<tr><td>8</td><td>R3</td></tr>
+<tr><td>9</td><td>R4</td></tr>
+<tr><td>10</td><td>R5</td></tr>
+<tr><td>11</td><td>R6</td></tr>
+<tr><td>12</td><td>R7</td></tr>
+<tr><td>13</td><td>R8</td></tr>
+<tr><td>14</td><td>R9</td></tr>
+<tr><td>15</td><td>R10</td></tr>
+<tr><td>16</td><td>R11</td></tr>
+<tr><td>17</td><td>R12</td></tr>
+<tr><td>18</td><td>R13</td></tr>
+<tr><td>19</td><td>R14</td></tr>
+<tr><td>20</td><td>R15</td></tr>
+</tbody></table>
+</div>
+<h2 id="mem"><a class="header" href="#mem">MEM</a></h2>
+<p>The memory field represents which memory operations gonna happen in the cycle.
+The bit 1 (MSB), 2 and 3 represents the operations of WRITE, READ and FETCH
+respectively.</p>
+<p>Each bit 1 in the field informs that the memory operation related to that
+field will be executed.</p>
+<h2 id="a-and-b"><a class="header" href="#a-and-b">A and B</a></h2>
+<p><code>A</code> and <code>B</code> are fields that control which register writes to the A and B bus
+respectively, but, since the A and B bus are connected directly to the A and B
+inputs of the ALU, they can also be viewed as which register goes as a entry
+to the ALU operation.</p>
+<p>The values of <code>A</code> and <code>B</code> and which register they enable (NONE,
+represents that none of them writes to the respective BUS, so the value of the
+bus is 0) is shown below:</p>
+<p>Output to BUS A:</p>
+<div class="table-wrapper"><table><thead><tr><th>ID</th><th>BIN</th><th>Register</th></tr></thead><tbody>
+<tr><td>0</td><td>00000</td><td>MDR</td></tr>
+<tr><td>1</td><td>00001</td><td>PC</td></tr>
+<tr><td>2</td><td>00010</td><td>MBR</td></tr>
+<tr><td>3</td><td>00011</td><td>MBRU</td></tr>
+<tr><td>4</td><td>00100</td><td>MBR2</td></tr>
+<tr><td>5</td><td>00101</td><td>MBR2U</td></tr>
+<tr><td>6</td><td>00110</td><td>LV</td></tr>
+<tr><td>7</td><td>00111</td><td>CPP</td></tr>
+<tr><td>8</td><td>01000</td><td>IMMEDIATE</td></tr>
+<tr><td>9</td><td>01001</td><td>R0</td></tr>
+<tr><td>10</td><td>01010</td><td>R1</td></tr>
+<tr><td>11</td><td>01011</td><td>R2</td></tr>
+<tr><td>12</td><td>01100</td><td>R3</td></tr>
+<tr><td>13</td><td>01101</td><td>R4</td></tr>
+<tr><td>14</td><td>01110</td><td>R5</td></tr>
+<tr><td>15</td><td>01111</td><td>R6</td></tr>
+<tr><td>16</td><td>10000</td><td>R7</td></tr>
+<tr><td>17</td><td>10001</td><td>R8</td></tr>
+<tr><td>18</td><td>10010</td><td>R9</td></tr>
+<tr><td>19</td><td>10011</td><td>R10</td></tr>
+<tr><td>20</td><td>10100</td><td>R11</td></tr>
+<tr><td>21</td><td>10101</td><td>R12</td></tr>
+<tr><td>22</td><td>10110</td><td>R13</td></tr>
+<tr><td>23</td><td>10111</td><td>R14</td></tr>
+<tr><td>24</td><td>11000</td><td>R15</td></tr>
+<tr><td>..</td><td>...</td><td>NONE</td></tr>
+</tbody></table>
+</div>
+<hr />
+<p>Output to BUS B:</p>
+<div class="table-wrapper"><table><thead><tr><th>ID</th><th>BIN</th><th>Register</th></tr></thead><tbody>
+<tr><td>0</td><td>00000</td><td>MDR</td></tr>
+<tr><td>1</td><td>00001</td><td>LV</td></tr>
+<tr><td>2</td><td>00010</td><td>CPP</td></tr>
+<tr><td>3</td><td>00011</td><td>IMMEDIATE</td></tr>
+<tr><td>4</td><td>00100</td><td>R0</td></tr>
+<tr><td>5</td><td>00101</td><td>R1</td></tr>
+<tr><td>6</td><td>00110</td><td>R2</td></tr>
+<tr><td>7</td><td>00111</td><td>R3</td></tr>
+<tr><td>8</td><td>01000</td><td>R4</td></tr>
+<tr><td>9</td><td>01001</td><td>R5</td></tr>
+<tr><td>10</td><td>01010</td><td>R6</td></tr>
+<tr><td>11</td><td>01011</td><td>R7</td></tr>
+<tr><td>12</td><td>01100</td><td>R8</td></tr>
+<tr><td>13</td><td>01101</td><td>R9</td></tr>
+<tr><td>14</td><td>01110</td><td>R10</td></tr>
+<tr><td>15</td><td>01111</td><td>R11</td></tr>
+<tr><td>16</td><td>10000</td><td>R12</td></tr>
+<tr><td>17</td><td>10001</td><td>R13</td></tr>
+<tr><td>18</td><td>10010</td><td>R14</td></tr>
+<tr><td>19</td><td>10011</td><td>R15</td></tr>
+<tr><td>..</td><td>...</td><td>NONE</td></tr>
+</tbody></table>
+</div>
+<h2 id="immediate"><a class="header" href="#immediate">IMMEDIATE</a></h2>
+<p>The immediate field allows us to send a arbitrary 8 bit number to the A or B
+bus, i.e if we set <code>0x08</code> in the IMMEDIATE field and enable the immediate input
+on the A and/or B bus, that <code>0x08</code> gonna be loaded in the corresponding bus.</p>
+<h2 id="assembly"><a class="header" href="#assembly">Assembly</a></h2>
+<p>Some details about the relation between the assembly code and the microarchitecture.</p>
+<h3 id="register-nomeclature"><a class="header" href="#register-nomeclature">Register nomeclature</a></h3>
+<p>In the assembly code the general purpose registers were renamed for convenience
+in when writing code, the rename table is as following:</p>
+<div class="table-wrapper"><table><thead><tr><th>Register</th><th>Assembly Name</th></tr></thead><tbody>
+<tr><td>R0</td><td>Ra</td></tr>
+<tr><td>R1</td><td>T0</td></tr>
+<tr><td>R2</td><td>T1</td></tr>
+<tr><td>R3</td><td>T2</td></tr>
+<tr><td>R4</td><td>T3</td></tr>
+<tr><td>R5</td><td>S0</td></tr>
+<tr><td>R6</td><td>S1</td></tr>
+<tr><td>R7</td><td>S2</td></tr>
+<tr><td>R8</td><td>S3</td></tr>
+<tr><td>R9</td><td>S4</td></tr>
+<tr><td>R10</td><td>S5</td></tr>
+<tr><td>R11</td><td>S6</td></tr>
+<tr><td>R12</td><td>A0</td></tr>
+<tr><td>R13</td><td>A1</td></tr>
+<tr><td>R14</td><td>A2</td></tr>
+<tr><td>R15</td><td>A3</td></tr>
+</tbody></table>
+</div>
+<p><strong>WARNING:</strong> The registers <code>T0</code> - <code>T3</code> can be used in instructions like <code>mul</code> to
+store temporary values, so the value of those can be changed in the instruction
+implementations, therefore they are not guaranteed to have the value that you expect
+using instruction like <code>lui</code> or <code>read</code>.</p>
+<h2 id="assembly-implementations"><a class="header" href="#assembly-implementations">Assembly Implementations</a></h2>
+<p>You can find some implementatinos examples of assembly code into the microarchitecture in the
+<a href="./implementations.html">next chapter</a>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../uarch/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../uarch/implementations.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../uarch/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../uarch/implementations.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

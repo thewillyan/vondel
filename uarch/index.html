@@ -1,0 +1,279 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>UArch - Vondel Language and Microarchitecture</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html" class="active"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Vondel Language and Microarchitecture</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/thewillyan/vondel" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="microarchitecture"><a class="header" href="#microarchitecture">Microarchitecture</a></h1>
+<p>The basic idea behind Vondel's design is to follow some tips from the book <em>Structured
+Computer Organization - Andrew S. Tanenbaum</em> while implementing the ability to
+perform operations even if the main clock is in a non-edge level in order to
+reduce clock cycles.</p>
+<p>The implementation of this design is provided by the <code>uarch</code> module.</p>
+<h2 id="datapath-structure"><a class="header" href="#datapath-structure">Datapath structure</a></h2>
+<p>The way that a datapath is structured is not far from the usual three-bus design
+plus a <a href="https://en.wikipedia.org/wiki/Instruction_unit"><em>IFU</em></a>, the techniques
+involved a rather simple for now as you can see the diagram below:</p>
+<div align="center">
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/WkBo8bD.png" alt="Data path diagram" /></th></tr></thead><tbody>
+<tr><td style="text-align: center"><em>The diagram of a single datapath (click to zoom).</em></td></tr>
+</tbody></table>
+</div></div>
+<p>This implementation provides 24 registers in total: 5 memory registers, 3 system
+registers (to manage function calls and variables) and 16 general 16 general
+purpose registers (from R0 to R15). The register list is as following:</p>
+<ul>
+<li>Memory
+<ul>
+<li>MAR (Memory Address Register): 20 bits</li>
+<li>MDR (Memory Data Register): 32 bits</li>
+<li>PC (Program Counter): 20 bits</li>
+<li>MBR (Memory Buffer Reader): 8 bits</li>
+<li>MBR2 (Memory Buffer Reader 2): 16 bits</li>
+</ul>
+</li>
+<li>System
+<ul>
+<li>SP (Stack Pointer): 20 bits</li>
+<li>LV (Local Variables): 20 bits</li>
+<li>CPP (Constant Pool Pointer): 20 bits</li>
+</ul>
+</li>
+<li>General Purpose
+<ul>
+<li>R0: 32 bits</li>
+<li>...</li>
+<li>R15: 32 bits</li>
+</ul>
+</li>
+</ul>
+<p>Each cycle the datapath is driven by a Microinstruction provided by the Control
+Store. For more info see the <a href="./uinstruction.html">next chapter</a>.</p>
+<h2 id="data-parallelism"><a class="header" href="#data-parallelism">Data parallelism</a></h2>
+<p>For that we will use two <a href="https://en.wikipedia.org/wiki/Datapath"><em>datapaths</em></a>
+with one <a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit"><em>ALU</em></a> each, but
+the clock trigger of one is the opposite of the other, that is, ALU1 is
+falling-edge triggered and ALU2 is rising-edge triggered. Furthermore,
+the clock signal received in ALU2 is a function of the clock signal
+of ALU1.</p>
+<p>Let's say that ALU1 has a clock <em>α<sub>1</sub></em> and the delayed version of this
+signal is <em>α<sub>1</sub><sup>'</sup></em>. So the ALU2 must have a clock
+<em>α<sub>2</sub> = (α<sub>1</sub> ∧ α<sub>1</sub><sup>'</sup>)</em> plus a
+delay of <em>δ<sub>1</sub></em> as shown below:</p>
+<div align="center">
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/O3SP6L2.png" alt="Clock relation diagram" /></th></tr></thead><tbody>
+<tr><td style="text-align: center"><em>The relation between the clock α<sub>1</sub> and α<sub>2</sub>.</em></td></tr>
+</tbody></table>
+</div></div>
+<p>In other words, ALU1 will start its operation cycle on the falling-edge of
+<em>α<sub>1</sub></em> and end the operation on the rising-edge, while ALU2 will
+start its operation cycle on the rising-edge of <em>α<sub>2</sub></em> and end the
+operation on the falling-edge, taking advantage of the main clock (<em>α<sub>1</sub></em>)
+even when it is at high level.</p>
+<p>The advantage of this method is that we can share the
+<a href="https://en.wikipedia.org/wiki/Control_storebbjk"><em>control store</em></a> and all the
+registers without big cost in the Misconstruction size, external hardware
+components and additional logic steps that may cost some clock cycles. The
+way that the components are shared is shown below:</p>
+<div align="center">
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/tlHAPgL.png" alt="Shared components diagram" /></th></tr></thead><tbody>
+<tr><td style="text-align: center"><em>The datapaths share some components such as the Microprogram, RAM and shared registers.</em></td></tr>
+</tbody></table>
+</div></div>
+<p>Those two datapaths will become a <a href="https://en.wikipedia.org/wiki/Thread_(computing)"><em>thread</em></a>
+in a future design of this Microarchitecture that is planned to have two task parallel threads.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../assembler/comparision.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="../uarch/uinstruction.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../assembler/comparision.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="../uarch/uinstruction.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
