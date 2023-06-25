@@ -420,7 +420,8 @@ impl AsmEvaluator {
                 mi.a = self.reg_a_code(rs1);
                 cs_state.add_instr(mi.get());
 
-                cs_state.add_complex_instr(|_, _| (loop_addr + 1) | 0b100000000);
+                let jal = Microinstruction::new(cs_state.addr());
+                cs_state.set_instr((loop_addr + 1) | 0b100000000, jal.get())
             }
         }
     }
@@ -944,6 +945,7 @@ mod tests {
             // CASE 2.1
             // Copy a1 into t1, t2, a0 and go to loop
             0b000000011_000_00011000_00000011000000001000_000_10110_11111_00000000,
+            Microinstruction::HALT,
         ];
 
         let brached_mcode: Vec<u64> = vec![
@@ -966,7 +968,8 @@ mod tests {
             // eprintln!("got:      {:061b}", firmware[addr]);
             assert_eq!(mi, firmware[addr]);
         }
-        assert_eq!(Microinstruction::HALT, firmware[0b100000100]);
+        let jal = 0b000000110_000_00000000_00000000000000000000_000_11111_11111_00000000;
+        assert_eq!(jal, firmware[0b100000100]);
     }
 
     #[test]
