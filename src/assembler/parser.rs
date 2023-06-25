@@ -276,13 +276,21 @@ impl Parser {
         let res = match *op {
             Opcode::Add => DoubleOperandOpcode::Add,
             Opcode::Mul => DoubleOperandOpcode::Mul,
+            Opcode::Mul2 => DoubleOperandOpcode::Mul2,
+            Opcode::Muli => DoubleOperandOpcode::Muli,
+            Opcode::Div => DoubleOperandOpcode::Div,
+            Opcode::Mod => DoubleOperandOpcode::Mod,
             Opcode::Sub => DoubleOperandOpcode::Sub,
             Opcode::And => DoubleOperandOpcode::And,
             Opcode::Or => DoubleOperandOpcode::Or,
+            Opcode::Xor => DoubleOperandOpcode::Xor,
             Opcode::Addi => DoubleOperandOpcode::Addi,
             Opcode::Andi => DoubleOperandOpcode::Andi,
             Opcode::Ori => DoubleOperandOpcode::Ori,
             Opcode::Subi => DoubleOperandOpcode::Subi,
+            Opcode::Xori => DoubleOperandOpcode::Xori,
+            Opcode::Divi => DoubleOperandOpcode::Divi,
+            Opcode::Modi => DoubleOperandOpcode::Modi,
             _ => {
                 bail!(ParserError::ExpectedToken {
                     expected: format!("{:?}", "DoubleOperandOpcode"),
@@ -429,7 +437,14 @@ impl Parser {
 
         let res = match *op {
             // Register Register Instructions
-            Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::And | Opcode::Or => {
+            Opcode::Add
+            | Opcode::Sub
+            | Opcode::Mul2
+            | Opcode::And
+            | Opcode::Or
+            | Opcode::Xor
+            | Opcode::Div
+            | Opcode::Mod => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -469,7 +484,14 @@ impl Parser {
                 )
             }
             // Imediate Register Instructions
-            Opcode::Addi | Opcode::Andi | Opcode::Ori | Opcode::Subi => {
+            Opcode::Addi
+            | Opcode::Andi
+            | Opcode::Ori
+            | Opcode::Subi
+            | Opcode::Xori
+            | Opcode::Muli
+            | Opcode::Divi
+            | Opcode::Modi => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -735,6 +757,10 @@ main:
     mul s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
     and t0 <- a0, a1
     or t0 <- a0, a1
+    mul2 t0 <- a0, a1
+    xor t0 <- a0, a1
+    div t0 <- a0, a1
+    mod t0 <- a0, a1
 
 .text
 error:
@@ -789,10 +815,33 @@ error2:
                     Rc::from(A0),
                     Value::Reg(Rc::from(A1)),
                 ),
+                Instruction::new_double_operand_instruction(
+                    Mul2,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Xor,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Div,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Mod,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);
-        // assert_eq!(program.errors.len(), 5);
         assert_eq!(program.sections[0], expected);
 
         Ok(())
@@ -807,8 +856,12 @@ error2:
 main:
     addi t0 <- t1, 8
     andi t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
+    muli t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
     ori t0 <- t1, 8
     subi t0 <- t1, 8
+    xori t0 <- t1, 8
+    divi t0 <- t1, 8
+    modi t0 <- t1, 8
         ";
 
         let program = create_program(input);
@@ -841,6 +894,24 @@ main:
                     Value::Immediate(200),
                 ),
                 Instruction::new_double_operand_instruction(
+                    Muli,
+                    vec![
+                        Rc::from(T1),
+                        Rc::from(T2),
+                        Rc::from(T3),
+                        Rc::from(S0),
+                        Rc::from(S1),
+                        Rc::from(S2),
+                        Rc::from(S3),
+                        Rc::from(S4),
+                        Rc::from(A0),
+                        Rc::from(A1),
+                        Rc::from(A2),
+                    ],
+                    Rc::from(A0),
+                    Value::Immediate(200),
+                ),
+                Instruction::new_double_operand_instruction(
                     Ori,
                     vec![Rc::from(T0)],
                     Rc::from(T1),
@@ -848,6 +919,24 @@ main:
                 ),
                 Instruction::new_double_operand_instruction(
                     Subi,
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Xori,
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Divi,
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Modi,
                     vec![Rc::from(T0)],
                     Rc::from(T1),
                     Value::Immediate(8),
