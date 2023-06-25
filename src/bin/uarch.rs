@@ -51,18 +51,10 @@ pub fn main() -> Result<()> {
     let ram = read_ram(&cli.ram)?;
     let firmware = read_firmware(&cli.rom)?;
 
-    for (idx, value) in firmware.firmware().iter().enumerate() {
-        if *value != 0 {
-            println!("Address: {}", idx);
-            println!("{:064b}", value);
-        }
-    }
-
     let mut comp = Computer::new(ram, firmware);
     comp.exec();
     let regs = &comp.regs().gen;
 
-    println!("Value of register 'ra': {}", regs.get(0).unwrap());
     for i in 0..15 {
         println!("Value of register r{}: {}", i, regs.get(i).unwrap());
     }
