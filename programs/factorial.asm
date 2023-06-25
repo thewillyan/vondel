@@ -10,3 +10,4 @@ loop:
   jal loop             ; Jump to the loop
 
 done:
+  halt
