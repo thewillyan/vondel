@@ -58,8 +58,12 @@ The assembler supports the following instructions:
   - [ADD](#add)
   - [SUB](#sub)
   - [MUL](#mul)
+  - [MUL2](#mul2)
+  - [DIV](#div)
+  - [MOD](#mod)
   - [AND](#and)
   - [OR](#or)
+  - [XOR](#xor)
   - [NOT](#not)
 - Shift
   - [SLL (Shift Left Logical)](#sll)
@@ -77,9 +81,13 @@ The assembler supports the following instructions:
 - Immediate
   - [LUI](#lui)
   - [ADDI](#addi)
+  - [MULI](#muli)
+  - [DIVI](#divi)
+  - [MODI](#modi)
   - [SUBI](#subi)
   - [ANDI](#andi)
   - [ORI](#ori)
+  - [XORI](#xori)
 - Other
   - [MOV](#mov)
   - [HALT](#halt)
@@ -110,6 +118,32 @@ mul s0, a2, ra <- a0, a1
 
 > `WARNING`: Mul cannot be used with t\* registers
 
+## Mul2
+
+Multiplies the value of `x` and `y` and store on registers
+
+```
+mul s0, a2, ra <- a0, a1
+```
+
+> `INFO`: More performatic and can use t\* registers
+
+## Div
+
+Divides `x` by `y` and store on registers
+
+```
+div t0, t1, s0, a2, ra <- a0, a1
+```
+
+## Mod
+
+Gets the remainder of `x` by `y` and store on registers
+
+```
+mod t0, t1, s0, a2, ra <- a0, a1
+```
+
 ## And
 
 Makes a bitwise `and` with `x` and `y`
@@ -124,6 +158,14 @@ Makes a bitwise `or` with `x` and `y`
 
 ```
 or t0, t1, t2, s0, s1, a2, ra <- a0, a1
+```
+
+## Xor
+
+Makes a bitwise `xor` with `x` and `y`
+
+```
+xor t0, t1, t2, s0, s1, a2, ra <- a0, a1
 ```
 
 ## Not
@@ -241,7 +283,7 @@ lui t0, t1,t2 <- 77
 
 > It takes only a single immediate as parameter
 
-> Imm can be both a label referencing a `.byte` in `.data` section or a immediate with value of 0 to 255
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
 
 ## Addi
 
@@ -254,46 +296,98 @@ addi t0, t1,t2 <- a2, 77
 
 > The first argument must be a register and the second a immediate
 
-> Imm can be both a label referencing a `.byte` in `.data` section or a immediate with value of 0 to 255
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
+
+## Muli
+
+Multiplies a register `x` and an immediate `imm` and save this value on registers
+
+```
+muli t0, t1,t2 <- t0, imm
+muli t0, t1,t2 <- a2, 77
+```
+
+> The first argument must be a register and the second an immediate
+
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
+
+## Divi
+
+Divides a register `x` by an immediate `imm` and save this value on registers
+
+```
+divi t0, t1,t2 <- t0, imm
+divi t0, t1,t2 <- a2, 77
+```
+
+> The first argument must be a register and the second an immediate
+
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
+
+## Modi
+
+Get the remainder of a `div` between a register `x` by an immediate `imm` and save this value on registers
+
+```
+modi t0, t1,t2 <- t0, imm
+modi t0, t1,t2 <- a2, 77
+```
+
+> The first argument must be a register and the second an immediate
+
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
 
 ## Subi
 
-Subtracts from register `x` the value of a immediate `imm` and save this value on registers
+Subtracts from register `x` the value of an immediate `imm` and save this value on registers
 
 ```
 subi t0, t1 <- t0, imm
 subi t0, t1 <- a2, 77
 ```
 
-> The first argument must be a register and the second a immediate
+> The first argument must be a register and the second an immediate
 
-> Imm can be both a label referencing a `.byte` in `.data` section or a immediate with value of 0 to 255
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
 
 ## Andi
 
-Makes a bitwise `and` of register `x` and a immediate `imm`, then saves this value on registers
+Makes a bitwise `and` of register `x` and an immediate `imm`, then saves this value on registers
 
 ```
 andi t0, t1 <- t0, imm
 andi t0, t1 <- a2, 77
 ```
 
-> The first argument must be a register and the second a immediate
+> The first argument must be a register and the second an immediate
 
-> Imm can be both a label referencing a `.byte` in `.data` section or a immediate with value of 0 to 255
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
 
 ## Ori
 
-Makes a bitwise `or` of register `x` and a immediate `imm`, then saves this value on registers
+Makes a bitwise `or` of register `x` and an immediate `imm`, then saves this value on registers
 
 ```
 ori t0, t1 <- t0, imm
 ori t0, t1 <- a2, 77
 ```
 
-> The first argument must be a register and the second a immediate
+> The first argument must be a register and the second an immediate
 
-> Imm can be both a label referencing a `.byte` in `.data` section or a immediate with value of 0 to 255
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
+
+## Xori
+
+Makes a bitwise `xor` of register `x` and an immediate `imm`, then saves this value on registers
+
+```
+xori t0, t1 <- t0, imm
+xori t0, t1 <- a2, 77
+```
+
+> The first argument must be a register and the second an immediate
+
+> Imm can be both a label referencing a `.byte` in `.data` section or an immediate with value of 0 to 255
 
 ## Mov
 
