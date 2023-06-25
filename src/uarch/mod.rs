@@ -4,6 +4,7 @@ use std::{
 };
 
 pub mod alu;
+pub mod cli;
 pub mod mem;
 
 use alu::Alu;

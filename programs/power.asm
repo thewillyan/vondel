@@ -4,16 +4,16 @@
 
 .text
 _start:
-    lui t0 <- x        # t0 = X must be a byte
-    lui t1 <- n        # t1 = n must be a byte
-    lui t2 <- 0        # T2 is a counter for the loop
+    lui a0 <- 2        # a0 = X must be a byte
+    lui a1 <- 5        # a1 = n must be a byte
+    lui a2 <- 0        # a2 is a counter for the loop
 
     lui ra <- 1        # ra = 1 will be the result of the multiplication
 
 loop:
-    beq t2, t1, done      # If the loop counter equals n, exit the loop
-    mul ra <- ra, t0      # Multiply ra by X
-    addi t2 <- t2, 1      # Increment the loop counter
+    beq a2, a1, done      # If the loop counter equals n, exit the loop
+    mul ra <- ra, a0      # Multiply ra by X
+    addi a2 <- a2, 1      # Increment the loop counter
     jal loop
 
 done:

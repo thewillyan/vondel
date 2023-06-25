@@ -206,6 +206,39 @@ The immediate field allows us to send a arbitrary 8 bit number to the A or B
 bus, i.e if we set `0x08` in the IMMEDIATE field and enable the immediate input
 on the A and/or B bus, that `0x08` gonna be loaded in the corresponding bus.
 
+## Assembly
+
+Some details about the relation between the assembly code and the microarchitecture.
+
+### Register nomeclature
+
+In the assembly code the general purpose registers were renamed for convenience
+in when writing code, the rename table is as following:
+
+| Register | Assembly Name |
+| --- | -- |
+| R0  | Ra | 
+| R1  | T0 |
+| R2  | T1 |
+| R3  | T2 |
+| R4  | T3 |
+| R5  | S0 |
+| R6  | S1 |
+| R7  | S2 |
+| R8  | S3 |
+| R9  | S4 |
+| R10 | S5 |
+| R11 | S6 |
+| R12 | A0 |
+| R13 | A1 |
+| R14 | A2 |
+| R15 | A3 |
+
+**WARNING:** The registers `T0` - `T3` can be used in instructions like `mul` to
+store temporary values, so the value of those can be changed in the instruction
+implementations, therefore they are not guaranteed to have the value that you expect
+using instruction like `lui` or `read`.
+
 ## Assembly Implementations
 
 You can find some implementatinos examples of assembly code into the microarchitecture in the

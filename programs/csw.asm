@@ -13,6 +13,7 @@ csw:
   beq t0, t2, a_equals_c ; if a == c, jump to a_equals_c
   mov t0 <- t2 ; a = c 
   lui ra <- 1 ; ra = 1
+  jal done ; jump to done
 
 a_equals_c:
   mov t2 <- t1 ; c = b no lui ra<- 0 because ra is always 0

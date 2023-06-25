@@ -1,52 +1,75 @@
+use std::{
+    fs::File,
+    io::{BufReader, Read},
+};
+
+use anyhow::Result;
+use clap::Parser;
 use vondel::uarch::{
+    cli::UArchCli,
     mem::{CtrlStore, Ram},
     Computer,
 };
 
-pub fn main() {
-    // trying to do 5 * 6 (dunno why)
-    let mut mem = Ram::new();
-    mem.load(0, [5, 6]);
+fn read_ram(file: &str) -> Result<Ram> {
+    let file = File::open(file)?;
+    let mut reader = BufReader::new(file);
+    let mut buffer = Vec::new();
+    reader.read_to_end(&mut buffer)?;
 
-    // |   NEXT  |JAM|   ALU  |          C BUS         |MEM|  A  |  B  | IMMEDIATE |
-    // |---------|---|--------|------------------------|---|-----|-----|-----------|
-    // |000000000|000|00000000|000000000000000000000000|000|00000|00000| 00000000  |
-    //
-    // R15: Stores the sum
-    // R14: Stores the 5
-    // R13: Stores the 6
-    #[allow(clippy::unusual_byte_groupings)]
-    let mcode = [
-        // READ word from memory (number 5 because MAR = 0 by default)
-        0b000000001_000_00000000_00000000000000000000_010_11111_11111_00000000,
-        // LOAD the value readed into R15 and R14
-        0b000000010_000_00011000_00000000000000000011_000_00000_11111_00000000,
-        // MAR = 1 (next word address)
-        0b000000011_000_00110001_01000000000000000000_000_11111_11111_00000000,
-        // READ word FROM memory (number 6)
-        0b000000100_000_00000000_00000000000000000000_010_11111_11111_00000000,
-        // LOAD the value readed into R13 and R12 (just to display later)
-        0b000000101_000_00011000_00000000000000001100_000_00000_11111_00000000,
-        // R13 <- R13 - 1 and JUMP if 0
-        0b000000110_001_00110110_00000000000000000100_000_11111_10001_00000000,
-        // R15 <- R15 + R14
-        0b000000101_000_00111100_00000000000000000001_000_11000_10010_00000000,
-    ];
-    let firmware = CtrlStore::builder()
-        .load(0, mcode)
-        // end when JUMP
-        .set(0b100000110, CtrlStore::HALT)
-        .build();
+    let mut result = Vec::new();
+    for i in (0..buffer.len()).step_by(4) {
+        let mut word = [0u8; 4];
+        word.copy_from_slice(&buffer[i..i + 4]);
+        result.push(u32::from_le_bytes(word));
+    }
+    let mut ram = Ram::new();
+    ram.load(0, result);
 
-    let mut comp = Computer::new(mem, firmware);
+    Ok(ram)
+}
+
+fn read_firmware(file: &str) -> Result<CtrlStore> {
+    let file = File::open(file)?;
+    let mut reader = BufReader::new(file);
+    let mut buffer = Vec::new();
+    reader.read_to_end(&mut buffer)?;
+
+    let mut result = Vec::new();
+    for i in (0..buffer.len()).step_by(8) {
+        let mut word = [0u8; 8];
+        word.copy_from_slice(&buffer[i..i + 8]);
+        result.push(u64::from_le_bytes(word));
+    }
+    let firmware = CtrlStore::builder().load(0, result).build();
+
+    Ok(firmware)
+}
+
+pub fn main() -> Result<()> {
+    let cli = UArchCli::parse();
+    let ram = read_ram(&cli.ram)?;
+    let firmware = read_firmware(&cli.rom)?;
+
+    for (idx, value) in firmware.firmware().iter().enumerate() {
+        if *value != 0 {
+            println!("Address: {}", idx);
+            println!("{:064b}", value);
+        }
+    }
+
+    let mut comp = Computer::new(ram, firmware);
     comp.exec();
-
     let regs = &comp.regs().gen;
-    println!(
-        "{} x {} = {}",
-        regs.get(14).unwrap(),
-        regs.get(12).unwrap(),
-        regs.get(15).unwrap()
-    );
-    println!("Cycles: {}", comp.cycles());
+
+    println!("Value of register 'ra': {}", regs.get(0).unwrap());
+    for i in 0..15 {
+        println!("Value of register r{}: {}", i, regs.get(i).unwrap());
+    }
+
+    if cli.cycles {
+        println!("Cycles: {}", comp.cycles());
+    }
+
+    Ok(())
 }
