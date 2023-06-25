@@ -4,8 +4,8 @@
 
 .text
 _start:
-    lui t0 <- x        # t0 = X must be a byte
-    lui t1 <- n        # t1 = n must be a byte
+    lui t0 <- 2        # t0 = X must be a byte
+    lui t1 <- 5        # t1 = n must be a byte
     lui t2 <- 0        # T2 is a counter for the loop
 
     lui ra <- 1        # ra = 1 will be the result of the multiplication
