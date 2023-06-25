@@ -78,6 +78,9 @@ pub enum ParserError {
         cur_line: usize,
         cur_column: usize,
     },
+
+    #[error("Temp register cannot be used in mul instruction\nContext: line {cur_line}, column {cur_column}")]
+    TempRegisterCannotBeUsedInMul { cur_line: usize, cur_column: usize },
 }
 
 #[derive(Debug, Default)]
@@ -307,7 +310,7 @@ impl Parser {
         Ok(pseudo_op)
     }
 
-    fn guard_a_bus(&mut self, reg: Rc<Register>) -> Result<Rc<Register>> {
+    fn guard_a_bus(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
         match *reg {
             Register::Mar => {
                 bail!(ParserError::RegisterCannotBeUsedInABus {
@@ -320,7 +323,7 @@ impl Parser {
         }
     }
 
-    fn guard_b_bus(&mut self, reg: Rc<Register>) -> Result<Rc<Register>> {
+    fn guard_b_bus(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
         match *reg {
             Register::Mar
             | Register::Mbr
@@ -343,6 +346,18 @@ impl Parser {
             Register::Cpp | Register::Mbr | Register::Mbr2 | Register::Mbru | Register::Mbr2u => {
                 bail!(ParserError::RegisterCannotBeUsedInCBus {
                     found: format!("{:?}", reg),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+            _ => Ok(reg),
+        }
+    }
+
+    fn guard_mul_temps(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
+        match *reg {
+            Register::T0 | Register::T1 | Register::T2 | Register::T3 => {
+                bail!(ParserError::TempRegisterCannotBeUsedInMul {
                     cur_line: self.cur_line,
                     cur_column: self.cur_column
                 })
@@ -420,6 +435,32 @@ impl Parser {
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
                 let rs2 = Value::Reg(self.guard_b_bus(self.get_register()?)?);
+                Instruction::new_double_operand_instruction(
+                    self.op_to_double_op(op)?,
+                    dest_regs,
+                    rs1,
+                    rs2,
+                )
+            }
+            Opcode::Mul => {
+                self.next_token();
+
+                let mut dest_regs = Vec::new();
+                dest_regs.push(self.guard_mul_temps(self.guard_c_bus(self.get_register()?)?)?);
+                while self.peek_token_is(AsmToken::Comma) {
+                    self.next_token();
+                    self.next_token();
+                    dest_regs.push(self.guard_c_bus(self.get_register()?)?);
+                }
+
+                self.expect_peek(AsmToken::Assign)?;
+                self.next_token();
+                let rs1 = self.guard_mul_temps(self.guard_a_bus(self.get_register()?)?)?;
+                self.expect_peek(AsmToken::Comma)?;
+                self.next_token();
+                let rs2 =
+                    Value::Reg(self.guard_mul_temps(self.guard_b_bus(self.get_register()?)?)?);
+
                 Instruction::new_double_operand_instruction(
                     self.op_to_double_op(op)?,
                     dest_regs,
@@ -691,7 +732,7 @@ mod tests {
 main:
     add t0 <- t1, t2
     sub t1, t2, t3, s0 <- t1, t2
-    mul t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
+    mul s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
     and t0 <- a0, a1
     or t0 <- a0, a1
 
@@ -724,9 +765,6 @@ error2:
                 Instruction::new_double_operand_instruction(
                     Mul,
                     vec![
-                        Rc::from(T1),
-                        Rc::from(T2),
-                        Rc::from(T3),
                         Rc::from(S0),
                         Rc::from(S1),
                         Rc::from(S2),
@@ -771,14 +809,6 @@ main:
     andi t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
     ori t0 <- t1, 8
     subi t0 <- t1, 8
-
-.text
-error:
-    addi t0 <- t1, t2
-
-.text
-error2:
-    addi <- t1, 7
         ";
 
         let program = create_program(input);
@@ -825,7 +855,6 @@ error2:
             ],
         )]);
         assert_eq!(program.sections.len(), 1);
-        // assert_eq!(program.errors.len(), 5);
         assert_eq!(program.sections[0], expected);
 
         Ok(())

@@ -105,8 +105,10 @@ sub t0, t1, s0, a2, ra <- a0, a1
 Multiplies the value of `x` and `y` and store on registers
 
 ```
-mul t0, t1, s0, a2, ra <- a0, a1
+mul s0, a2, ra <- a0, a1
 ```
+
+> `WARNING`: Mul cannot be used with t\* registers
 
 ## And
 
