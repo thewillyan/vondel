@@ -199,8 +199,8 @@ impl DataPath {
 
         self.state.enable_in = (mi & 0b11111111111111111111) as u32;
         mi >>= 20;
-        self.state.alu_entry = (mi & 0b11111111) as u8;
-        mi >>= 8;
+        self.state.alu_entry = (mi & 0b111111111) as u16;
+        mi >>= 9;
 
         // NEXT_ADDR | JAM
         self.state.cs_opcode = mi as u16;
@@ -300,7 +300,7 @@ impl ClkLevel {
 #[derive(Debug, Default)]
 struct DPState {
     cs_opcode: u16,
-    alu_entry: u8,
+    alu_entry: u16,
     enable_in: u32,
     a: u32,
     b: u32,
