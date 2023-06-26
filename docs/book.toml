@@ -7,3 +7,4 @@ title = "Vondel Language and Microarchitecture"
 
 [output.html]
 git-repository-url = "https://github.com/thewillyan/vondel"
+default-theme = "ayu"
