@@ -46,14 +46,14 @@ This constant is avalible as a shortcut in the `CtrlStore` struct.
 
 ## MOV
 
-Syntax: `mov x -> r0, ..., rn`.
+Syntax: `mov r0, ..., rn <- x`.
 
 Action: Store the value of the register `x` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-mov r14 -> r15, r13
+mov r15, r13 <- r14
 ```
 
 ### Microprogram
@@ -65,14 +65,14 @@ mov r14 -> r15, r13
 
 ## ADD
 
-Syntax: `add x, y -> r0, ..., rn`.
+Syntax: `add r0, ..., rn <- x, y`.
 
 Action: Stores the result of `x + y` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-add r2, r3 -> r0, r1
+add r0, r1 <- r2, r3
 ```
 
 ### Microprogram
@@ -84,14 +84,14 @@ add r2, r3 -> r0, r1
 
 ## SUB
 
-Syntax: `sub x, y -> r0, ..., rn`.
+Syntax: `sub r0, ..., rn <- x, y`.
 
 Action: Stores the result of `x - y` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-sub r2, r3 -> r0
+sub r0 <- r2, r3
 ```
 
 ### Microprogram
@@ -102,14 +102,14 @@ sub r2, r3 -> r0
 |1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 ## AND
-Syntax: `and x, y -> r0, ..., rn`.
+Syntax: `and r0, ..., rn <- x, y`.
 
 Action: Stores the result of `x & y ` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-and r2, r3 -> r1
+and r1 <- r2, r3
 ```
 
 ### Microprogram
@@ -120,14 +120,14 @@ and r2, r3 -> r1
 |1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 ## OR
-Syntax: `or x, y -> r0, ..., rn`.
+Syntax: `or r0, ..., rn <- x, y`.
 
 Action: Stores the result of `x | y ` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-or r2, r3 -> r0, r1, r14, r15
+or r0, r1, r14, r15 <- r2, r3
 ```
 
 ### Microprogram
@@ -139,14 +139,14 @@ or r2, r3 -> r0, r1, r14, r15
 
 ## NOT
 
-Syntax: `not x -> r0, ..., rn`.
+Syntax: `not r0, ..., rn <- x`.
 
 Action: Stores the result of `!x` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-not r3 -> r0, r15
+not r0, r15 <- r3
 ```
 
 ### Microprogram
@@ -157,14 +157,14 @@ not r3 -> r0, r15
 |1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 ## SLL
-Syntax: `sll x -> r0, ..., rn`.
+Syntax: `sll r0, ..., rn <- x`.
 
 Action: Stores the result of `x << 8` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-sll r3 -> r0, r15
+sll r0, r15 <- r3
 ```
 
 ### Microprogram
@@ -175,14 +175,14 @@ sll r3 -> r0, r15
 |1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 ## SLA
-Syntax: `sla x -> r0, ..., rn`.
+Syntax: `sla r0, ..., rn <- x`.
 
 Action: Stores the result of `x << 1` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-sla r3 -> r0, r15
+sla r0, r15 <- r3
 ```
 
 ### Microprogram
@@ -193,14 +193,14 @@ sla r3 -> r0, r15
 |1 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 
 ## SRA
-Syntax: `sra x -> r0, ..., rn`.
+Syntax: `sra r0, ..., rn <- x`.
 
 Action: Stores the result of `x >> 1` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-sra r3 -> r0, r15
+sra r0, r15 <- r3
 ```
 
 ### Microprogram
@@ -212,14 +212,14 @@ sra r3 -> r0, r15
 
 ## READ
 
-Syntax: `read [addr] -> r0, ..., rn`.
+Syntax: `read r0, ..., rn <- [addr]`.
 
 Action: Stores the memory word at `addr` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-read 0x00008 -> r0, r15
+read r0, r15 <- 0x00008
 ```
 
 ### Microprogram
@@ -234,14 +234,14 @@ Precondition: `0x00008` should be stored at MAR.
 
 ## WRITE
 
-Syntax: `write x -> [addr]`.
+Syntax: `write [addr] <- x`.
 
 Action: Stores the memory value of `x` at `addr` on the memory.
 
 ### High Level
 
 ```
-write r14 -> 0x00001
+write 0x00001 <- r14
 ```
 
 ### Microprogram
@@ -374,14 +374,14 @@ bgt r14, r15
 
 
 ## MUL
-Syntax: `mul x, y -> r0, ..., rn`.
+Syntax: `mul r0, ..., rn <- x, y`.
 
 Action: Multiply the value of x by y .
 
 ### High Level
 
 ```
-mul r6, r7 -> r13
+mul r13 <- r6, r7
 ```
 
 ### Microprogram
@@ -393,11 +393,12 @@ mul r6, r7 -> r13
 |2   |000000011|000|00111111|00000100000000000100|000|01111|11111|  00000000 |
 |3   |000000100|001|00110110|00001000000000000000|000|01001|11111|  00000000 |
 |4   |000000011|000|00111100|00000000000000000100|000|10110|00101|  00000000 |
+|5   |000000011|000|00111111|00000100000000000100|000|10000|11111|  00000000 |
+|6   |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
 |-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
-|257 |100000010|000|00011000|00001000000000000000|000|01111|11111|  00000000 |
-|258 |000000011|000|00111111|00000100000000000100|000|10000|11111|  00000000 |
+|257 |000000101|000|00011000|00001000000000000000|000|01111|11111|  00000000 |
 |-   |    -    | - |    -   |         -          | - |  -  |  -  |     -     |
-|260 |111111111|111|11111111|11111111111111111111|111|11111|11111|  11111111 |
+|260 |000000110|000|00000000|00000000000000000000|000|00000|00000|  00000000 |
 
 In a nutshell the operations are the following:
 
@@ -416,16 +417,38 @@ in `r1` and we aways make `r0 * r1`. This optimization is necessary because a
 multiplication is computed as sequential additions, and making less additions
 save some clock cycles.
 
+In the real assembly implementation the registers used to store the temporary
+values are `T0` (to store the minimum), `T1` (to store the sum) and `T2` (to store the maximum),
+so be caution when using this registers at the same time as the `mul` operation.
+
+## MUL2
+
+Syntax: `mul2 r0, ..., rn <- x, y`.
+
+Action: Multiply the value of x by y .
+
+The difference between `mul2` and `mul` are that `mul` is a software addition,
+in other words, a sequential sum of a number, on the other hand `mul2` is
+hardware implemented (uses a multiplication circuit).
+
+### High Level
+
+```
+mul2 r13 <- r6, r7
+```
+
+### Microprogram
+
 ## LUI
 
-Syntax: `lui [byte] -> r0, ..., rn`.
+Syntax: `lui r0, ..., rn <- [byte]`.
 
 Action: Store the the immediate value of `byte` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-lui 0xFF -> r15
+lui r15 <- 0xFF
 ```
 
 This program stores `0xFF` (255) to r15, but 255 is not stored in any register (it is
@@ -440,14 +463,14 @@ a _immediate value_).
 
 ## ADDI
 
-Syntax: `addi x, [byte] -> r0, ..., rn`.
+Syntax: `addi r0, ..., rn <- x, [byte]`.
 
 Action: Stores the value of `x + [byte]` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-addi r14, 0x05 -> r14
+addi r14 <- r14, 0x05
 ```
 
 ### Microprogram
@@ -459,14 +482,14 @@ addi r14, 0x05 -> r14
 
 ## SUBI
 
-Syntax: `subi x, [byte] -> r0, ..., rn`.
+Syntax: `subi r0, ..., rn <- x, [byte]`.
 
 Action: Stores the value of `x - [byte]` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-subi r14, 0x05 -> r14
+subi r14 <- r14, 0x05
 ```
 
 ### Microprogram
@@ -478,14 +501,14 @@ subi r14, 0x05 -> r14
 
 ## ANDI
 
-Syntax: `andi x, [byte] -> r0, ..., rn`.
+Syntax: `andi r0, ..., rn <- x, [byte]`.
 
 Action: Stores the value of `x & [byte]` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-andi r14, 0xFF -> r14
+andi r14 <- r14, 0xFF
 ```
 
 ### Microprogram
@@ -497,14 +520,14 @@ andi r14, 0xFF -> r14
 
 ## ORI
 
-Syntax: `ori x, [byte] -> r0, ..., rn`.
+Syntax: `ori r0, ..., rn <- x, [byte]`.
 
 Action: Stores the value of `x | [byte]` on the registers `r0, ..., rn`.
 
 ### High Level
 
 ```
-ori r14, 0x00 -> r14
+ori r14 <- r14, 0x00
 ```
 
 ### Microprogram
