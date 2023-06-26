@@ -163,7 +163,7 @@ impl AsmEvaluator {
     ) {
         let mut read = Microinstruction::new(state.next_addr());
         read.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
-        read.alu = 0b00011000;
+        read.alu = 0b000011000;
         read.mem = 0b010;
         read.a = Microinstruction::IMM_A;
         read.immediate = match addr {
@@ -177,7 +177,7 @@ impl AsmEvaluator {
 
         let mut w_reg = Microinstruction::new(state.next_addr());
         w_reg.c_bus = self.get_c_code(rds);
-        w_reg.alu = 0b00011000;
+        w_reg.alu = 0b000011000;
         w_reg.a = self.reg_a_code(&Register::Mdr);
         state.add_instr(w_reg.get());
     }
@@ -185,13 +185,13 @@ impl AsmEvaluator {
     fn eval_write_inst(&mut self, addr: &ImmediateOrLabel, rd: &Rc<Register>, state: &mut CsState) {
         let mut mdr = Microinstruction::new(state.next_addr());
         mdr.c_bus = self.get_c_code(&vec![Rc::new(Register::Mdr)]);
-        mdr.alu = 0b00011000;
+        mdr.alu = 0b000011000;
         mdr.a = self.reg_a_code(rd);
         state.add_instr(mdr.get());
 
         let mut mar = Microinstruction::new(state.next_addr());
         mar.c_bus = self.get_c_code(&vec![Rc::new(Register::Mar)]);
-        mar.alu = 0b00011000;
+        mar.alu = 0b000011000;
         mar.mem = 0b100;
         mar.a = Microinstruction::IMM_A;
         mar.immediate = match addr {
@@ -226,7 +226,7 @@ impl AsmEvaluator {
         let branched_addr = state.next_addr() | 0b100000000;
         first.a = self.reg_a_code(&ins.rs1);
         first.b = self.reg_b_code(&ins.rs2);
-        first.alu = 0b00111111;
+        first.alu = 0b000111111;
 
         let mut branched = Microinstruction::new(branched_addr);
         let mut second_branched = None;
@@ -298,12 +298,12 @@ impl AsmEvaluator {
         mi.b = Microinstruction::NO_B;
 
         match op {
-            SingleOperandOpcode::Lui => mi.alu = 0b00011000,
-            SingleOperandOpcode::Not => mi.alu = 0b00011010,
-            SingleOperandOpcode::Sll => mi.alu = 0b10011000,
-            SingleOperandOpcode::Sra => mi.alu = 0b01011000,
-            SingleOperandOpcode::Sla => mi.alu = 0b11011000,
-            SingleOperandOpcode::Mov => mi.alu = 0b00011000,
+            SingleOperandOpcode::Lui => mi.alu = 0b000011000,
+            SingleOperandOpcode::Not => mi.alu = 0b000011010,
+            SingleOperandOpcode::Sll => mi.alu = 0b100011000,
+            SingleOperandOpcode::Sra => mi.alu = 0b010011000,
+            SingleOperandOpcode::Sla => mi.alu = 0b110011000,
+            SingleOperandOpcode::Mov => mi.alu = 0b000011000,
         }
         cs_state.add_instr(mi.get());
     }
@@ -321,7 +321,7 @@ impl AsmEvaluator {
             DoubleOperandOpcode::Add | DoubleOperandOpcode::Addi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
-                mi.alu = 0b00111100;
+                mi.alu = 0b000111100;
                 mi.a = self.reg_a_code(rs1.as_ref());
                 (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
@@ -329,7 +329,7 @@ impl AsmEvaluator {
             DoubleOperandOpcode::Sub | DoubleOperandOpcode::Subi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
-                mi.alu = 0b00111111;
+                mi.alu = 0b000111111;
                 mi.b = self.reg_b_code(rs1.as_ref());
                 (mi.a, mi.immediate) = self.val_a_code(rs2);
                 cs_state.add_instr(mi.get());
@@ -337,7 +337,7 @@ impl AsmEvaluator {
             DoubleOperandOpcode::And | DoubleOperandOpcode::Andi => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
-                mi.alu = 0b00011000;
+                mi.alu = 0b000011000;
                 mi.a = self.reg_a_code(rs1.as_ref());
                 (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
@@ -345,7 +345,7 @@ impl AsmEvaluator {
             DoubleOperandOpcode::Or | DoubleOperandOpcode::Ori => {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.c_bus = c_code;
-                mi.alu = 0b00011100;
+                mi.alu = 0b000011100;
                 mi.a = self.reg_a_code(rs1.as_ref());
                 (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
@@ -359,7 +359,7 @@ impl AsmEvaluator {
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 // JUMP if rs1 > rs2
                 mi.jam = 0b010;
-                mi.alu = 0b00111111;
+                mi.alu = 0b000111111;
                 mi.a = self.reg_a_code(rs1);
                 (mi.b, mi.immediate) = self.val_b_code(rs2);
                 cs_state.add_instr(mi.get());
@@ -367,13 +367,13 @@ impl AsmEvaluator {
                 // HAS NOT JUMPED, therefore rs1 <= rs2
                 // mv t0 <- rs1
                 let mut mi = Microinstruction::new(cs_state.next_addr());
-                mi.alu = 0b00011000;
+                mi.alu = 0b000011000;
                 mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
                 mi.a = self.reg_a_code(rs1);
                 cs_state.add_instr(mi.get());
                 // mv t1, t2, rd <- rs2
                 let mut mi = Microinstruction::new(cs_state.next_addr());
-                mi.alu = 0b00011000;
+                mi.alu = 0b000011000;
                 mi.c_bus =
                     self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)]) | c_code;
                 mi.a = match rs2 {
@@ -387,14 +387,14 @@ impl AsmEvaluator {
                 // t0 <- t0 - 1 (special case because we subtract 1 without ussing immediate)
                 let mut mi = Microinstruction::new(cs_state.next_addr());
                 mi.jam = 0b001;
-                mi.alu = 0b00110110;
+                mi.alu = 0b000110110;
                 mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
                 mi.b = self.reg_b_code(&Register::T0);
                 cs_state.add_instr(mi.get());
                 // add t1, rd <- t1 + t2
                 let mut mi = Microinstruction::new(loop_addr);
                 mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T1)]) | c_code;
-                mi.alu = 0b00111100;
+                mi.alu = 0b000111100;
                 mi.a = self.reg_a_code(&Register::T1);
                 mi.b = self.reg_b_code(&Register::T2);
                 cs_state.add_instr(mi.get());
@@ -402,7 +402,7 @@ impl AsmEvaluator {
                 // HAS JUMPED, therefore rs1 > rs2
                 // mv t0 <- rs2
                 let mut mi = Microinstruction::new(cs_state.next_addr() - 1);
-                mi.alu = 0b00011000;
+                mi.alu = 0b000011000;
                 mi.c_bus = self.get_c_code(&vec![Rc::new(Register::T0)]);
                 mi.a = match rs2 {
                     Value::Reg(r) => self.reg_a_code(r),
@@ -414,7 +414,7 @@ impl AsmEvaluator {
                 });
                 // mv t1, t2, rd <- rs1
                 let mut mi = Microinstruction::new(loop_addr);
-                mi.alu = 0b00011000;
+                mi.alu = 0b000011000;
                 mi.c_bus =
                     self.get_c_code(&vec![Rc::new(Register::T1), Rc::new(Register::T2)]) | c_code;
                 mi.a = self.reg_a_code(rs1);
@@ -422,6 +422,38 @@ impl AsmEvaluator {
 
                 let jal = Microinstruction::new(cs_state.addr());
                 cs_state.set_instr((loop_addr + 1) | 0b100000000, jal.get())
+            }
+            DoubleOperandOpcode::Xor | DoubleOperandOpcode::Xori => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.c_bus = c_code;
+                mi.alu = 0b001001100;
+                mi.a = self.reg_a_code(rs1.as_ref());
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
+                cs_state.add_instr(mi.get());
+            }
+            DoubleOperandOpcode::Mul2 | DoubleOperandOpcode::Muli => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.c_bus = c_code;
+                mi.alu = 0b001011100;
+                mi.a = self.reg_a_code(rs1.as_ref());
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
+                cs_state.add_instr(mi.get());
+            }
+            DoubleOperandOpcode::Div | DoubleOperandOpcode::Divi => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.c_bus = c_code;
+                mi.alu = 0b001101100;
+                mi.a = self.reg_a_code(rs1.as_ref());
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
+                cs_state.add_instr(mi.get());
+            }
+            DoubleOperandOpcode::Mod | DoubleOperandOpcode::Modi => {
+                let mut mi = Microinstruction::new(cs_state.next_addr());
+                mi.c_bus = c_code;
+                mi.alu = 0b001111100;
+                mi.a = self.reg_a_code(rs1.as_ref());
+                (mi.b, mi.immediate) = self.val_b_code(rs2);
+                cs_state.add_instr(mi.get());
             }
         }
     }
@@ -575,7 +607,7 @@ impl CsState {
 struct Microinstruction {
     pub next: u16,
     pub jam: u8,
-    pub alu: u8,
+    pub alu: u16,
     pub c_bus: u32,
     pub mem: u8,
     pub a: u8,
@@ -610,7 +642,7 @@ impl Microinstruction {
         mi <<= 3;
         mi |= self.jam as u64;
 
-        mi <<= 8;
+        mi <<= 9;
         mi |= self.alu as u64;
 
         mi <<= 20;
@@ -656,7 +688,7 @@ mod tests {
         let mut mi = Microinstruction::new(0);
         mi.next = 0b000000001;
         mi.jam = 0b000;
-        mi.alu = 0b00111100;
+        mi.alu = 0b000111100;
         mi.c_bus = 0b00001100000000000000;
         mi.mem = 000;
         mi.a = 0b01011;
@@ -664,7 +696,7 @@ mod tests {
         mi.immediate = 0b00000000;
 
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00111100_00001100000000000000_000_01011_01100_00000000;
+        let expected = 0b000000001_000_000111100_00001100000000000000_000_01011_01100_00000000;
 
         assert_eq!(expected, mi.get());
     }
@@ -685,7 +717,7 @@ mod tests {
         let secs = Sections::new_text_section(vec![seg]);
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00111100_00000000000000001100_000_01010_10011_00000000;
+        let expected = 0b000000001_000_000111100_00000000000000001100_000_01010_10011_00000000;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -710,7 +742,7 @@ mod tests {
         let secs = Sections::new_text_section(vec![seg]);
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00111100_00000000000000001100_000_01010_00011_00000101;
+        let expected = 0b000000001_000_000111100_00000000000000001100_000_01010_00011_00000101;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -735,7 +767,7 @@ mod tests {
         let secs = Sections::new_text_section(vec![seg]);
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00111111_00000000000000001100_000_11000_00101_00000000;
+        let expected = 0b000000001_000_000111111_00000000000000001100_000_11000_00101_00000000;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -760,7 +792,207 @@ mod tests {
         let secs = Sections::new_text_section(vec![seg]);
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00111111_00000000000000001100_000_01000_00101_00000111;
+        let expected = 0b000000001_000_000111111_00000000000000001100_000_01000_00101_00000111;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_xor() {
+        // xor a0, a1 <- t0, a3
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Xor,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Reg(Rc::new(Register::A3)),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001001100_00000000000000001100_000_01010_10011_00000000;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_xori() {
+        // muli a0, a1 <- t0, 5
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Xori,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Immediate(5),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001001100_00000000000000001100_000_01010_00011_00000101;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_mul2() {
+        // mul2 a0, a1 <- t0, a3
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Mul2,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Reg(Rc::new(Register::A3)),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001011100_00000000000000001100_000_01010_10011_00000000;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_muli() {
+        // muli a0, a1 <- t0, 5
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Muli,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Immediate(5),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001011100_00000000000000001100_000_01010_00011_00000101;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_div() {
+        // mul2 a0, a1 <- t0, a3
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Div,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Reg(Rc::new(Register::A3)),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001101100_00000000000000001100_000_01010_10011_00000000;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_divi() {
+        // muli a0, a1 <- t0, 5
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Divi,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Immediate(5),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001101100_00000000000000001100_000_01010_00011_00000101;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_mod() {
+        // mul2 a0, a1 <- t0, a3
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Mod,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Reg(Rc::new(Register::A3)),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001111100_00000000000000001100_000_01010_10011_00000000;
+
+        assert_eq!(firmware[0], expected);
+        assert_eq!(firmware[1], Microinstruction::HALT);
+        for i in 2..=255 {
+            assert_eq!(firmware[i], 0);
+        }
+    }
+
+    #[test]
+    fn test_modi() {
+        // muli a0, a1 <- t0, 5
+        let instructions = vec![
+            Instruction::new_double_operand_instruction(
+                DoubleOperandOpcode::Modi,
+                vec![Rc::new(Register::A0), Rc::new(Register::A1)],
+                Rc::new(Register::T0),
+                Value::Immediate(5),
+            ),
+            Instruction::new_no_operand_instruction(NoOperandOpcode::Halt),
+        ];
+        let seg = TextSegment::new_labeled_section("main".into(), instructions);
+        let secs = Sections::new_text_section(vec![seg]);
+        let firmware = AsmEvaluator::new().eval(&secs).firmware();
+        #[allow(clippy::unusual_byte_groupings)]
+        let expected = 0b000000001_000_001111100_00000000000000001100_000_01010_00011_00000101;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -784,7 +1016,7 @@ mod tests {
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00011000_00000000000000000001_000_01000_11111_00000001;
+        let expected = 0b000000001_000_000011000_00000000000000000001_000_01000_11111_00000001;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -808,7 +1040,7 @@ mod tests {
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00011000_00000000000000000001_000_00000_11111_00000000;
+        let expected = 0b000000001_000_000011000_00000000000000000001_000_00000_11111_00000000;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -832,7 +1064,7 @@ mod tests {
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_00011010_00000000000000000011_000_00000_11111_00000000;
+        let expected = 0b000000001_000_000011010_00000000000000000011_000_00000_11111_00000000;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -856,7 +1088,7 @@ mod tests {
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_10011000_00000000000000000011_000_00000_11111_00000000;
+        let expected = 0b000000001_000_100011000_00000000000000000011_000_00000_11111_00000000;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -880,7 +1112,7 @@ mod tests {
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_11011000_00000000000000000011_000_00000_11111_00000000;
+        let expected = 0b000000001_000_110011000_00000000000000000011_000_00000_11111_00000000;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -904,7 +1136,7 @@ mod tests {
         let firmware = AsmEvaluator::new().eval(&secs).firmware();
 
         #[allow(clippy::unusual_byte_groupings)]
-        let expected = 0b000000001_000_01011000_00000000000000000011_000_00000_11111_00000000;
+        let expected = 0b000000001_000_010011000_00000000000000000011_000_00000_11111_00000000;
 
         assert_eq!(firmware[0], expected);
         assert_eq!(firmware[1], Microinstruction::HALT);
@@ -931,27 +1163,27 @@ mod tests {
 
         let no_branch_mcode: Vec<u64> = vec![
             // JUMP if a1 > a2 (a2 - a1 < 0)
-            0b000000001_010_00111111_00000000000000000000_000_10110_10010_00000000,
+            0b000000001_010_000111111_00000000000000000000_000_10110_10010_00000000,
             // CASE 1 (has not branched)
             // Copy a1 into t0
-            0b000000010_000_00011000_00000100000000000000_000_10110_11111_00000000,
+            0b000000010_000_000011000_00000100000000000000_000_10110_11111_00000000,
             // Copy a2 into t1, t2, a0
-            0b000000011_000_00011000_00000011000000001000_000_10111_11111_00000000,
+            0b000000011_000_000011000_00000011000000001000_000_10111_11111_00000000,
             // Intersection between the cases: r13 + .. + r13, r14-times
             // t0 <- t0 - 1 or JUMP if (t0 - 1) = 0
-            0b000000100_001_00110110_00000100000000000000_000_11111_00101_00000000,
+            0b000000100_001_000110110_00000100000000000000_000_11111_00101_00000000,
             // a0, t1 <- t1 + t2
-            0b000000011_000_00111100_00000010000000001000_000_01011_00111_00000000,
+            0b000000011_000_000111100_00000010000000001000_000_01011_00111_00000000,
             // CASE 2.1
             // Copy a1 into t1, t2, a0 and go to loop
-            0b000000011_000_00011000_00000011000000001000_000_10110_11111_00000000,
+            0b000000011_000_000011000_00000011000000001000_000_10110_11111_00000000,
             Microinstruction::HALT,
         ];
 
         let brached_mcode: Vec<u64> = vec![
             // CASE 2: has branched
             // Copy a2 into t0 as go to CASE 2.1
-            0b000000101_000_00011000_00000100000000000000_000_10111_11111_00000000,
+            0b000000101_000_000011000_00000100000000000000_000_10111_11111_00000000,
         ];
 
         for (addr, &mi) in no_branch_mcode.iter().enumerate() {
@@ -968,7 +1200,7 @@ mod tests {
             // eprintln!("got:      {:061b}", firmware[addr]);
             assert_eq!(mi, firmware[addr]);
         }
-        let jal = 0b000000110_000_00000000_00000000000000000000_000_11111_11111_00000000;
+        let jal = 0b000000110_000_000000000_00000000000000000000_000_11111_11111_00000000;
         assert_eq!(jal, firmware[0b100000100]);
     }
 
@@ -1025,17 +1257,17 @@ mod tests {
         #[allow(clippy::unusual_byte_groupings)]
         let expected = [
             // mar <- 0 and READ
-            0b000000001_000_00011000_01000000000000000000_010_01000_11111_00000000,
+            0b000000001_000_000011000_01000000000000000000_010_01000_11111_00000000,
             // a1, a2, a3 <- mdr
-            0b000000010_000_00011000_00000000000000000111_000_00000_11111_00000000,
+            0b000000010_000_000011000_00000000000000000111_000_00000_11111_00000000,
             // mar <- 1 and READ
-            0b000000011_000_00011000_01000000000000000000_010_01000_11111_00000001,
+            0b000000011_000_000011000_01000000000000000000_010_01000_11111_00000001,
             // a1 <- mdr
-            0b000000100_000_00011000_00000000000000000100_000_00000_11111_00000000,
+            0b000000100_000_000011000_00000000000000000100_000_00000_11111_00000000,
             // mar <- 0 and READ
-            0b000000101_000_00011000_01000000000000000000_010_01000_11111_00000000,
+            0b000000101_000_000011000_01000000000000000000_010_01000_11111_00000000,
             // a1 <- mdr
-            0b000000110_000_00011000_00000000000000000100_000_00000_11111_00000000,
+            0b000000110_000_000011000_00000000000000000100_000_00000_11111_00000000,
             Microinstruction::HALT,
         ];
 
@@ -1097,17 +1329,17 @@ mod tests {
         #[allow(clippy::unusual_byte_groupings)]
         let expected = [
             // mdr <- a3
-            0b000000001_000_00011000_10000000000000000000_000_11000_11111_00000000,
+            0b000000001_000_000011000_10000000000000000000_000_11000_11111_00000000,
             // mar <- 0 and WRITE
-            0b000000010_000_00011000_01000000000000000000_100_01000_11111_00000000,
+            0b000000010_000_000011000_01000000000000000000_100_01000_11111_00000000,
             // mdr <- a2
-            0b000000011_000_00011000_10000000000000000000_000_10111_11111_00000000,
+            0b000000011_000_000011000_10000000000000000000_000_10111_11111_00000000,
             // mar <- address of gepeto that is 1 and WRITE
-            0b000000100_000_00011000_01000000000000000000_100_01000_11111_00000001,
+            0b000000100_000_000011000_01000000000000000000_100_01000_11111_00000001,
             // mdr <- a1
-            0b000000101_000_00011000_10000000000000000000_000_10110_11111_00000000,
+            0b000000101_000_000011000_10000000000000000000_000_10110_11111_00000000,
             // mar <- tubias_addr that is 0 and WRITE
-            0b000000110_000_00011000_01000000000000000000_100_01000_11111_00000000,
+            0b000000110_000_000011000_01000000000000000000_100_01000_11111_00000000,
             Microinstruction::HALT,
         ];
 
@@ -1138,7 +1370,7 @@ mod tests {
 
         let expected = [
             Microinstruction::HALT,
-            0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000,
+            0b000000000_000_000000000_00000000000000000000_000_11111_11111_00000000,
             Microinstruction::HALT,
         ];
 
@@ -1184,11 +1416,11 @@ mod tests {
 
         let no_branch_mcode: Vec<u64> = vec![
             // add a0 <- a1, a2
-            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000001_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // add a0 <- a1, a2
-            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000010_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // beq a1 == a2, done
-            0b000000011_001_00111111_00000000000000000000_000_10110_10010_00000000,
+            0b000000011_001_000111111_00000000000000000000_000_10110_10010_00000000,
         ];
 
         let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
@@ -1234,17 +1466,17 @@ mod tests {
 
         let no_branch_mcode: Vec<u64> = vec![
             // add a0 <- a1, a2
-            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000001_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // add a0 <- a1, a2
-            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000010_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // bne a2, a3, done
-            0b000000011_010_00111111_00000000000000000000_000_10111_10011_00000000,
-            0b000000100_010_00111111_00000000000000000000_000_11000_10010_00000000,
+            0b000000011_010_000111111_00000000000000000000_000_10111_10011_00000000,
+            0b000000100_010_000111111_00000000000000000000_000_11000_10010_00000000,
         ];
 
         let branched_mcode = vec![
-            0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000,
-            0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000,
+            0b000000000_000_000000000_00000000000000000000_000_11111_11111_00000000,
+            0b000000000_000_000000000_00000000000000000000_000_11111_11111_00000000,
         ];
 
         for (addr, &mi) in no_branch_mcode.iter().enumerate() {
@@ -1289,14 +1521,15 @@ mod tests {
 
         let no_branch_mcode: Vec<u64> = vec![
             // add a0 <- a1, a2
-            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000001_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // add a0 <- a1, a2
-            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000010_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // blt a2, a3, done
-            0b000000011_010_00111111_00000000000000000000_000_11000_10010_00000000,
+            0b000000011_010_000111111_00000000000000000000_000_11000_10010_00000000,
         ];
 
-        let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
+        let branched_mcode =
+            0b000000000_000_000000000_00000000000000000000_000_11111_11111_00000000;
 
         for (addr, &mi) in no_branch_mcode.iter().enumerate() {
             assert_eq!(mi, firmware[addr]);
@@ -1339,14 +1572,15 @@ mod tests {
 
         let no_branch_mcode: Vec<u64> = vec![
             // add a0 <- a1, a2
-            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000001_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // add a0 <- a1, a2
-            0b000000010_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000010_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // bgt a2, a3, done
-            0b000000011_010_00111111_00000000000000000000_000_10111_10011_00000000,
+            0b000000011_010_000111111_00000000000000000000_000_10111_10011_00000000,
         ];
 
-        let branched_mcode = 0b000000000_000_00000000_00000000000000000000_000_11111_11111_00000000;
+        let branched_mcode =
+            0b000000000_000_000000000_00000000000000000000_000_11111_11111_00000000;
 
         for (addr, &mi) in no_branch_mcode.iter().enumerate() {
             assert_eq!(mi, firmware[addr]);
@@ -1395,14 +1629,15 @@ mod tests {
 
         let no_branch_mcode: Vec<u64> = vec![
             // add a0 <- a1, a2
-            0b000000001_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000001_000_000111100_00000000000000001000_000_10110_10010_00000000,
             // beq a2, a3, done
-            0b000000010_001_00111111_00000000000000000000_000_10111_10011_00000000,
+            0b000000010_001_000111111_00000000000000000000_000_10111_10011_00000000,
             // add a0 <- a1, a2
-            0b000000011_000_00111100_00000000000000001000_000_10110_10010_00000000,
+            0b000000011_000_000111100_00000000000000001000_000_10110_10010_00000000,
         ];
 
-        let branched_mcode = 0b000000010_000_00000000_00000000000000000000_000_11111_11111_00000000;
+        let branched_mcode =
+            0b000000010_000_000000000_00000000000000000000_000_11111_11111_00000000;
 
         for (addr, &mi) in no_branch_mcode.iter().enumerate() {
             assert_eq!(mi, firmware[addr]);

@@ -16,7 +16,7 @@ impl Alu {
     }
 
     /// Set ALU inputs
-    pub fn entry(&mut self, opcode: u8, a: u32, b: u32) {
+    pub fn entry(&mut self, opcode: u16, a: u32, b: u32) {
         let inc = (opcode & 0b00000001) == 0b00000001;
         let inva = (opcode & 0b00000010) == 0b00000010;
 
@@ -32,16 +32,19 @@ impl Alu {
         (self.a, self.b) = (a, b);
 
         // get f0 and f1
-        let func_code = opcode & 0b00110000;
+        let func_code = opcode & 0b001110000;
         self.f = match func_code {
             0b00000000 => Func::And,
             0b00010000 => Func::Or,
             0b00100000 => Func::Not,
             0b00110000 => Func::Add { inc },
+            0b01000000 => Func::Xor,
+            0b01010000 => Func::Mul,
+            0b01100000 => Func::Div,
+            0b01110000 => Func::Mod,
             _ => unreachable!(),
         };
-
-        self.s.entry = opcode >> 6;
+        self.s.entry = (opcode >> 7) as u8;
     }
 
     pub fn op(&self) -> u32 {
@@ -56,6 +59,10 @@ impl Alu {
             Func::And => self.a & self.b,
             Func::Or => self.a | self.b,
             Func::Not => !self.b,
+            Func::Xor => self.a ^ self.b,
+            Func::Mul => self.a * self.b,
+            Func::Div => self.a / self.b,
+            Func::Mod => self.a % self.b,
         };
         self.z.set(c == 0);
         self.n.set((c >> 31) == 1);
@@ -75,8 +82,12 @@ impl Alu {
 enum Func {
     And,
     Or,
+    Xor,
     Not,
     Add { inc: bool },
+    Mul,
+    Div,
+    Mod,
 }
 
 impl Default for Func {
@@ -136,6 +147,34 @@ pub mod test {
     }
 
     #[test]
+    fn xor() {
+        let mut alu = Alu::default();
+        alu.entry(0b001001100, A, B);
+        assert_eq!(A ^ B, alu.op());
+    }
+
+    #[test]
+    fn mul() {
+        let mut alu = Alu::default();
+        alu.entry(0b001011100, A, B);
+        assert_eq!(A * B, alu.op());
+    }
+
+    #[test]
+    fn div() {
+        let mut alu = Alu::default();
+        alu.entry(0b001101100, A, B);
+        assert_eq!(A / B, alu.op());
+    }
+
+    #[test]
+    fn div_mod() {
+        let mut alu = Alu::default();
+        alu.entry(0b001111100, A, B);
+        assert_eq!(A % B, alu.op());
+    }
+
+    #[test]
     fn not() {
         let mut alu = Alu::default();
         alu.entry(0b00101100, A, B);
@@ -176,21 +215,21 @@ pub mod test {
     #[test]
     fn sll() {
         let mut alu = Alu::default();
-        alu.entry(0b10111101, A, B);
+        alu.entry(0b100111101, A, B);
         assert_eq!((A + B + 1) << 8, alu.op());
     }
 
     #[test]
     fn sla() {
         let mut alu = Alu::default();
-        alu.entry(0b11111101, A, B);
+        alu.entry(0b110111101, A, B);
         assert_eq!((A + B + 1) << 1, alu.op());
     }
 
     #[test]
     fn sra() {
         let mut alu = Alu::default();
-        alu.entry(0b01111101, A, B);
+        alu.entry(0b010111101, A, B);
         assert_eq!((A + B + 1) >> 1, alu.op());
     }
 
