@@ -50,6 +50,7 @@ pub enum BranchOp {
 pub enum Value {
     Immediate(u8),
     Reg(Rc<Register>),
+    Label(Rc<str>)
 }
 
 #[derive(Debug, PartialEq)]

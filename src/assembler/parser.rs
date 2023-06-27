@@ -496,8 +496,16 @@ impl Parser {
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
-                let immediate = self.get_number()?.parse::<u8>()?;
-                let rs2 = Value::Immediate(immediate);
+                let rs2 = match *self.cur_tok {
+                    AsmToken::Label(ref l) => Value::Label(Rc::clone(l)),
+                    AsmToken::Number(ref n) => Value::Immediate(n.parse::<u8>()?),
+                    _ => bail!(ParserError::ExpectedToken {
+                        expected: format!("{:?}", "Immediate or Label"),
+                        found: format!("{:?}", self.cur_tok),
+                        cur_line: self.cur_line,
+                        cur_column: self.cur_column
+                    }),
+                };
                 Instruction::new_double_operand_instruction(
                     self.op_to_double_op(op)?,
                     dest_regs,
@@ -510,8 +518,16 @@ impl Parser {
                 let dest_regs = self.get_dest_regs()?;
                 self.expect_peek(AsmToken::Assign)?;
                 self.next_token();
-                let immediate = self.get_number()?.parse::<u8>()?;
-                let rs1 = Value::Immediate(immediate);
+                let rs1 = match *self.cur_tok {
+                    AsmToken::Label(ref l) => Value::Label(Rc::clone(l)),
+                    AsmToken::Number(ref n) => Value::Immediate(n.parse::<u8>()?),
+                    _ => bail!(ParserError::ExpectedToken {
+                        expected: format!("{:?}", "Immediate or Label"),
+                        found: format!("{:?}", self.cur_tok),
+                        cur_line: self.cur_line,
+                        cur_column: self.cur_column
+                    }),
+                };
                 Instruction::new_single_operand_instruction(
                     self.op_to_single_op(op)?,
                     dest_regs,

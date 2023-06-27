@@ -4,8 +4,8 @@
 
 .text
 _start:
-    lui a0 <- 2        # a0 = X must be a byte
-    lui a1 <- 5        # a1 = n must be a byte
+    lui a0 <- x        # a0 = X must be a byte
+    lui a1 <- n        # a1 = n must be a byte
     lui a2 <- 0        # a2 is a counter for the loop
 
     lui ra <- 1        # ra = 1 will be the result of the multiplication, ra will be r0 in microarchitecture
