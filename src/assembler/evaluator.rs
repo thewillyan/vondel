@@ -379,6 +379,7 @@ impl AsmEvaluator {
                 mi.a = match rs2 {
                     Value::Reg(r) => self.reg_a_code(r),
                     Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
+                    _ => unreachable!("Should't receive a label arg."),
                 };
                 let loop_addr = cs_state.next_addr();
                 cs_state.add_instr(mi.get());
@@ -407,6 +408,7 @@ impl AsmEvaluator {
                 mi.a = match rs2 {
                     Value::Reg(r) => self.reg_a_code(r),
                     Value::Immediate(_) => unreachable!("Should't receive a immediate arg."),
+                    _ => unreachable!("Should't receive a label arg."),
                 };
                 cs_state.add_complex_instr(|cs, addr| {
                     cs.set_word(branched_addr, mi.get());
@@ -463,6 +465,10 @@ impl AsmEvaluator {
         match val {
             Value::Reg(r) => (self.reg_a_code(r), 0),
             Value::Immediate(imm) => (Microinstruction::IMM_A, *imm),
+            Value::Label(l) => (
+                Microinstruction::IMM_A,
+                *self.values.get(l.as_ref()).expect("Should be defined before"),
+            ),
         }
     }
 
@@ -471,6 +477,10 @@ impl AsmEvaluator {
         match val {
             Value::Reg(r) => (self.reg_b_code(r), 0),
             Value::Immediate(imm) => (Microinstruction::IMM_B, *imm),
+            Value::Label(l) => (
+                Microinstruction::IMM_B,
+                *self.values.get(l.as_ref()).expect("Should be defined before"),
+            ),
         }
     }
 
