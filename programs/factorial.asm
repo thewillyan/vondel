@@ -1,6 +1,6 @@
 .text
 _start:
-  lui a0 <- 5        ; Number for which factorial is calculated
+  lui a0 <- 12        ; Number for which factorial is calculated
   lui a1, ra <- 1    ; Initialize a1 to 1 (used as a counter) and ra will be the r0 on microarchitecture
 
 loop:
