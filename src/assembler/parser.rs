@@ -78,6 +78,9 @@ pub enum ParserError {
         cur_line: usize,
         cur_column: usize,
     },
+
+    #[error("Temp register cannot be used in mul instruction\nContext: line {cur_line}, column {cur_column}")]
+    TempRegisterCannotBeUsedInMul { cur_line: usize, cur_column: usize },
 }
 
 #[derive(Debug, Default)]
@@ -273,13 +276,21 @@ impl Parser {
         let res = match *op {
             Opcode::Add => DoubleOperandOpcode::Add,
             Opcode::Mul => DoubleOperandOpcode::Mul,
+            Opcode::Mul2 => DoubleOperandOpcode::Mul2,
+            Opcode::Muli => DoubleOperandOpcode::Muli,
+            Opcode::Div => DoubleOperandOpcode::Div,
+            Opcode::Mod => DoubleOperandOpcode::Mod,
             Opcode::Sub => DoubleOperandOpcode::Sub,
             Opcode::And => DoubleOperandOpcode::And,
             Opcode::Or => DoubleOperandOpcode::Or,
+            Opcode::Xor => DoubleOperandOpcode::Xor,
             Opcode::Addi => DoubleOperandOpcode::Addi,
             Opcode::Andi => DoubleOperandOpcode::Andi,
             Opcode::Ori => DoubleOperandOpcode::Ori,
             Opcode::Subi => DoubleOperandOpcode::Subi,
+            Opcode::Xori => DoubleOperandOpcode::Xori,
+            Opcode::Divi => DoubleOperandOpcode::Divi,
+            Opcode::Modi => DoubleOperandOpcode::Modi,
             _ => {
                 bail!(ParserError::ExpectedToken {
                     expected: format!("{:?}", "DoubleOperandOpcode"),
@@ -307,7 +318,7 @@ impl Parser {
         Ok(pseudo_op)
     }
 
-    fn guard_a_bus(&mut self, reg: Rc<Register>) -> Result<Rc<Register>> {
+    fn guard_a_bus(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
         match *reg {
             Register::Mar => {
                 bail!(ParserError::RegisterCannotBeUsedInABus {
@@ -320,7 +331,7 @@ impl Parser {
         }
     }
 
-    fn guard_b_bus(&mut self, reg: Rc<Register>) -> Result<Rc<Register>> {
+    fn guard_b_bus(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
         match *reg {
             Register::Mar
             | Register::Mbr
@@ -343,6 +354,18 @@ impl Parser {
             Register::Cpp | Register::Mbr | Register::Mbr2 | Register::Mbru | Register::Mbr2u => {
                 bail!(ParserError::RegisterCannotBeUsedInCBus {
                     found: format!("{:?}", reg),
+                    cur_line: self.cur_line,
+                    cur_column: self.cur_column
+                })
+            }
+            _ => Ok(reg),
+        }
+    }
+
+    fn guard_mul_temps(&self, reg: Rc<Register>) -> Result<Rc<Register>> {
+        match *reg {
+            Register::T0 | Register::T1 | Register::T2 | Register::T3 => {
+                bail!(ParserError::TempRegisterCannotBeUsedInMul {
                     cur_line: self.cur_line,
                     cur_column: self.cur_column
                 })
@@ -414,7 +437,14 @@ impl Parser {
 
         let res = match *op {
             // Register Register Instructions
-            Opcode::Add | Opcode::Sub | Opcode::Mul | Opcode::And | Opcode::Or => {
+            Opcode::Add
+            | Opcode::Sub
+            | Opcode::Mul2
+            | Opcode::And
+            | Opcode::Or
+            | Opcode::Xor
+            | Opcode::Div
+            | Opcode::Mod => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
@@ -427,14 +457,55 @@ impl Parser {
                     rs2,
                 )
             }
+            Opcode::Mul => {
+                self.next_token();
+
+                let mut dest_regs = Vec::new();
+                dest_regs.push(self.guard_mul_temps(self.guard_c_bus(self.get_register()?)?)?);
+                while self.peek_token_is(AsmToken::Comma) {
+                    self.next_token();
+                    self.next_token();
+                    dest_regs.push(self.guard_c_bus(self.get_register()?)?);
+                }
+
+                self.expect_peek(AsmToken::Assign)?;
+                self.next_token();
+                let rs1 = self.guard_mul_temps(self.guard_a_bus(self.get_register()?)?)?;
+                self.expect_peek(AsmToken::Comma)?;
+                self.next_token();
+                let rs2 =
+                    Value::Reg(self.guard_mul_temps(self.guard_b_bus(self.get_register()?)?)?);
+
+                Instruction::new_double_operand_instruction(
+                    self.op_to_double_op(op)?,
+                    dest_regs,
+                    rs1,
+                    rs2,
+                )
+            }
             // Imediate Register Instructions
-            Opcode::Addi | Opcode::Andi | Opcode::Ori | Opcode::Subi => {
+            Opcode::Addi
+            | Opcode::Andi
+            | Opcode::Ori
+            | Opcode::Subi
+            | Opcode::Xori
+            | Opcode::Muli
+            | Opcode::Divi
+            | Opcode::Modi => {
                 self.next_token();
                 let (dest_regs, rs1) = self.parse_instruction_til_rs1()?;
                 self.expect_peek(AsmToken::Comma)?;
                 self.next_token();
-                let immediate = self.get_number()?.parse::<u8>()?;
-                let rs2 = Value::Immediate(immediate);
+                let rs2 = match *self.cur_tok {
+                    AsmToken::Label(ref l) => Value::Label(Rc::clone(l)),
+                    AsmToken::Number(ref n) => Value::Immediate(n.parse::<u8>()?),
+                    _ => bail!(ParserError::ExpectedToken {
+                        expected: format!("{:?}", "Immediate or Label"),
+                        found: format!("{:?}", self.cur_tok),
+                        cur_line: self.cur_line,
+                        cur_column: self.cur_column
+                    }),
+                };
                 Instruction::new_double_operand_instruction(
                     self.op_to_double_op(op)?,
                     dest_regs,
@@ -447,8 +518,16 @@ impl Parser {
                 let dest_regs = self.get_dest_regs()?;
                 self.expect_peek(AsmToken::Assign)?;
                 self.next_token();
-                let immediate = self.get_number()?.parse::<u8>()?;
-                let rs1 = Value::Immediate(immediate);
+                let rs1 = match *self.cur_tok {
+                    AsmToken::Label(ref l) => Value::Label(Rc::clone(l)),
+                    AsmToken::Number(ref n) => Value::Immediate(n.parse::<u8>()?),
+                    _ => bail!(ParserError::ExpectedToken {
+                        expected: format!("{:?}", "Immediate or Label"),
+                        found: format!("{:?}", self.cur_tok),
+                        cur_line: self.cur_line,
+                        cur_column: self.cur_column
+                    }),
+                };
                 Instruction::new_single_operand_instruction(
                     self.op_to_single_op(op)?,
                     dest_regs,
@@ -691,9 +770,13 @@ mod tests {
 main:
     add t0 <- t1, t2
     sub t1, t2, t3, s0 <- t1, t2
-    mul t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
+    mul s0,s1,s2,s3,s4,a0,a1,a2 <- a0, a1
     and t0 <- a0, a1
     or t0 <- a0, a1
+    mul2 t0 <- a0, a1
+    xor t0 <- a0, a1
+    div t0 <- a0, a1
+    mod t0 <- a0, a1
 
 .text
 error:
@@ -724,9 +807,6 @@ error2:
                 Instruction::new_double_operand_instruction(
                     Mul,
                     vec![
-                        Rc::from(T1),
-                        Rc::from(T2),
-                        Rc::from(T3),
                         Rc::from(S0),
                         Rc::from(S1),
                         Rc::from(S2),
@@ -751,10 +831,33 @@ error2:
                     Rc::from(A0),
                     Value::Reg(Rc::from(A1)),
                 ),
+                Instruction::new_double_operand_instruction(
+                    Mul2,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Xor,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Div,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Mod,
+                    vec![Rc::from(T0)],
+                    Rc::from(A0),
+                    Value::Reg(Rc::from(A1)),
+                ),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);
-        // assert_eq!(program.errors.len(), 5);
         assert_eq!(program.sections[0], expected);
 
         Ok(())
@@ -769,16 +872,12 @@ error2:
 main:
     addi t0 <- t1, 8
     andi t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
+    muli t1,t2,t3,s0,s1,s2,s3,s4,a0,a1,a2 <- a0, 200
     ori t0 <- t1, 8
     subi t0 <- t1, 8
-
-.text
-error:
-    addi t0 <- t1, t2
-
-.text
-error2:
-    addi <- t1, 7
+    xori t0 <- t1, 8
+    divi t0 <- t1, 8
+    modi t0 <- t1, 8
         ";
 
         let program = create_program(input);
@@ -811,6 +910,24 @@ error2:
                     Value::Immediate(200),
                 ),
                 Instruction::new_double_operand_instruction(
+                    Muli,
+                    vec![
+                        Rc::from(T1),
+                        Rc::from(T2),
+                        Rc::from(T3),
+                        Rc::from(S0),
+                        Rc::from(S1),
+                        Rc::from(S2),
+                        Rc::from(S3),
+                        Rc::from(S4),
+                        Rc::from(A0),
+                        Rc::from(A1),
+                        Rc::from(A2),
+                    ],
+                    Rc::from(A0),
+                    Value::Immediate(200),
+                ),
+                Instruction::new_double_operand_instruction(
                     Ori,
                     vec![Rc::from(T0)],
                     Rc::from(T1),
@@ -822,10 +939,27 @@ error2:
                     Rc::from(T1),
                     Value::Immediate(8),
                 ),
+                Instruction::new_double_operand_instruction(
+                    Xori,
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Divi,
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
+                Instruction::new_double_operand_instruction(
+                    Modi,
+                    vec![Rc::from(T0)],
+                    Rc::from(T1),
+                    Value::Immediate(8),
+                ),
             ],
         )]);
         assert_eq!(program.sections.len(), 1);
-        // assert_eq!(program.errors.len(), 5);
         assert_eq!(program.sections[0], expected);
 
         Ok(())

@@ -1,5 +1,8 @@
 # Summary
 
+[Introduction](./README.md)
+
+- [File Structure with Comparision](./files.md)
 - [Interpreter](./interpreter/README.md)
   - [Language Specification](./interpreter/language.md)
   - [Lexer](./interpreter/lexer.md)
@@ -17,5 +20,6 @@
   - [Comparision](./assembler/comparision.md)
 - [UArch](./uarch/README.md)
   - [Microinstruction](./uarch/uinstruction.md)
-    - [Implementations](./uarch/implementations.md)
+  - [Implementations](./uarch/implementations.md)
+  - [Hardware](./uarch/hardware.md)
 - [Comparision with Requested UArch](./chapter_1.md)

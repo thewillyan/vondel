@@ -3,13 +3,13 @@
 Microinstructions are stored in the control store and are fetched with the address
 stode at MPC (Microprogram Counter).
 
-A Vondel microinstruction has 64 bits the following format:
+A Vondel microinstruction has 62 bits the following format:
 
 |   NEXT  |  JAM   |   ALU  |  C BUS  |  MEM   |   A    |   B    | IMMEDIATE |
 |:-------:|:------:|:------:|:-------:|:------:|:------:|:------:|:---------:|
-| 9 bits  | 3 bits | 8 bits | 20 bits | 3 bits | 5 bits | 5 bits |  8 bits   |
+| 9 bits  | 3 bits | 9 bits | 20 bits | 3 bits | 5 bits | 5 bits |  8 bits   |
 
-You can find a more detailed version of this diagram [here](https://i.imgur.com/tlHAPgL.png).
+You can find a more detailed version of this diagram [here](./README.md#data-parallelism)
 
 ## NEXT
 
@@ -41,41 +41,52 @@ connected to its autput.
 The ALU has two input, A and B (that come from the A and B bus, respectively) and 
 it's controled by the 6 LSB's from the ALU field, they are:
 
-- F0 and F1 (Controls the ALU function)
+- F0, F1 and F2 (Controls the ALU function)
 - ENA and ENB (Enables the input from A and B bus respectively)
 - INVA (Inverts the bits of A)
 - INC (Increments 1 to the ALU result)
 
 from MSB to LSB. The logic and arithmetic functions that ALU can
-operate are managed by F0 and F1 like this:
+operate are managed by F0, F1 and F2 like this:
 
-| F0 | F1 | Function |
-|:--:|:--:|:---------|
-| 0  | 0  | A AND B  |
-| 0  | 1  | A OR B   |
-| 1  | 0  | NOT B    |
-| 1  | 1  | A + B    |
+| F0 | F1 | F2 | Function |
+|:--:|:--:|:--:|:---------|
+| 0  | 0  | 0  | A AND B  |
+| 0  | 0  | 1  | A OR B   |
+| 0  | 1  | 0  | NOT B    |
+| 0  | 1  | 1  | A + B    |
+| 1  | 0  | 0  | A XOR B  |
+| 1  | 0  | 1  | A * B    |
+| 1  | 1  | 0  | A / B    |
+| 1  | 1  | 1  | A % B    |
+
+Where `AND`, `OR` and `XOR` are bitwise operations and `+`, `*`, `/` and `%` are
+the addition, multiplication, division and remainder arithmetic operations respectively.
 
 Some useful combinations of ALU signal can be found below:
 
-| F0 | F1 | ENA | ENB | INVA | INC | Function |
-|:--:|:--:|:---:|:---:|:----:|:---:|:---------|
-| 0 | 1 | 1 | 0 | 0 | 0 | A |
-| 0 | 1 | 0 | 1 | 0 | 0 | B |
-| 0 | 1 | 1 | 0 | 1 | 0 | not A |
-| 1 | 0 | 1 | 1 | 0 | 0 | not B |
-| 1 | 1 | 1 | 1 | 0 | 0 | A + B |
-| 1 | 1 | 1 | 1 | 0 | 1 | A + B + 1 |
-| 1 | 1 | 1 | 0 | 0 | 1 | A + 1 |
-| 1 | 1 | 0 | 1 | 0 | 1 | B + 1 |
-| 1 | 1 | 1 | 1 | 1 | 1 | B − A |
-| 1 | 1 | 0 | 1 | 1 | 0 | B − 1 |
-| 1 | 1 | 1 | 0 | 1 | 1 | −A |
-| 0 | 0 | 1 | 1 | 0 | 0 | A AND B |
-| 0 | 1 | 1 | 1 | 0 | 0 | A OR B |
-| 0 | 1 | 0 | 0 | 0 | 0 | 0 |
-| 1 | 1 | 0 | 0 | 0 | 1 | 1 |
-| 1 | 1 | 0 | 0 | 1 | 0 | −1 |
+| F0 | F1 | F2 | ENA | ENB | INVA | INC | Function |
+|:--:|:--:|:--:|:---:|:---:|:----:|:---:|:---------|
+| 0 | 0 | 1 | 1 | 0 | 0 | 0 | A |
+| 0 | 0 | 1 | 0 | 1 | 0 | 0 | B |
+| 0 | 0 | 1 | 1 | 0 | 1 | 0 | not A |
+| 0 | 1 | 0 | 1 | 1 | 0 | 0 | not B |
+| 0 | 1 | 1 | 1 | 1 | 0 | 0 | A + B |
+| 0 | 1 | 1 | 1 | 1 | 0 | 1 | A + B + 1 |
+| 0 | 1 | 1 | 1 | 0 | 0 | 1 | A + 1 |
+| 0 | 1 | 1 | 0 | 1 | 0 | 1 | B + 1 |
+| 0 | 1 | 1 | 1 | 1 | 1 | 1 | B − A |
+| 0 | 1 | 1 | 0 | 1 | 1 | 0 | B − 1 |
+| 0 | 1 | 1 | 1 | 0 | 1 | 1 | −A |
+| 0 | 0 | 0 | 1 | 1 | 0 | 0 | A AND B |
+| 0 | 0 | 1 | 1 | 1 | 0 | 0 | A OR B |
+| 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 1 | 0 | 0 | 0 | 1 | 1 |
+| 0 | 1 | 1 | 0 | 0 | 1 | 0 | −1 |
+| 1 | 0 | 0 | 1 | 1 | 0 | 0 | A XOR B |
+| 1 | 0 | 1 | 1 | 1 | 0 | 0 | A * B |
+| 1 | 1 | 0 | 1 | 1 | 0 | 0 | A / B |
+| 1 | 1 | 1 | 1 | 1 | 0 | 0 | A % B |
 
 The shifter has 2 inputs: The value of the ALU operation (let's call it `X`) and
 the operation opcode that are which are the 2 MSB's from the ALU field. The
@@ -128,7 +139,14 @@ The bit 1 (MSB), 2 and 3 represents the operations of WRITE, READ and FETCH
 respectively.
 
 Each bit 1 in the field informs that the memory operation related to that
-field will be executed.
+field will be executed. What is actually done in operations can be found below:
+
+- READ: Reads the memory word (32 bit) of the address stored in `MAR` into `MDR`.
+- WRITE: Writes the memory word stored in  `MDR` into the memory address stored in `MAR`.
+- FETCH: Reads the memory word of the address stored in `PC` into `MBR` (8-bit) and `MBR2` (16-bit).
+
+The `FETCH` operation uses the IFU to store the remainder bytes in cache to only
+access memory when needed.
 
 ## A and B
 

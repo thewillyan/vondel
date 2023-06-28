@@ -50,7 +50,7 @@ way that the components are shared is shown below:
 
 <div align="center">
 
-|               ![Shared components diagram](https://i.imgur.com/tlHAPgL.png)               |
+|               ![Shared components diagram](https://i.imgur.com/CvFBTr1.png)               |
 | :---------------------------------------------------------------------------------------: |
 |_The datapaths share some components such as the Microprogram, RAM and shared registers._|
 
@@ -62,7 +62,7 @@ involved a rather simple for now as you can see the diagram below:
 
 <div align="center">
 
-| ![Data path diagram](https://i.imgur.com/WkBo8bD.png) |
+| ![Data path diagram](https://i.imgur.com/Imr9yI5.png) |
 | :---------------------------------------------------: |
 | _The diagram of a single datapath (click to zoom)._   |
 

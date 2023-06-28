@@ -7,8 +7,16 @@ pub enum DoubleOperandOpcode {
     Add,
     Sub,
     Mul,
+    Mul2,
+    Muli,
+    Div,
+    Divi,
+    Mod,
+    Modi,
     And,
     Or,
+    Xor,
+    Xori,
     Addi,
     Andi,
     Ori,
@@ -42,6 +50,7 @@ pub enum BranchOp {
 pub enum Value {
     Immediate(u8),
     Reg(Rc<Register>),
+    Label(Rc<str>),
 }
 
 #[derive(Debug, PartialEq)]

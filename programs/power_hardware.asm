@@ -8,11 +8,11 @@ _start:
     lui a1 <- n        # a1 = n must be a byte
     lui a2 <- 0        # a2 is a counter for the loop
 
-    lui ra <- 1        # ra = 1 will be the result of the multiplication, ra will be r0 in microarchitecture
+    lui ra <- 1        # ra = 1 will be the result of the multiplication, ra will be r0 in microarquitecture
 
 loop:
     beq a2, a1, done      # If the loop counter equals n, exit the loop
-    mul ra <- ra, a0      # Multiply ra by X
+    mul2 ra <- ra, a0      # Multiply ra by X
     addi a2 <- a2, 1      # Increment the loop counter
     jal loop
 
