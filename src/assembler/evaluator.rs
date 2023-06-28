@@ -467,7 +467,10 @@ impl AsmEvaluator {
             Value::Immediate(imm) => (Microinstruction::IMM_A, *imm),
             Value::Label(l) => (
                 Microinstruction::IMM_A,
-                *self.values.get(l.as_ref()).expect("Should be defined before"),
+                *self
+                    .values
+                    .get(l.as_ref())
+                    .expect("Should be defined before"),
             ),
         }
     }
@@ -479,7 +482,10 @@ impl AsmEvaluator {
             Value::Immediate(imm) => (Microinstruction::IMM_B, *imm),
             Value::Label(l) => (
                 Microinstruction::IMM_B,
-                *self.values.get(l.as_ref()).expect("Should be defined before"),
+                *self
+                    .values
+                    .get(l.as_ref())
+                    .expect("Should be defined before"),
             ),
         }
     }
