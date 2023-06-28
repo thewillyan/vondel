@@ -1,11 +1,12 @@
 # Hardware
 
-Some hardware details about some relevant components of the microarchitecture.
+Some hardware details about some relevant components of the microarchitecture
+that differ from the provided components from the book _Structured Computer Organization_.
 
 ## ALU
 
 Vondel's ALU have some optimizations oven the Arithmetic Logic Unit provided
-by the book _Structured Computer Organization_, the main difference is that
+by the book, the main difference is that
 the function inputs are 3-bit lenght instead of 2-bit, in other words we have
 _2<sup>3</sup>_ possible operations that are:
 
@@ -21,7 +22,7 @@ _2<sup>3</sup>_ possible operations that are:
 For that we change a little bit the hardware provide a circuit to any given
 possible operation. The ALU model can be found below:
 
-![ALU hardware info]()
+![ALU hardware info](https://i.imgur.com/Afpp4on.png)
 
 ### Adder
 
@@ -32,7 +33,7 @@ the `Co` of one is the `Ci` of the next adder.
 ### Multiplier
 
 The multiplier circuit uses a standard
-[_sigle cycle multiplier_](https://en.wikipedia.org/wiki/Binary_multiplier)
+[_single cycle multiplier_](https://en.wikipedia.org/wiki/Binary_multiplier)
 to multilpy A by B, for that we need to set the inputs and output width to 32-bit lenght.
 
 ![32-bit x 32-bit sigle cycle multiplier diagram](https://i.imgur.com/c7yAAmu.png)
@@ -68,6 +69,13 @@ You can simulate a smaller sample of this circuit [here](https://www.circuitlab.
 
 ## IMM
 
-## High Bit
+The IMM circuit provides pre functionality of write the `IMMEDIATE` field
+of the microinstruction in the A and/or the B buses. The circuit is fairly
+simple and looks like this:
 
-## O
+![IMM circuit diagram](https://i.imgur.com/n0zI4kF.png)
+
+## Others
+
+Other integrated circuits of the microarchitecture like the Logic Unit, O and
+High Bit are exactly the same as illustrated in the book.

@@ -1,0 +1,66 @@
+<mxfile host="app.diagrams.net" modified="2023-06-28T13:37:51.933Z" agent="Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/114.0" etag="Wb0o9YP5KmAxRDdHei3Y" version="21.5.1">
+  <diagram name="Page-1" id="G7AOmqkMIJqdyBEciJPv">
+    <mxGraphModel dx="837" dy="442" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;endArrow=block;endFill=1;" edge="1" parent="1" source="rmZ8mgBwKqfeFKovVoOO-2" target="rmZ8mgBwKqfeFKovVoOO-15">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-2" value="" style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.logic_gates.logic_gate;operation=and;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="360" y="160" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;endArrow=block;endFill=1;" edge="1" parent="1" source="rmZ8mgBwKqfeFKovVoOO-3" target="rmZ8mgBwKqfeFKovVoOO-16">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="480" y="260" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="480" y="260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-3" value="" style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.logic_gates.logic_gate;operation=and;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="360" y="240" width="60" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="rmZ8mgBwKqfeFKovVoOO-8" target="rmZ8mgBwKqfeFKovVoOO-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="rmZ8mgBwKqfeFKovVoOO-8" target="rmZ8mgBwKqfeFKovVoOO-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-8" value="&lt;div&gt;IMMEDIATE&lt;br&gt;&lt;/div&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="180" y="200" width="90" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="rmZ8mgBwKqfeFKovVoOO-11" target="rmZ8mgBwKqfeFKovVoOO-2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="180" />
+              <mxPoint x="300" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-11" value="ENA" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="230" y="160" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;endArrow=none;endFill=0;" edge="1" parent="1" source="rmZ8mgBwKqfeFKovVoOO-12" target="rmZ8mgBwKqfeFKovVoOO-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="260" />
+              <mxPoint x="300" y="270" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-12" value="ENB" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="230" y="240" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-15" value="A BUS" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="165" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="rmZ8mgBwKqfeFKovVoOO-16" value="B BUS" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="245" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
