@@ -29,5 +29,4 @@ jobs:
           bin: assembler,uarch
           tar: unix
           zip: windows
-          archive: $bin-$tag-$target
           token: ${{ secrets.RELEASE_TOKEN }}
