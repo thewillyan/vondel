@@ -20,5 +20,6 @@
   - [Comparision](./assembler/comparision.md)
 - [UArch](./uarch/README.md)
   - [Microinstruction](./uarch/uinstruction.md)
-    - [Implementations](./uarch/implementations.md)
+  - [Implementations](./uarch/implementations.md)
+  - [Hardware](./uarch/hardware.md)
 - [Comparision with Requested UArch](./chapter_1.md)
