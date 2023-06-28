@@ -29,4 +29,5 @@ jobs:
           bin: assembler,uarch
           tar: unix
           zip: windows
+          archive: vondel-$tag-$target
           token: ${{ secrets.RELEASE_TOKEN }}
