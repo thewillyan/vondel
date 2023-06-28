@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="sidebar-visible no-js ayu">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -36,7 +36,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "ayu";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -62,7 +62,7 @@
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
             html.classList.remove('no-js')
-            html.classList.remove('light')
+            html.classList.remove('ayu')
             html.classList.add(theme);
             html.classList.add('js');
         </script>
@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html" class="active"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../files.html"><strong aria-hidden="true">1.</strong> File Structure with Comparision</a></li><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">2.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">2.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">2.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">2.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">2.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">3.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html" class="active"><strong aria-hidden="true">3.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">3.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">3.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">3.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">3.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">4.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">4.1.</strong> Microinstruction</a></li><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">4.2.</strong> Implementations</a></li><li class="chapter-item expanded "><a href="../uarch/hardware.html"><strong aria-hidden="true">4.3.</strong> Hardware</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">5.</strong> Comparision with Requested UArch</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -198,8 +198,12 @@
 <li><a href="#add">ADD</a></li>
 <li><a href="#sub">SUB</a></li>
 <li><a href="#mul">MUL</a></li>
+<li><a href="#mul2">MUL2</a></li>
+<li><a href="#div">DIV</a></li>
+<li><a href="#mod">MOD</a></li>
 <li><a href="#and">AND</a></li>
 <li><a href="#or">OR</a></li>
+<li><a href="#xor">XOR</a></li>
 <li><a href="#not">NOT</a></li>
 </ul>
 </li>
@@ -229,9 +233,13 @@
 <ul>
 <li><a href="#lui">LUI</a></li>
 <li><a href="#addi">ADDI</a></li>
+<li><a href="#muli">MULI</a></li>
+<li><a href="#divi">DIVI</a></li>
+<li><a href="#modi">MODI</a></li>
 <li><a href="#subi">SUBI</a></li>
 <li><a href="#andi">ANDI</a></li>
 <li><a href="#ori">ORI</a></li>
+<li><a href="#xori">XORI</a></li>
 </ul>
 </li>
 <li>Other
@@ -251,7 +259,25 @@
 </code></pre>
 <h2 id="mul"><a class="header" href="#mul">Mul</a></h2>
 <p>Multiplies the value of <code>x</code> and <code>y</code> and store on registers</p>
-<pre><code>mul t0, t1, s0, a2, ra &lt;- a0, a1
+<pre><code>mul s0, a2, ra &lt;- a0, a1
+</code></pre>
+<blockquote>
+<p><code>WARNING</code>: Mul cannot be used with t* registers</p>
+</blockquote>
+<h2 id="mul2"><a class="header" href="#mul2">Mul2</a></h2>
+<p>Multiplies the value of <code>x</code> and <code>y</code> and store on registers</p>
+<pre><code>mul s0, a2, ra &lt;- a0, a1
+</code></pre>
+<blockquote>
+<p><code>INFO</code>: More performatic and can use t* registers</p>
+</blockquote>
+<h2 id="div"><a class="header" href="#div">Div</a></h2>
+<p>Divides <code>x</code> by <code>y</code> and store on registers</p>
+<pre><code>div t0, t1, s0, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="mod"><a class="header" href="#mod">Mod</a></h2>
+<p>Gets the remainder of <code>x</code> by <code>y</code> and store on registers</p>
+<pre><code>mod t0, t1, s0, a2, ra &lt;- a0, a1
 </code></pre>
 <h2 id="and"><a class="header" href="#and">And</a></h2>
 <p>Makes a bitwise <code>and</code> with <code>x</code> and <code>y</code></p>
@@ -260,6 +286,10 @@
 <h2 id="or"><a class="header" href="#or">Or</a></h2>
 <p>Makes a bitwise <code>or</code> with <code>x</code> and <code>y</code></p>
 <pre><code>or t0, t1, t2, s0, s1, a2, ra &lt;- a0, a1
+</code></pre>
+<h2 id="xor"><a class="header" href="#xor">Xor</a></h2>
+<p>Makes a bitwise <code>xor</code> with <code>x</code> and <code>y</code></p>
+<pre><code>xor t0, t1, t2, s0, s1, a2, ra &lt;- a0, a1
 </code></pre>
 <h2 id="not"><a class="header" href="#not">Not</a></h2>
 <p>Stores the result of <code>!x</code> on the registers</p>
@@ -337,7 +367,7 @@ lui t0, t1,t2 &lt;- 77
 <p>It takes only a single immediate as parameter</p>
 </blockquote>
 <blockquote>
-<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
 </blockquote>
 <h2 id="addi"><a class="header" href="#addi">Addi</a></h2>
 <p>Adds a register <code>x</code> and a immediate <code>imm</code> and save this value on registers</p>
@@ -348,40 +378,84 @@ addi t0, t1,t2 &lt;- a2, 77
 <p>The first argument must be a register and the second a immediate</p>
 </blockquote>
 <blockquote>
-<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="muli"><a class="header" href="#muli">Muli</a></h2>
+<p>Multiplies a register <code>x</code> and an immediate <code>imm</code> and save this value on registers</p>
+<pre><code>muli t0, t1,t2 &lt;- t0, imm
+muli t0, t1,t2 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second an immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="divi"><a class="header" href="#divi">Divi</a></h2>
+<p>Divides a register <code>x</code> by an immediate <code>imm</code> and save this value on registers</p>
+<pre><code>divi t0, t1,t2 &lt;- t0, imm
+divi t0, t1,t2 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second an immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="modi"><a class="header" href="#modi">Modi</a></h2>
+<p>Get the remainder of a <code>div</code> between a register <code>x</code> by an immediate <code>imm</code> and save this value on registers</p>
+<pre><code>modi t0, t1,t2 &lt;- t0, imm
+modi t0, t1,t2 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second an immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
 </blockquote>
 <h2 id="subi"><a class="header" href="#subi">Subi</a></h2>
-<p>Subtracts from register <code>x</code> the value of a immediate <code>imm</code> and save this value on registers</p>
+<p>Subtracts from register <code>x</code> the value of an immediate <code>imm</code> and save this value on registers</p>
 <pre><code>subi t0, t1 &lt;- t0, imm
 subi t0, t1 &lt;- a2, 77
 </code></pre>
 <blockquote>
-<p>The first argument must be a register and the second a immediate</p>
+<p>The first argument must be a register and the second an immediate</p>
 </blockquote>
 <blockquote>
-<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
 </blockquote>
 <h2 id="andi"><a class="header" href="#andi">Andi</a></h2>
-<p>Makes a bitwise <code>and</code> of register <code>x</code> and a immediate <code>imm</code>, then saves this value on registers</p>
+<p>Makes a bitwise <code>and</code> of register <code>x</code> and an immediate <code>imm</code>, then saves this value on registers</p>
 <pre><code>andi t0, t1 &lt;- t0, imm
 andi t0, t1 &lt;- a2, 77
 </code></pre>
 <blockquote>
-<p>The first argument must be a register and the second a immediate</p>
+<p>The first argument must be a register and the second an immediate</p>
 </blockquote>
 <blockquote>
-<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
 </blockquote>
 <h2 id="ori"><a class="header" href="#ori">Ori</a></h2>
-<p>Makes a bitwise <code>or</code> of register <code>x</code> and a immediate <code>imm</code>, then saves this value on registers</p>
+<p>Makes a bitwise <code>or</code> of register <code>x</code> and an immediate <code>imm</code>, then saves this value on registers</p>
 <pre><code>ori t0, t1 &lt;- t0, imm
 ori t0, t1 &lt;- a2, 77
 </code></pre>
 <blockquote>
-<p>The first argument must be a register and the second a immediate</p>
+<p>The first argument must be a register and the second an immediate</p>
 </blockquote>
 <blockquote>
-<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or a immediate with value of 0 to 255</p>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
+</blockquote>
+<h2 id="xori"><a class="header" href="#xori">Xori</a></h2>
+<p>Makes a bitwise <code>xor</code> of register <code>x</code> and an immediate <code>imm</code>, then saves this value on registers</p>
+<pre><code>xori t0, t1 &lt;- t0, imm
+xori t0, t1 &lt;- a2, 77
+</code></pre>
+<blockquote>
+<p>The first argument must be a register and the second an immediate</p>
+</blockquote>
+<blockquote>
+<p>Imm can be both a label referencing a <code>.byte</code> in <code>.data</code> section or an immediate with value of 0 to 255</p>
 </blockquote>
 <h2 id="mov"><a class="header" href="#mov">Mov</a></h2>
 <p>Store the value of the register x on the registers</p>

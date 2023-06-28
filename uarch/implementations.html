@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="sidebar-visible no-js ayu">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -36,7 +36,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "ayu";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -62,7 +62,7 @@
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
             html.classList.remove('no-js')
-            html.classList.remove('light')
+            html.classList.remove('ayu')
             html.classList.add(theme);
             html.classList.add('js');
         </script>
@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/implementations.html" class="active"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../files.html"><strong aria-hidden="true">1.</strong> File Structure with Comparision</a></li><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">2.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">2.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">2.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">2.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">2.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">3.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">3.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">3.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">3.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">3.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">3.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">4.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">4.1.</strong> Microinstruction</a></li><li class="chapter-item expanded "><a href="../uarch/implementations.html" class="active"><strong aria-hidden="true">4.2.</strong> Implementations</a></li><li class="chapter-item expanded "><a href="../uarch/hardware.html"><strong aria-hidden="true">4.3.</strong> Hardware</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">5.</strong> Comparision with Requested UArch</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -157,12 +157,16 @@ Language are implemented in the microprogram.</p>
 <li><a href="#add">ADD</a></li>
 <li><a href="#sub">SUB</a></li>
 <li><a href="#mul">MUL</a></li>
+<li><a href="#mul2">MUL2</a></li>
+<li><a href="#div">DIV</a></li>
+<li><a href="#mod">MOD</a></li>
 </ul>
 </li>
 <li>Logic
 <ul>
 <li><a href="#and">AND</a></li>
 <li><a href="#or">OR</a></li>
+<li><a href="#xor">XOR</a></li>
 <li><a href="#not">NOT</a></li>
 </ul>
 </li>
@@ -195,6 +199,10 @@ Language are implemented in the microprogram.</p>
 <li><a href="#subi">SUBI</a></li>
 <li><a href="#andi">ANDI</a></li>
 <li><a href="#ori">ORI</a></li>
+<li><a href="#xori">XORI</a></li>
+<li><a href="#muli">MULI</a></li>
+<li><a href="#divi">DIVI</a></li>
+<li><a href="#modi">MODI</a></li>
 </ul>
 </li>
 <li>Other
@@ -210,158 +218,170 @@ the program has ended. In this design this opcode is achieved by seting all 64
 bits of the microinstruction to 1.</p>
 <p>This constant is avalible as a shortcut in the <code>CtrlStore</code> struct.</p>
 <h2 id="mov"><a class="header" href="#mov">MOV</a></h2>
-<p>Syntax: <code>mov x -&gt; r0, ..., rn</code>.</p>
+<p>Syntax: <code>mov r0, ..., rn &lt;- x</code>.</p>
 <p>Action: Store the value of the register <code>x</code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level"><a class="header" href="#high-level">High Level</a></h3>
-<pre><code>mov r14 -&gt; r15, r13
+<pre><code class="language-assembly">mov r15, r13 &lt;- r14
 </code></pre>
 <h3 id="microprogram"><a class="header" href="#microprogram">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00000000000000000101</td><td style="text-align: center">000</td><td style="text-align: center">01110</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000011000</td><td style="text-align: center">00000000000000000101</td><td style="text-align: center">000</td><td style="text-align: center">01110</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="add"><a class="header" href="#add">ADD</a></h2>
-<p>Syntax: <code>add x, y -&gt; r0, ..., rn</code>.</p>
+<p>Syntax: <code>add r0, ..., rn &lt;- x, y</code>.</p>
 <p>Action: Stores the result of <code>x + y</code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-1"><a class="header" href="#high-level-1">High Level</a></h3>
-<pre><code>add r2, r3 -&gt; r0, r1
+<pre><code class="language-assembly">add r0, r1 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-1"><a class="header" href="#microprogram-1">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111100</td><td style="text-align: center">00001100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000111100</td><td style="text-align: center">00001100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="sub"><a class="header" href="#sub">SUB</a></h2>
-<p>Syntax: <code>sub x, y -&gt; r0, ..., rn</code>.</p>
+<p>Syntax: <code>sub r0, ..., rn &lt;- x, y</code>.</p>
 <p>Action: Stores the result of <code>x - y</code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-2"><a class="header" href="#high-level-2">High Level</a></h3>
-<pre><code>sub r2, r3 -&gt; r0
+<pre><code class="language-assembly">sub r0 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-2"><a class="header" href="#microprogram-2">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">00110</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000111111</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">00110</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="and"><a class="header" href="#and">AND</a></h2>
-<p>Syntax: <code>and x, y -&gt; r0, ..., rn</code>.</p>
+<p>Syntax: <code>and r0, ..., rn &lt;- x, y</code>.</p>
 <p>Action: Stores the result of <code>x &amp; y </code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-3"><a class="header" href="#high-level-3">High Level</a></h3>
-<pre><code>and r2, r3 -&gt; r1
+<pre><code class="language-assembly">and r1 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-3"><a class="header" href="#microprogram-3">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00001100</td><td style="text-align: center">00000100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000001100</td><td style="text-align: center">00000100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="or"><a class="header" href="#or">OR</a></h2>
-<p>Syntax: <code>or x, y -&gt; r0, ..., rn</code>.</p>
+<p>Syntax: <code>or r0, ..., rn &lt;- x, y</code>.</p>
 <p>Action: Stores the result of <code>x | y </code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-4"><a class="header" href="#high-level-4">High Level</a></h3>
-<pre><code>or r2, r3 -&gt; r0, r1, r14, r15
+<pre><code class="language-assembly">or r0, r1, r14, r15 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-4"><a class="header" href="#microprogram-4">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000011100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
-<h2 id="not"><a class="header" href="#not">NOT</a></h2>
-<p>Syntax: <code>not x -&gt; r0, ..., rn</code>.</p>
-<p>Action: Stores the result of <code>!x</code> on the registers <code>r0, ..., rn</code>.</p>
+<h2 id="xor"><a class="header" href="#xor">XOR</a></h2>
+<p>Syntax: <code>xor r0, ..., rn &lt;- x, y</code>.</p>
+<p>Action: Stores the result of <code>x ^ y </code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-5"><a class="header" href="#high-level-5">High Level</a></h3>
-<pre><code>not r3 -&gt; r0, r15
+<pre><code class="language-assembly">xor r0, r1, r14, r15 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-5"><a class="header" href="#microprogram-5">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011010</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001001100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
-<h2 id="sll"><a class="header" href="#sll">SLL</a></h2>
-<p>Syntax: <code>sll x -&gt; r0, ..., rn</code>.</p>
-<p>Action: Stores the result of <code>x &lt;&lt; 8</code> on the registers <code>r0, ..., rn</code>.</p>
+<h2 id="not"><a class="header" href="#not">NOT</a></h2>
+<p>Syntax: <code>not r0, ..., rn &lt;- x</code>.</p>
+<p>Action: Stores the result of <code>!x</code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-6"><a class="header" href="#high-level-6">High Level</a></h3>
-<pre><code>sll r3 -&gt; r0, r15
+<pre><code class="language-assembly">not r0, r15 &lt;- r3
 </code></pre>
 <h3 id="microprogram-6"><a class="header" href="#microprogram-6">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">10011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000011010</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
-<h2 id="sla"><a class="header" href="#sla">SLA</a></h2>
-<p>Syntax: <code>sla x -&gt; r0, ..., rn</code>.</p>
-<p>Action: Stores the result of <code>x &lt;&lt; 1</code> on the registers <code>r0, ..., rn</code>.</p>
+<h2 id="sll"><a class="header" href="#sll">SLL</a></h2>
+<p>Syntax: <code>sll r0, ..., rn &lt;- x</code>.</p>
+<p>Action: Stores the result of <code>x &lt;&lt; 8</code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-7"><a class="header" href="#high-level-7">High Level</a></h3>
-<pre><code>sla r3 -&gt; r0, r15
+<pre><code class="language-assembly">sll r0, r15 &lt;- r3
 </code></pre>
 <h3 id="microprogram-7"><a class="header" href="#microprogram-7">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">11011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">100011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
-<h2 id="sra"><a class="header" href="#sra">SRA</a></h2>
-<p>Syntax: <code>sra x -&gt; r0, ..., rn</code>.</p>
-<p>Action: Stores the result of <code>x &gt;&gt; 1</code> on the registers <code>r0, ..., rn</code>.</p>
+<h2 id="sla"><a class="header" href="#sla">SLA</a></h2>
+<p>Syntax: <code>sla r0, ..., rn &lt;- x</code>.</p>
+<p>Action: Stores the result of <code>x &lt;&lt; 1</code> on the registers <code>r0, ..., rn</code>.</p>
 <h3 id="high-level-8"><a class="header" href="#high-level-8">High Level</a></h3>
-<pre><code>sra r3 -&gt; r0, r15
+<pre><code class="language-assembly">sla r0, r15 &lt;- r3
 </code></pre>
 <h3 id="microprogram-8"><a class="header" href="#microprogram-8">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">01011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">110011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="sra"><a class="header" href="#sra">SRA</a></h2>
+<p>Syntax: <code>sra r0, ..., rn &lt;- x</code>.</p>
+<p>Action: Stores the result of <code>x &gt;&gt; 1</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-9"><a class="header" href="#high-level-9">High Level</a></h3>
+<pre><code class="language-assembly">sra r0, r15 &lt;- r3
+</code></pre>
+<h3 id="microprogram-9"><a class="header" href="#microprogram-9">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">010011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01100</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="read"><a class="header" href="#read">READ</a></h2>
-<p>Syntax: <code>read [addr] -&gt; r0, ..., rn</code>.</p>
+<p>Syntax: <code>read r0, ..., rn &lt;- [addr]</code>.</p>
 <p>Action: Stores the memory word at <code>addr</code> on the registers <code>r0, ..., rn</code>.</p>
-<h3 id="high-level-9"><a class="header" href="#high-level-9">High Level</a></h3>
-<pre><code>read 0x00008 -&gt; r0, r15
+<h3 id="high-level-10"><a class="header" href="#high-level-10">High Level</a></h3>
+<pre><code class="language-assembly">read r0, r15 &lt;- 0x00008
 </code></pre>
-<h3 id="microprogram-9"><a class="header" href="#microprogram-9">Microprogram</a></h3>
+<h3 id="microprogram-10"><a class="header" href="#microprogram-10">Microprogram</a></h3>
 <p>Precondition: <code>0x00008</code> should be stored at MAR.</p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">010</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">00000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">2</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">010</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">000011000</td><td style="text-align: center">00001000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">00000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">2</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="write"><a class="header" href="#write">WRITE</a></h2>
-<p>Syntax: <code>write x -&gt; [addr]</code>.</p>
+<p>Syntax: <code>write [addr] &lt;- x</code>.</p>
 <p>Action: Stores the memory value of <code>x</code> at <code>addr</code> on the memory.</p>
-<h3 id="high-level-10"><a class="header" href="#high-level-10">High Level</a></h3>
-<pre><code>write r14 -&gt; 0x00001
+<h3 id="high-level-11"><a class="header" href="#high-level-11">High Level</a></h3>
+<pre><code class="language-assembly">write 0x00001 &lt;- r14
 </code></pre>
-<h3 id="microprogram-10"><a class="header" href="#microprogram-10">Microprogram</a></h3>
+<h3 id="microprogram-11"><a class="header" href="#microprogram-11">Microprogram</a></h3>
 <p>Precondition: <code>0x00001</code> should be store at MAR.</p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">10000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01110</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000001</td><td style="text-align: center">100</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">2</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000011000</td><td style="text-align: center">10000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01110</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">000000000</td><td style="text-align: center">00000000000000000001</td><td style="text-align: center">100</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">2</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">110111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="jal"><a class="header" href="#jal">JAL</a></h2>
 <p>Syntax: <code>jal [addr]</code>.</p>
 <p>Action: Jumps to the instruction of id (address) <code>addr</code>.</p>
-<h3 id="high-level-11"><a class="header" href="#high-level-11">High Level</a></h3>
-<pre><code>jal 0x0A
+<h3 id="high-level-12"><a class="header" href="#high-level-12">High Level</a></h3>
+<pre><code class="language-assembly">jal 0x0A
 </code></pre>
-<h3 id="microprogram-11"><a class="header" href="#microprogram-11">Microprogram</a></h3>
+<h3 id="microprogram-12"><a class="header" href="#microprogram-12">Microprogram</a></h3>
 <p><code>JMPC</code> bit is used to nconditional branch, so we have to find some way of
 storing <code>0x0A</code> into MBR and then use <code>JMPC</code> to jump to that address.
 For that the number 10 (<code>0x0A</code>) must be stored at memory and its address
 should be stored in PC. So, let's store 10 in the current address of the PC,
 by default the PC is 0, so let's store it there.</p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">010</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">100</td><td style="text-align: center">00000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">010</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">100</td><td style="text-align: center">000000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
 <tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
-<tr><td style="text-align: left">10</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">10</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <p>In a nutshell the operations are the following:</p>
@@ -373,78 +393,79 @@ by default the PC is 0, so let's store it there.</p>
 <p>Syntax: <code>beq x, y</code>.</p>
 <p>Action: Jump if the value of the register <code>x</code> is equal to the value of the
 register <code>y</code>.</p>
-<h3 id="high-level-12"><a class="header" href="#high-level-12">High Level</a></h3>
-<pre><code>beq r14, r15
+<h3 id="high-level-13"><a class="header" href="#high-level-13">High Level</a></h3>
+<pre><code class="language-assembly">beq r14, r15
 </code></pre>
-<h3 id="microprogram-12"><a class="header" href="#microprogram-12">Microprogram</a></h3>
+<h3 id="microprogram-13"><a class="header" href="#microprogram-13">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">001</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">001</td><td style="text-align: center">000111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
 <tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
-<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="bne"><a class="header" href="#bne">BNE</a></h2>
 <p>Syntax: <code>bne x, y</code>.</p>
 <p>Action: Jump if the value of the register <code>x</code> is <strong>not</strong> equal to the value of the
 register <code>y</code>.</p>
-<h3 id="high-level-13"><a class="header" href="#high-level-13">High Level</a></h3>
-<pre><code>bne r14, r15
+<h3 id="high-level-14"><a class="header" href="#high-level-14">High Level</a></h3>
+<pre><code class="language-assembly">bne r14, r15
 </code></pre>
-<h3 id="microprogram-13"><a class="header" href="#microprogram-13">Microprogram</a></h3>
+<h3 id="microprogram-14"><a class="header" href="#microprogram-14">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">000111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">010</td><td style="text-align: center">000111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
 <tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
-<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
-<tr><td style="text-align: left">258</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">258</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="blt"><a class="header" href="#blt">BLT</a></h2>
 <p>Syntax: <code>blt x, y</code>.</p>
 <p>Action: Jump if the value of the register <code>x</code> is less than the value of the
 register <code>y</code>.</p>
-<h3 id="high-level-14"><a class="header" href="#high-level-14">High Level</a></h3>
-<pre><code>blt r14, r15
+<h3 id="high-level-15"><a class="header" href="#high-level-15">High Level</a></h3>
+<pre><code class="language-assembly">blt r14, r15
 </code></pre>
-<h3 id="microprogram-14"><a class="header" href="#microprogram-14">Microprogram</a></h3>
+<h3 id="microprogram-15"><a class="header" href="#microprogram-15">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">000111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">11000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
 <tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
-<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="bgt"><a class="header" href="#bgt">BGT</a></h2>
 <p>Syntax: <code>bgt x, y</code>.</p>
 <p>Action: Jump if the value of the register <code>x</code> is greater than the value of the
 register <code>y</code>.</p>
-<h3 id="high-level-15"><a class="header" href="#high-level-15">High Level</a></h3>
-<pre><code>bgt r14, r15
-</code></pre>
-<h3 id="microprogram-15"><a class="header" href="#microprogram-15">Microprogram</a></h3>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
-<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
-</tbody></table>
-</div>
-<h2 id="mul"><a class="header" href="#mul">MUL</a></h2>
-<p>Syntax: <code>mul x, y -&gt; r0, ..., rn</code>.</p>
-<p>Action: Multiply the value of x by y .</p>
 <h3 id="high-level-16"><a class="header" href="#high-level-16">High Level</a></h3>
-<pre><code>mul r6, r7 -&gt; r13
+<pre><code class="language-assembly">bgt r14, r15
 </code></pre>
 <h3 id="microprogram-16"><a class="header" href="#microprogram-16">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">01010</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">2</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00000100000000000100</td><td style="text-align: center">000</td><td style="text-align: center">01111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">3</td><td style="text-align: center">000000100</td><td style="text-align: center">001</td><td style="text-align: center">00110110</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01001</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">4</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">00111100</td><td style="text-align: center">00000000000000000100</td><td style="text-align: center">000</td><td style="text-align: center">10110</td><td style="text-align: center">00101</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">000111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10111</td><td style="text-align: center">10011</td><td style="text-align: center">00000000</td></tr>
 <tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
-<tr><td style="text-align: left">257</td><td style="text-align: center">100000010</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">258</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00000100000000000100</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="mul"><a class="header" href="#mul">MUL</a></h2>
+<p>Syntax: <code>mul r0, ..., rn &lt;- x, y</code>.</p>
+<p>Action: Multiply the value of x by y .</p>
+<h3 id="high-level-17"><a class="header" href="#high-level-17">High Level</a></h3>
+<pre><code class="language-assembly">mul r13 &lt;- r6, r7
+</code></pre>
+<h3 id="microprogram-17"><a class="header" href="#microprogram-17">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">010</td><td style="text-align: center">000111111</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">01010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">000000010</td><td style="text-align: center">000</td><td style="text-align: center">000011000</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">2</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">000111111</td><td style="text-align: center">00000100000000000100</td><td style="text-align: center">000</td><td style="text-align: center">01111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">3</td><td style="text-align: center">000000100</td><td style="text-align: center">001</td><td style="text-align: center">000110110</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01001</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">4</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">000111100</td><td style="text-align: center">00000000000000000100</td><td style="text-align: center">000</td><td style="text-align: center">10110</td><td style="text-align: center">00101</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">5</td><td style="text-align: center">000000011</td><td style="text-align: center">000</td><td style="text-align: center">000111111</td><td style="text-align: center">00000100000000000100</td><td style="text-align: center">000</td><td style="text-align: center">10000</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">6</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 <tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
-<tr><td style="text-align: left">260</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">257</td><td style="text-align: center">000000101</td><td style="text-align: center">000</td><td style="text-align: center">000011000</td><td style="text-align: center">00001000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01111</td><td style="text-align: center">11111</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td><td style="text-align: center">-</td></tr>
+<tr><td style="text-align: left">260</td><td style="text-align: center">000000110</td><td style="text-align: center">000</td><td style="text-align: center">000000000</td><td style="text-align: center">00000000000000000000</td><td style="text-align: center">000</td><td style="text-align: center">00000</td><td style="text-align: center">00000</td><td style="text-align: center">00000000</td></tr>
 </tbody></table>
 </div>
 <p>In a nutshell the operations are the following:</p>
@@ -469,66 +490,156 @@ register <code>y</code>.</p>
 in <code>r1</code> and we aways make <code>r0 * r1</code>. This optimization is necessary because a
 multiplication is computed as sequential additions, and making less additions
 save some clock cycles.</p>
-<h2 id="lui"><a class="header" href="#lui">LUI</a></h2>
-<p>Syntax: <code>lui [byte] -&gt; r0, ..., rn</code>.</p>
-<p>Action: Store the the immediate value of <code>byte</code> on the registers <code>r0, ..., rn</code>.</p>
-<h3 id="high-level-17"><a class="header" href="#high-level-17">High Level</a></h3>
-<pre><code>lui 0xFF -&gt; r15
-</code></pre>
-<p>This program stores <code>0xFF</code> (255) to r15, but 255 is not stored in any register (it is
-a <em>immediate value</em>).</p>
-<h3 id="microprogram-17"><a class="header" href="#microprogram-17">Microprogram</a></h3>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011000</td><td style="text-align: center">00000000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
-</tbody></table>
-</div>
-<h2 id="addi"><a class="header" href="#addi">ADDI</a></h2>
-<p>Syntax: <code>addi x, [byte] -&gt; r0, ..., rn</code>.</p>
-<p>Action: Stores the value of <code>x + [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<p>In the real assembly implementation the registers used to store the temporary
+values are <code>T0</code> (to store the minimum), <code>T1</code> (to store the sum) and <code>T2</code> (to store the maximum),
+so be caution when using this registers at the same time as the <code>mul</code> operation.</p>
+<h2 id="mul2"><a class="header" href="#mul2">MUL2</a></h2>
+<p>Syntax: <code>mul2 r0, ..., rn &lt;- x, y</code>.</p>
+<p>Action: Multiply the value of x by y .</p>
+<p>The difference between <code>mul2</code> and <code>mul</code> are that <code>mul</code> is a software addition,
+in other words, a sequential sum of a number, on the other hand <code>mul2</code> is
+hardware implemented (uses a multiplication circuit).</p>
 <h3 id="high-level-18"><a class="header" href="#high-level-18">High Level</a></h3>
-<pre><code>addi r14, 0x05 -&gt; r14
+<pre><code class="language-assembly">mul2 r0, r1 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-18"><a class="header" href="#microprogram-18">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000101</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001011100</td><td style="text-align: center">00001100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
-<h2 id="subi"><a class="header" href="#subi">SUBI</a></h2>
-<p>Syntax: <code>subi x, [byte] -&gt; r0, ..., rn</code>.</p>
-<p>Action: Stores the value of <code>x - [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h2 id="div"><a class="header" href="#div">DIV</a></h2>
+<p>Syntax: <code>div r0, ..., rn &lt;- x, y</code>.</p>
+<p>Action: Divide the value of x by y .</p>
 <h3 id="high-level-19"><a class="header" href="#high-level-19">High Level</a></h3>
-<pre><code>subi r14, 0x05 -&gt; r14
+<pre><code class="language-assembly">div r0, r1 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-19"><a class="header" href="#microprogram-19">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00111111</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000101</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001101100</td><td style="text-align: center">00001100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
-<h2 id="andi"><a class="header" href="#andi">ANDI</a></h2>
-<p>Syntax: <code>andi x, [byte] -&gt; r0, ..., rn</code>.</p>
-<p>Action: Stores the value of <code>x &amp; [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h2 id="mod"><a class="header" href="#mod">MOD</a></h2>
+<p>Syntax: <code>mod r0, ..., rn &lt;- x, y</code>.</p>
+<p>Action: Calculate the remainder of the division of x by y.</p>
 <h3 id="high-level-20"><a class="header" href="#high-level-20">High Level</a></h3>
-<pre><code>andi r14, 0xFF -&gt; r14
+<pre><code class="language-assembly">mod r0, r1 &lt;- r2, r3
 </code></pre>
 <h3 id="microprogram-20"><a class="header" href="#microprogram-20">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00001100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">11111111</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001111100</td><td style="text-align: center">00001100000000000000</td><td style="text-align: center">000</td><td style="text-align: center">01011</td><td style="text-align: center">01100</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="lui"><a class="header" href="#lui">LUI</a></h2>
+<p>Syntax: <code>lui r0, ..., rn &lt;- [byte]</code>.</p>
+<p>Action: Store the the immediate value of <code>byte</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-21"><a class="header" href="#high-level-21">High Level</a></h3>
+<pre><code class="language-assembly">lui r15 &lt;- 0xFF
+</code></pre>
+<p>This program stores <code>0xFF</code> (255) to r15, but 255 is not stored in any register (it is
+a <em>immediate value</em>).</p>
+<h3 id="microprogram-21"><a class="header" href="#microprogram-21">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000011000</td><td style="text-align: center">00000000000000000001</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="addi"><a class="header" href="#addi">ADDI</a></h2>
+<p>Syntax: <code>addi r0, ..., rn &lt;- x, [byte]</code>.</p>
+<p>Action: Stores the value of <code>x + [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-22"><a class="header" href="#high-level-22">High Level</a></h3>
+<pre><code class="language-assembly">addi r14 &lt;- r14, 0x05
+</code></pre>
+<h3 id="microprogram-22"><a class="header" href="#microprogram-22">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000111100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000101</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="subi"><a class="header" href="#subi">SUBI</a></h2>
+<p>Syntax: <code>subi r0, ..., rn &lt;- x, [byte]</code>.</p>
+<p>Action: Stores the value of <code>x - [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-23"><a class="header" href="#high-level-23">High Level</a></h3>
+<pre><code class="language-assembly">subi r14 &lt;- r14, 0x05
+</code></pre>
+<h3 id="microprogram-23"><a class="header" href="#microprogram-23">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000111111</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000101</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="andi"><a class="header" href="#andi">ANDI</a></h2>
+<p>Syntax: <code>andi r0, ..., rn &lt;- x, [byte]</code>.</p>
+<p>Action: Stores the value of <code>x &amp; [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-24"><a class="header" href="#high-level-24">High Level</a></h3>
+<pre><code class="language-assembly">andi r14 &lt;- r14, 0xFF
+</code></pre>
+<h3 id="microprogram-24"><a class="header" href="#microprogram-24">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000001100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
 <h2 id="ori"><a class="header" href="#ori">ORI</a></h2>
-<p>Syntax: <code>ori x, [byte] -&gt; r0, ..., rn</code>.</p>
+<p>Syntax: <code>ori r0, ..., rn &lt;- x, [byte]</code>.</p>
 <p>Action: Stores the value of <code>x | [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
-<h3 id="high-level-21"><a class="header" href="#high-level-21">High Level</a></h3>
-<pre><code>ori r14, 0x00 -&gt; r14
+<h3 id="high-level-25"><a class="header" href="#high-level-25">High Level</a></h3>
+<pre><code class="language-assembly">ori r14 &lt;- r14, 0x00
 </code></pre>
-<h3 id="microprogram-21"><a class="header" href="#microprogram-21">Microprogram</a></h3>
+<h3 id="microprogram-25"><a class="header" href="#microprogram-25">Microprogram</a></h3>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">00011100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
-<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">000011100</td><td style="text-align: center">00000000000000000010</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">10010</td><td style="text-align: center">00000000</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="xori"><a class="header" href="#xori">XORI</a></h2>
+<p>Syntax: <code>xori r0, ..., rn &lt;- x, [byte]</code>.</p>
+<p>Action: Stores the result of <code>x ^ [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-26"><a class="header" href="#high-level-26">High Level</a></h3>
+<pre><code class="language-assembly">xori r0, r1, r14, r15 &lt;- r2, 0x02
+</code></pre>
+<h3 id="microprogram-26"><a class="header" href="#microprogram-26">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001001100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">00110</td><td style="text-align: center">00000010</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="muli"><a class="header" href="#muli">MULI</a></h2>
+<p>Syntax: <code>muli r0, ..., rn &lt;- x, [byte]</code>.</p>
+<p>Action: Stores the result of <code>x * [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-27"><a class="header" href="#high-level-27">High Level</a></h3>
+<pre><code class="language-assembly">muli r0, r1, r14, r15 &lt;- r2, 0x02
+</code></pre>
+<h3 id="microprogram-27"><a class="header" href="#microprogram-27">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001011100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">00110</td><td style="text-align: center">00000010</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="divi"><a class="header" href="#divi">DIVI</a></h2>
+<p>Syntax: <code>divi r0, ..., rn &lt;- x, [byte]</code>.</p>
+<p>Action: Stores the result of <code>x / [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-28"><a class="header" href="#high-level-28">High Level</a></h3>
+<pre><code class="language-assembly">divi r0, r1, r14, r15 &lt;- r2, 0x02
+</code></pre>
+<h3 id="microprogram-28"><a class="header" href="#microprogram-28">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001101100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">00110</td><td style="text-align: center">00000010</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
+</tbody></table>
+</div>
+<h2 id="modi"><a class="header" href="#modi">MODI</a></h2>
+<p>Syntax: <code>modi r0, ..., rn &lt;- x, [byte]</code>.</p>
+<p>Action: Stores the result of <code>x % [byte]</code> on the registers <code>r0, ..., rn</code>.</p>
+<h3 id="high-level-29"><a class="header" href="#high-level-29">High Level</a></h3>
+<pre><code class="language-assembly">modi r0, r1, r14, r15 &lt;- r2, 0x02
+</code></pre>
+<h3 id="microprogram-29"><a class="header" href="#microprogram-29">Microprogram</a></h3>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">ID</th><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
+<tr><td style="text-align: left">0</td><td style="text-align: center">000000001</td><td style="text-align: center">000</td><td style="text-align: center">001111100</td><td style="text-align: center">00001100000000000011</td><td style="text-align: center">000</td><td style="text-align: center">01000</td><td style="text-align: center">00110</td><td style="text-align: center">00000010</td></tr>
+<tr><td style="text-align: left">1</td><td style="text-align: center">111111111</td><td style="text-align: center">111</td><td style="text-align: center">111111111</td><td style="text-align: center">11111111111111111111</td><td style="text-align: center">111</td><td style="text-align: center">11111</td><td style="text-align: center">11111</td><td style="text-align: center">11111111</td></tr>
 </tbody></table>
 </div>
                     </main>
@@ -539,7 +650,7 @@ a <em>immediate value</em>).</p>
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../chapter_1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../uarch/hardware.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -553,7 +664,7 @@ a <em>immediate value</em>).</p>
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../chapter_1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../uarch/hardware.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

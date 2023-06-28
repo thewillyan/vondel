@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="sidebar-visible no-js ayu">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -36,7 +36,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "ayu";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -62,7 +62,7 @@
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
             html.classList.remove('no-js')
-            html.classList.remove('light')
+            html.classList.remove('ayu')
             html.classList.add(theme);
             html.classList.add('js');
         </script>
@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html" class="active"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../files.html"><strong aria-hidden="true">1.</strong> File Structure with Comparision</a></li><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">2.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">2.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">2.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">2.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">2.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">3.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">3.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">3.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">3.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">3.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">3.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">4.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html" class="active"><strong aria-hidden="true">4.1.</strong> Microinstruction</a></li><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">4.2.</strong> Implementations</a></li><li class="chapter-item expanded "><a href="../uarch/hardware.html"><strong aria-hidden="true">4.3.</strong> Hardware</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">5.</strong> Comparision with Requested UArch</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -150,12 +150,12 @@
                         <h1 id="microinstruction"><a class="header" href="#microinstruction">Microinstruction</a></h1>
 <p>Microinstructions are stored in the control store and are fetched with the address
 stode at MPC (Microprogram Counter).</p>
-<p>A Vondel microinstruction has 64 bits the following format:</p>
+<p>A Vondel microinstruction has 62 bits the following format:</p>
 <div class="table-wrapper"><table><thead><tr><th style="text-align: center">NEXT</th><th style="text-align: center">JAM</th><th style="text-align: center">ALU</th><th style="text-align: center">C BUS</th><th style="text-align: center">MEM</th><th style="text-align: center">A</th><th style="text-align: center">B</th><th style="text-align: center">IMMEDIATE</th></tr></thead><tbody>
-<tr><td style="text-align: center">9 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">8 bits</td><td style="text-align: center">20 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">8 bits</td></tr>
+<tr><td style="text-align: center">9 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">9 bits</td><td style="text-align: center">20 bits</td><td style="text-align: center">3 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">5 bits</td><td style="text-align: center">8 bits</td></tr>
 </tbody></table>
 </div>
-<p>You can find a more detailed version of this diagram <a href="https://i.imgur.com/tlHAPgL.png">here</a>.</p>
+<p>You can find a more detailed version of this diagram <a href="./README.html#data-parallelism">here</a></p>
 <h2 id="next"><a class="header" href="#next">NEXT</a></h2>
 <p>The <code>NEXT</code> field stores the next microinstruction address. In other words, the
 <code>NEXT</code> field stores the next value to be stored at MPC.</p>
@@ -178,38 +178,48 @@ connected to its autput.</p>
 <p>The ALU has two input, A and B (that come from the A and B bus, respectively) and 
 it's controled by the 6 LSB's from the ALU field, they are:</p>
 <ul>
-<li>F0 and F1 (Controls the ALU function)</li>
+<li>F0, F1 and F2 (Controls the ALU function)</li>
 <li>ENA and ENB (Enables the input from A and B bus respectively)</li>
 <li>INVA (Inverts the bits of A)</li>
 <li>INC (Increments 1 to the ALU result)</li>
 </ul>
 <p>from MSB to LSB. The logic and arithmetic functions that ALU can
-operate are managed by F0 and F1 like this:</p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: left">Function</th></tr></thead><tbody>
-<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
-<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A OR B</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">NOT B</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">A + B</td></tr>
+operate are managed by F0, F1 and F2 like this:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: center">F2</th><th style="text-align: left">Function</th></tr></thead><tbody>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A OR B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">NOT B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">A + B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A XOR B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A * B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">A / B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">A % B</td></tr>
 </tbody></table>
 </div>
+<p>Where <code>AND</code>, <code>OR</code> and <code>XOR</code> are bitwise operations and <code>+</code>, <code>*</code>, <code>/</code> and <code>%</code> are
+the addition, multiplication, division and remainder arithmetic operations respectively.</p>
 <p>Some useful combinations of ALU signal can be found below:</p>
-<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: center">ENA</th><th style="text-align: center">ENB</th><th style="text-align: center">INVA</th><th style="text-align: center">INC</th><th style="text-align: left">Function</th></tr></thead><tbody>
-<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A</td></tr>
-<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">B</td></tr>
-<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">not A</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">not B</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A + B</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + B + 1</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + 1</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">B + 1</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">B − A</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">B − 1</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">−A</td></tr>
-<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
-<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A OR B</td></tr>
-<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">0</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">1</td></tr>
-<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">−1</td></tr>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">F0</th><th style="text-align: center">F1</th><th style="text-align: center">F2</th><th style="text-align: center">ENA</th><th style="text-align: center">ENB</th><th style="text-align: center">INVA</th><th style="text-align: center">INC</th><th style="text-align: left">Function</th></tr></thead><tbody>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">not A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">not B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A + B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + B + 1</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">A + 1</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">B + 1</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">B − A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">B − 1</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: left">−A</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A AND B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A OR B</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">0</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: left">1</td></tr>
+<tr><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: left">−1</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A XOR B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A * B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A / B</td></tr>
+<tr><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">1</td><td style="text-align: center">0</td><td style="text-align: center">0</td><td style="text-align: left">A % B</td></tr>
 </tbody></table>
 </div>
 <p>The shifter has 2 inputs: The value of the ALU operation (let's call it <code>X</code>) and
@@ -257,7 +267,14 @@ register represented by that bit should be writen by the C BUS.</p>
 The bit 1 (MSB), 2 and 3 represents the operations of WRITE, READ and FETCH
 respectively.</p>
 <p>Each bit 1 in the field informs that the memory operation related to that
-field will be executed.</p>
+field will be executed. What is actually done in operations can be found below:</p>
+<ul>
+<li>READ: Reads the memory word (32 bit) of the address stored in <code>MAR</code> into <code>MDR</code>.</li>
+<li>WRITE: Writes the memory word stored in  <code>MDR</code> into the memory address stored in <code>MAR</code>.</li>
+<li>FETCH: Reads the memory word of the address stored in <code>PC</code> into <code>MBR</code> (8-bit) and <code>MBR2</code> (16-bit).</li>
+</ul>
+<p>The <code>FETCH</code> operation uses the IFU to store the remainder bytes in cache to only
+access memory when needed.</p>
 <h2 id="a-and-b"><a class="header" href="#a-and-b">A and B</a></h2>
 <p><code>A</code> and <code>B</code> are fields that control which register writes to the A and B bus
 respectively, but, since the A and B bus are connected directly to the A and B

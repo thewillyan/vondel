@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Object - Vondel Language and Microarchitecture</title>
+        <title>Hardware - Vondel Language and Microarchitecture</title>
 
 
         <!-- Custom HTML head -->
@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../files.html"><strong aria-hidden="true">1.</strong> File Structure with Comparision</a></li><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">2.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html" class="active"><strong aria-hidden="true">2.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">2.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">2.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">2.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">3.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">3.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">3.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">3.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">3.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">3.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">4.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">4.1.</strong> Microinstruction</a></li><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">4.2.</strong> Implementations</a></li><li class="chapter-item expanded "><a href="../uarch/hardware.html"><strong aria-hidden="true">4.3.</strong> Hardware</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">5.</strong> Comparision with Requested UArch</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../files.html"><strong aria-hidden="true">1.</strong> File Structure with Comparision</a></li><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">2.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">2.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">2.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">2.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">2.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">3.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">3.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">3.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">3.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">3.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">3.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html"><strong aria-hidden="true">4.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">4.1.</strong> Microinstruction</a></li><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">4.2.</strong> Implementations</a></li><li class="chapter-item expanded "><a href="../uarch/hardware.html" class="active"><strong aria-hidden="true">4.3.</strong> Hardware</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">5.</strong> Comparision with Requested UArch</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -147,45 +147,79 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="object"><a class="header" href="#object">Object</a></h1>
-<p>The <code>Object</code> module in the Vondel language is designed to handle various types of objects used in the language, including integers, booleans, return values, null values, and functions. It provides a <code>Object</code> enum with associated data for each object type. The module defines methods to inspect objects and retrieve their string representation. The <code>Object</code> enum implements the <code>Debug</code>, <code>PartialEq</code>, and <code>Clone</code> traits for debugging, equality comparison, and cloning, respectively. Additionally, it provides a <code>type_as_string()</code> method to retrieve the type of the object as a string for error handling.</p>
-<h2 id="object-enum"><a class="header" href="#object-enum">Object Enum</a></h2>
-<p>The <code>Object</code> enum represents the different types of objects in the Vondel language. It has the following variants:</p>
+                        <h1 id="hardware"><a class="header" href="#hardware">Hardware</a></h1>
+<p>Some hardware details about some relevant components of the microarchitecture
+that differ from the provided components from the book <em>Structured Computer Organization</em>.</p>
+<h2 id="alu"><a class="header" href="#alu">ALU</a></h2>
+<p>Vondel's ALU have some optimizations oven the Arithmetic Logic Unit provided
+by the book, the main difference is that
+the function inputs are 3-bit lenght instead of 2-bit, in other words we have
+<em>2<sup>3</sup></em> possible operations that are:</p>
 <ul>
-<li><code>Integer(i64)</code>: Represents an integer value.</li>
-<li><code>Boolean(bool)</code>: Represents a boolean value.</li>
-<li><code>ReturnValue(Box&lt;Object&gt;)</code>: Represents a return value from a function.</li>
-<li><code>Null</code>: Represents a null value.</li>
-<li><code>Function { params: Vec&lt;Expression&gt;, body: StatementType, env: Rc&lt;RefCell&lt;Environment&gt;&gt; }</code>: Represents a function object, storing the function's parameters, body, and environment.</li>
+<li>Logic And</li>
+<li>Logic Or</li>
+<li>Logic Xor</li>
+<li>Logic Not</li>
+<li>Addition</li>
+<li>Multiplication</li>
+<li>Division</li>
+<li>Remainder</li>
 </ul>
-<h2 id="object-methods"><a class="header" href="#object-methods">Object Methods</a></h2>
-<p>The <code>Object</code> module provides the following methods:</p>
-<ul>
-<li><code>inspect() -&gt; String</code>: Returns a string representation of the object.</li>
-<li><code>type_as_string() -&gt; &amp;'static str</code>: Returns the type of the object as a string for error handling.</li>
-</ul>
-<h2 id="display-formatting"><a class="header" href="#display-formatting">Display Formatting</a></h2>
-<p>The <code>Object</code> enum implements the <code>fmt::Display</code> trait to provide a formatted string representation for display purposes. The <code>Display</code> implementation formats the object based on its variant, converting it to a string representation.</p>
-<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
-</span><span class="boring">fn main() {
-</span>impl fmt::Display for Object {
-    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
-        // Format the object based on its variant
-        // ...
-    }
-}
-
-<span class="boring">}</span></code></pre></pre>
+<p>For that we change a little bit the hardware provide a circuit to any given
+possible operation. The ALU model can be found below:</p>
+<p><img src="https://i.imgur.com/Afpp4on.png" alt="ALU hardware info" /></p>
+<h3 id="adder"><a class="header" href="#adder">Adder</a></h3>
+<p>The adder is a simple 32-bit full-adder that uses a combination of sequential
+1-bit full-adders that conects to each other by the carry, in other words,
+the <code>Co</code> of one is the <code>Ci</code> of the next adder.</p>
+<h3 id="multiplier"><a class="header" href="#multiplier">Multiplier</a></h3>
+<p>The multiplier circuit uses a standard
+<a href="https://en.wikipedia.org/wiki/Binary_multiplier"><em>single cycle multiplier</em></a>
+to multilpy A by B, for that we need to set the inputs and output width to 32-bit lenght.</p>
+<p><img src="https://i.imgur.com/c7yAAmu.png" alt="32-bit x 32-bit sigle cycle multiplier diagram" /></p>
+<h3 id="divider-and-remainder"><a class="header" href="#divider-and-remainder">Divider and Remainder</a></h3>
+<p>The divider circuit uses the
+<a href="https://en.wikipedia.org/wiki/Division_algorithm"><em>division algorithm</em></a>
+logic implemented on digital logic to divide A by B, the basic idea is:</p>
+<ol>
+<li>Compare the divisor with the selected bits of the dividend.
+<ol>
+<li>If is less, then perform the subtraction, that results on a <code>Q = 1</code> (<code>Q</code> is the Quotient).</li>
+<li>If is greater, do not perform the subtraction (<code>Q = 0</code>), go to step 2.</li>
+</ol>
+</li>
+<li>Add the next bit of the dividend to the result and shift the divisor to right by 1 bit, go to step 1.</li>
+<li>Repeat the procedure until all the bits of the dividend are covered.</li>
+</ol>
+<p>This circuit uses a Process Unit (PU) to perform the comparison logic part of this algorithm,
+this simple circuit is ilustrated below:</p>
+<p><img src="https://i.imgur.com/oNgSOQ1.png" alt="Divider process unit" /></p>
+<p>Combining a matrix of PU's which each row determine a single Quotient bit we
+can buid a simple 32-bit x 32-bit adder.</p>
+<p><img src="https://i.imgur.com/5mwdFDX.png" alt="32-bit by 32-bit divider" /></p>
+<p>You may notice that in the first row we feed the PU inputs only with B and zeros,
+the reason is that in the standard divider circuit the dividend lenght is aways 2 times
+the divisor lenght, that way whe fill the 32 MSB's of the pseudo 64-bit input with
+zeros, that way we can achieve a 32-bit x 32-bit division.</p>
+<p>You can simulate a smaller sample of this circuit <a href="https://www.circuitlab.com/editor/#?id=f9s285">here</a>.</p>
+<h2 id="imm"><a class="header" href="#imm">IMM</a></h2>
+<p>The IMM circuit provides pre functionality of write the <code>IMMEDIATE</code> field
+of the microinstruction in the A and/or the B buses. The circuit is fairly
+simple and looks like this:</p>
+<p><img src="https://i.imgur.com/n0zI4kF.png" alt="IMM circuit diagram" /></p>
+<h2 id="others"><a class="header" href="#others">Others</a></h2>
+<p>Other integrated circuits of the microarchitecture like the Logic Unit, O and
+High Bit are exactly the same as illustrated in the book.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../interpreter/parser.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../uarch/implementations.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="../interpreter/environment.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="../chapter_1.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -195,11 +229,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../interpreter/parser.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../uarch/implementations.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="../interpreter/environment.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="../chapter_1.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="sidebar-visible no-js ayu">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -36,7 +36,7 @@
         <!-- Provide site root to javascript -->
         <script>
             var path_to_root = "../";
-            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "ayu";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -62,7 +62,7 @@
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
             html.classList.remove('no-js')
-            html.classList.remove('light')
+            html.classList.remove('ayu')
             html.classList.add(theme);
             html.classList.add('js');
         </script>
@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">1.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">1.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">1.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">1.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">1.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">1.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">1.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">1.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">1.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">2.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">2.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">2.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html" class="active"><strong aria-hidden="true">3.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">3.1.</strong> Microinstruction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">3.1.1.</strong> Implementations</a></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">4.</strong> Comparision with Requested UArch</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../index.html">Introduction</a></li><li class="chapter-item expanded "><a href="../files.html"><strong aria-hidden="true">1.</strong> File Structure with Comparision</a></li><li class="chapter-item expanded "><a href="../interpreter/index.html"><strong aria-hidden="true">2.</strong> Interpreter</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/language.html"><strong aria-hidden="true">2.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../interpreter/lexer.html"><strong aria-hidden="true">2.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../interpreter/parser.html"><strong aria-hidden="true">2.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../interpreter/object.html"><strong aria-hidden="true">2.4.</strong> Object</a></li><li class="chapter-item expanded "><a href="../interpreter/environment.html"><strong aria-hidden="true">2.5.</strong> Environment</a></li><li class="chapter-item expanded "><a href="../interpreter/evaluator/index.html"><strong aria-hidden="true">2.6.</strong> Evaluator</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../interpreter/evaluator/rust.html"><strong aria-hidden="true">2.6.1.</strong> Rust</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.6.2.</strong> Custom Draft</div></li></ol></li></ol></li><li class="chapter-item expanded "><a href="../assembler/index.html"><strong aria-hidden="true">3.</strong> Assembler</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../assembler/specs.html"><strong aria-hidden="true">3.1.</strong> Language Specification</a></li><li class="chapter-item expanded "><a href="../assembler/lexer.html"><strong aria-hidden="true">3.2.</strong> Lexer</a></li><li class="chapter-item expanded "><a href="../assembler/parser.html"><strong aria-hidden="true">3.3.</strong> Parser</a></li><li class="chapter-item expanded "><a href="../assembler/evaluator.html"><strong aria-hidden="true">3.4.</strong> Evaluator</a></li><li class="chapter-item expanded "><a href="../assembler/comparision.html"><strong aria-hidden="true">3.5.</strong> Comparision</a></li></ol></li><li class="chapter-item expanded "><a href="../uarch/index.html" class="active"><strong aria-hidden="true">4.</strong> UArch</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../uarch/uinstruction.html"><strong aria-hidden="true">4.1.</strong> Microinstruction</a></li><li class="chapter-item expanded "><a href="../uarch/implementations.html"><strong aria-hidden="true">4.2.</strong> Implementations</a></li><li class="chapter-item expanded "><a href="../uarch/hardware.html"><strong aria-hidden="true">4.3.</strong> Hardware</a></li></ol></li><li class="chapter-item expanded "><a href="../chapter_1.html"><strong aria-hidden="true">5.</strong> Comparision with Requested UArch</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -157,11 +157,7 @@ reduce clock cycles.</p>
 <p>The way that a datapath is structured is not far from the usual three-bus design
 plus a <a href="https://en.wikipedia.org/wiki/Instruction_unit"><em>IFU</em></a>, the techniques
 involved a rather simple for now as you can see the diagram below:</p>
-<div align="center">
-<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/WkBo8bD.png" alt="Data path diagram" /></th></tr></thead><tbody>
-<tr><td style="text-align: center"><em>The diagram of a single datapath (click to zoom).</em></td></tr>
-</tbody></table>
-</div></div>
+<p><img src="https://i.imgur.com/Imr9yI5.png" alt="Data path diagram" /></p>
 <p>This implementation provides 24 registers in total: 5 memory registers, 3 system
 registers (to manage function calls and variables) and 16 general 16 general
 purpose registers (from R0 to R15). The register list is as following:</p>
@@ -193,8 +189,9 @@ purpose registers (from R0 to R15). The register list is as following:</p>
 <p>Each cycle the datapath is driven by a Microinstruction provided by the Control
 Store. For more info see the <a href="./uinstruction.html">next chapter</a>.</p>
 <h2 id="data-parallelism"><a class="header" href="#data-parallelism">Data parallelism</a></h2>
-<p>For that we will use two <a href="https://en.wikipedia.org/wiki/Datapath"><em>datapaths</em></a>
-with one <a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit"><em>ALU</em></a> each, but
+<p>For achieve data parallel processing we will use two
+<a href="https://en.wikipedia.org/wiki/Datapath"><em>datapaths</em></a> with one
+<a href="https://en.wikipedia.org/wiki/Arithmetic_logic_unit"><em>ALU</em></a> each, but
 the clock trigger of one is the opposite of the other, that is, ALU1 is
 falling-edge triggered and ALU2 is rising-edge triggered. Furthermore,
 the clock signal received in ALU2 is a function of the clock signal
@@ -203,26 +200,18 @@ of ALU1.</p>
 signal is <em>α<sub>1</sub><sup>'</sup></em>. So the ALU2 must have a clock
 <em>α<sub>2</sub> = (α<sub>1</sub> ∧ α<sub>1</sub><sup>'</sup>)</em> plus a
 delay of <em>δ<sub>1</sub></em> as shown below:</p>
-<div align="center">
-<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/O3SP6L2.png" alt="Clock relation diagram" /></th></tr></thead><tbody>
-<tr><td style="text-align: center"><em>The relation between the clock α<sub>1</sub> and α<sub>2</sub>.</em></td></tr>
-</tbody></table>
-</div></div>
+<p><img src="https://i.imgur.com/O3SP6L2.png" alt="Clock relation diagram" /></p>
 <p>In other words, ALU1 will start its operation cycle on the falling-edge of
 <em>α<sub>1</sub></em> and end the operation on the rising-edge, while ALU2 will
 start its operation cycle on the rising-edge of <em>α<sub>2</sub></em> and end the
 operation on the falling-edge, taking advantage of the main clock (<em>α<sub>1</sub></em>)
 even when it is at high level.</p>
 <p>The advantage of this method is that we can share the
-<a href="https://en.wikipedia.org/wiki/Control_storebbjk"><em>control store</em></a> and all the
+<a href="https://en.wikipedia.org/wiki/Control_store"><em>control store</em></a> and all the
 registers without big cost in the Misconstruction size, external hardware
 components and additional logic steps that may cost some clock cycles. The
 way that the components are shared is shown below:</p>
-<div align="center">
-<div class="table-wrapper"><table><thead><tr><th style="text-align: center"><img src="https://i.imgur.com/tlHAPgL.png" alt="Shared components diagram" /></th></tr></thead><tbody>
-<tr><td style="text-align: center"><em>The datapaths share some components such as the Microprogram, RAM and shared registers.</em></td></tr>
-</tbody></table>
-</div></div>
+<p><img src="https://i.imgur.com/CvFBTr1.png" alt="Shared components diagram" /></p>
 <p>Those two datapaths will become a <a href="https://en.wikipedia.org/wiki/Thread_(computing)"><em>thread</em></a>
 in a future design of this Microarchitecture that is planned to have two task parallel threads.</p>
 
